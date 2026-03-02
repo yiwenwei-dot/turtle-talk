@@ -34,7 +34,7 @@ export default function LoginPage() {
         setError(err.message || 'Could not send code');
         return;
       }
-      setMessage('Check your email for the 6-digit code');
+      setMessage('Check your email for the 8-digit code');
       setStep('code');
     } finally {
       setLoading(false);
@@ -44,9 +44,9 @@ export default function LoginPage() {
   async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const trimmed = code.replace(/\D/g, '').slice(0, 6);
-    if (trimmed.length !== 6) {
-      setError('Please enter the 6-digit code');
+    const trimmed = code.replace(/\D/g, '').slice(0, 8);
+    if (trimmed.length !== 8) {
+      setError('Please enter the 8-digit code');
       return;
     }
     setLoading(true);
@@ -131,7 +131,7 @@ export default function LoginPage() {
         >
           {step === 'email'
             ? 'Enter your email and we’ll send you a one-time code.'
-            : 'Enter the 6-digit code from your email.'}
+            : 'Enter the 8-digit code from your email.'}
         </p>
 
         {step === 'email' ? (
@@ -177,8 +177,8 @@ export default function LoginPage() {
               autoComplete="one-time-code"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-              placeholder="000000"
-              maxLength={6}
+              placeholder="00000000"
+              maxLength={8}
               disabled={loading}
               style={{
                 padding: '14px 16px',

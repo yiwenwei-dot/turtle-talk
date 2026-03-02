@@ -8,8 +8,25 @@ const LIVE_MODEL = 'gemini-2.5-flash-native-audio-preview-12-2025';
 const SEND_SAMPLE_RATE = 16000;
 const RECV_SAMPLE_RATE = 24000;
 
+/** Event type for Gemini Live API onmessage callback (avoids deep inline type parse errors). */
+type GeminiLiveMessageEvent = {
+  serverContent?: {
+    modelTurn?: {
+      parts?: { inlineData?: { data?: string; mimeType?: string }; text?: string }[];
+    };
+    interrupted?: boolean;
+    turnComplete?: boolean;
+  };
+};
+
 function buildShellySystemInstruction(options: VoiceSessionOptions): string {
   let prompt = `You are Shelly, a friendly sea turtle who chats with children aged 4-10.
+
+CONVERSATION FOCUS — stay on the child:
+- Always focus on the child: their feelings, what they did today, and what they are saying right now.
+- Prioritise how they feel (happy, sad, excited, worried) and what happened in their day (school, friends, play, family).
+- Do not wander off into unrelated topics, long stories, or general knowledge. Keep the conversation about them.
+- Listen to what the child actually said and respond to that. If they share one thing, reflect that back and ask one follow-up about it.
 
 SPEAKING RULES — these are the most important:
 - Always speak and respond in English only.
@@ -98,7 +115,7 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
             if (this._generation !== gen) return;
             console.info('[Shelly] gemini-live: connected');
           },
-          onmessage: (e: { serverContent?: { modelTurn?: { parts?: { inlineData?: { data?: string; mimeType?: string }; text?: string }[] }; interrupted?: boolean } }) => {
+          onmessage: (e: GeminiLiveMessageEvent) => {
             if (this._generation !== gen) return;
             const sc = e?.serverContent;
             if (sc?.interrupted) {
@@ -107,6 +124,7 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
             }
             const turn = sc?.modelTurn;
             const parts = turn?.parts ?? [];
+            let assistantText = '';
             for (const part of parts) {
               if (part.inlineData?.data) {
                 try {
@@ -121,6 +139,11 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
                   // ignore decode errors
                 }
               }
+              if (part.text?.trim()) assistantText += part.text;
+            }
+            if (assistantText.trim()) {
+              this.messages = [...this.messages, { role: 'assistant', content: assistantText.trim() }];
+              this.emit('messages', this.messages);
             }
           },
           onerror: (ev: { error?: unknown }) => {
@@ -131,6 +154,18 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
           onclose: () => {
             if (this._generation !== gen) return;
             console.info('[Shelly] gemini-live: closed');
+            this.session = null;
+            this.mediaStream?.getTracks().forEach((t) => t.stop());
+            this.mediaStream = null;
+            this.streamRef?.disconnect();
+            this.streamRef = null;
+            this.processor?.disconnect();
+            this.processor = null;
+            this.audioContext?.close();
+            this.audioContext = null;
+            this.emit('stateChange', 'idle');
+            this.emit('moodChange', 'idle');
+            this.emit('end');
           },
         },
       });
@@ -198,18 +233,22 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
         this.processor = processor;
         processor.onaudioprocess = (e) => {
           if (!this.session || this._muted) return;
-          const input = e.inputBuffer.getChannelData(0);
-          const outFrames = Math.floor(input.length / 3);
-          const out = new Int16Array(outFrames);
-          for (let i = 0; i < outFrames; i++) {
-            const j = i * 3;
-            const v = (input[j] + input[j + 1] + input[j + 2]) / 3;
-            out[i] = Math.max(-32768, Math.min(32767, Math.round(v * 32768)));
+          try {
+            const input = e.inputBuffer.getChannelData(0);
+            const outFrames = Math.floor(input.length / 3);
+            const out = new Int16Array(outFrames);
+            for (let i = 0; i < outFrames; i++) {
+              const j = i * 3;
+              const v = (input[j] + input[j + 1] + input[j + 2]) / 3;
+              out[i] = Math.max(-32768, Math.min(32767, Math.round(v * 32768)));
+            }
+            const b64 = btoa(String.fromCharCode(...new Uint8Array(out.buffer)));
+            this.session?.sendRealtimeInput({
+              audio: { data: b64, mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}` },
+            });
+          } catch {
+            // Session closed; ignore
           }
-          const b64 = btoa(String.fromCharCode(...new Uint8Array(out.buffer)));
-          this.session.sendRealtimeInput({
-            audio: { data: b64, mimeType: `audio/pcm;rate=${SEND_SAMPLE_RATE}` },
-          });
         };
         source.connect(processor);
         processor.connect(ctx.destination);
@@ -235,8 +274,9 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
     this.audioContext = null;
     this.playbackContext?.close();
     this.playbackContext = null;
-    this.emit('stateChange', 'idle');
+    this.emit('stateChange', 'ended');
     this.emit('moodChange', 'idle');
+    this.emit('end');
   }
 
   setMuted(muted: boolean): void {

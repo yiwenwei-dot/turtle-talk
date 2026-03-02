@@ -27,7 +27,18 @@ If you set `NEXT_PUBLIC_DB_PROVIDER=supabase`, run the migrations in your Supaba
 
 ## Voice and audio
 
-For Shelly to reply with real conversation (not just “I’m listening, tell me more”), use **Anthropic** or **OpenAI** for the chat step: set `SPEECH_CHAT_PROVIDER=anthropic` (or `openai`) and the matching API key in `.env.local`. See `.env.example` for all speech options.
+Set `NEXT_PUBLIC_VOICE_PROVIDER` to choose how the app talks to Shelly:
+
+| Provider        | Description |
+|----------------|-------------|
+| `native`       | (default) Browser VAD + MediaRecorder; STT/LLM/TTS via `/api/talk`. |
+| `vapi`         | Vapi WebRTC; custom LLM at `/api/vapi/llm`. |
+| `gemini-live`  | Gemini Live API (real-time bidirectional voice). |
+| `livekit`      | LiveKit room + agent; agent uses Gemini Live for voice. See [livekit-agent](livekit-agent/README.md). |
+
+For the **native** pipeline, for Shelly to reply with real conversation (not just “I’m listening, tell me more”), use **Anthropic** or **OpenAI** for the chat step: set `SPEECH_CHAT_PROVIDER=anthropic` (or `openai`) and the matching API key in `.env.local`. See `.env.example` for all speech options.
+
+**LiveKit**: To use `livekit`, run the agent in `livekit-agent/` (e.g. `pnpm dev` after `lk cloud auth` and setting `GOOGLE_API_KEY`). Add `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` to `.env.local` so the app can issue room tokens at `/api/livekit/token`.
 
 See [DEBUG.md](DEBUG.md) for the voice pipeline overview, how to enable logs, and an audio-issues checklist.
 

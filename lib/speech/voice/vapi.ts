@@ -122,9 +122,6 @@ export class VapiVoiceProvider extends BaseVoiceProvider {
 
   stop(): void {
     console.info('[Shelly] vapi stop');
-    // #region agent log
-    fetch('http://127.0.0.1:7379/ingest/9dfc6de0-1d29-4c43-9b59-25a539942869',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'83bf97'},body:JSON.stringify({sessionId:'83bf97',location:'vapi.ts:stop',message:'Vapi stop() entered',data:{hadVapi:!!this.vapi},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
     this._generation++; // invalidate all handlers from the current session
     this.vapi?.stop();
     this.vapi = null;

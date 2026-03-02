@@ -43,6 +43,27 @@ If the user already exists (e.g. created in Dashboard), the script only upserts 
 2. Copy the user’s **UUID** from the Users table.
 3. Open `scripts/seed_admin.sql`, replace `YOUR_AUTH_USER_UUID` with that UUID, then run the script in the SQL Editor.
 
+## Auth: send code instead of magic link
+
+Login uses **OTP (email code)**. Supabase must send the code in the email, not a magic link. The project accepts the length Supabase sends (e.g. 8 digits).
+
+1. In [Supabase Dashboard](https://supabase.com/dashboard) → **Authentication** → **Email Templates**.
+2. Open the **Magic Link** template.
+3. Change the body to use the OTP token instead of the link, for example:
+
+   **Subject:** `Your sign-in code` (or keep existing)
+
+   **Body (HTML):**
+   ```html
+   <h2>Sign in to TurtleTalk</h2>
+   <p>Your sign-in code is: <strong>{{ .Token }}</strong></p>
+   <p>Enter this code on the login page. It expires in 1 hour.</p>
+   ```
+
+   Use `{{ .Token }}` (the code). Do **not** use `{{ .ConfirmationURL }}` or the email will be a magic link.
+
+4. Save. New sign-in emails will contain the code; your app already verifies it with `verifyOtp` on the login page.
+
 ## Applying via Supabase MCP
 
 When using the Supabase MCP server, you can create or alter structure and insert seed data directly in the linked project. Any such changes that must be reproducible (e.g. for new environments or CI) should also be added to:

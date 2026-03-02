@@ -32,9 +32,6 @@ type ToolCall = {
 };
 
 export async function POST(req: NextRequest) {
-  // #region agent log
-  fetch('http://127.0.0.1:7379/ingest/9dfc6de0-1d29-4c43-9b59-25a539942869',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'83bf97'},body:JSON.stringify({sessionId:'83bf97',location:'vapi/llm/route.ts:POST',message:'vapi/llm POST received',data:{},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-  // #endregion
   let body: { messages?: OAIMessage[] };
   try {
     body = await req.json();

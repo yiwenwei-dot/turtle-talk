@@ -1,17 +1,17 @@
-/**
- * @jest-environment node
- * Tests for GET /api/child-session
- */
+/** @jest-environment node */
+/** Tests for GET /api/child-session */
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/child-session/route';
 
-const getChildSessionCookieName = jest.fn(() => 'child_session');
-const parseChildSessionCookieValue = jest.fn();
-
 jest.mock('@/lib/child-session', () => ({
-  getChildSessionCookieName,
-  parseChildSessionCookieValue,
+  getChildSessionCookieName: jest.fn(() => 'child_session'),
+  parseChildSessionCookieValue: jest.fn(),
 }));
+
+const childSession = require('@/lib/child-session') as {
+  getChildSessionCookieName: jest.Mock;
+  parseChildSessionCookieValue: jest.Mock;
+};
 
 describe('GET /api/child-session', () => {
   beforeEach(() => {
@@ -20,21 +20,21 @@ describe('GET /api/child-session', () => {
 
   it('returns child: null when no cookie', async () => {
     const req = new NextRequest('http://localhost/api/child-session');
-    parseChildSessionCookieValue.mockReturnValue(null);
+    childSession.parseChildSessionCookieValue.mockReturnValue(null);
 
     const res = await GET(req);
     const data = await res.json();
 
     expect(res.status).toBe(200);
     expect(data).toEqual({ child: null });
-    expect(parseChildSessionCookieValue).toHaveBeenCalledWith(undefined);
+    expect(childSession.parseChildSessionCookieValue).toHaveBeenCalledWith(undefined);
   });
 
   it('returns child: null when cookie is invalid', async () => {
     const req = new NextRequest('http://localhost/api/child-session', {
       headers: { Cookie: 'child_session=invalid' },
     });
-    parseChildSessionCookieValue.mockReturnValue(null);
+    childSession.parseChildSessionCookieValue.mockReturnValue(null);
 
     const res = await GET(req);
     const data = await res.json();
@@ -45,7 +45,7 @@ describe('GET /api/child-session', () => {
 
   it('returns child object when cookie is valid', async () => {
     const session = { childId: 'cid-1', firstName: 'Sam', emoji: '🐢' };
-    parseChildSessionCookieValue.mockReturnValue(session);
+    childSession.parseChildSessionCookieValue.mockReturnValue(session);
 
     const req = new NextRequest('http://localhost/api/child-session', {
       headers: { Cookie: 'child_session=valid-token' },
@@ -62,7 +62,7 @@ describe('GET /api/child-session', () => {
   });
 
   it('returns child: null on parse error', async () => {
-    parseChildSessionCookieValue.mockImplementation(() => {
+    childSession.parseChildSessionCookieValue.mockImplementation(() => {
       throw new Error('bad');
     });
     const req = new NextRequest('http://localhost/api/child-session', {

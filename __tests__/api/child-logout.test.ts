@@ -1,14 +1,12 @@
-/**
- * @jest-environment node
- * Tests for POST /api/child-logout
- */
+/** @jest-environment node */
+/** Tests for POST /api/child-logout */
 import { POST } from '@/app/api/child-logout/route';
 
-const getChildSessionCookieName = jest.fn(() => 'child_session');
-
 jest.mock('@/lib/child-session', () => ({
-  getChildSessionCookieName,
+  getChildSessionCookieName: jest.fn(() => 'child_session'),
 }));
+
+const childSession = require('@/lib/child-session') as { getChildSessionCookieName: jest.Mock };
 
 describe('POST /api/child-logout', () => {
   beforeEach(() => {
@@ -21,6 +19,6 @@ describe('POST /api/child-logout', () => {
 
     expect(res.status).toBe(200);
     expect(data).toEqual({ ok: true });
-    expect(getChildSessionCookieName).toHaveBeenCalled();
+    expect(childSession.getChildSessionCookieName).toHaveBeenCalled();
   });
 });

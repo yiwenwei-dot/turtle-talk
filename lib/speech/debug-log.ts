@@ -21,7 +21,7 @@ export function debugLog(payload: {
   data?: Record<string, unknown>;
   hypothesisId?: string;
 }): void {
-  if (!isLocalhost()) return;
+  if (process.env.NODE_ENV === 'test' || typeof fetch === 'undefined' || !isLocalhost()) return;
   const full = { sessionId: DEBUG_SESSION_ID, ...payload, timestamp: Date.now() };
   const body = JSON.stringify(full);
 

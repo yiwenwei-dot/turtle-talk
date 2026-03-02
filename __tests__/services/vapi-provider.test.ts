@@ -50,14 +50,16 @@ test('start() passes model override with custom-llm URL as second argument', asy
   expect(overrides.model.url).toBe('https://test.ngrok.io/api/vapi/llm');
 });
 
-test('start() falls back to window.location.origin when CUSTOM_LLM_URL is unset', async () => {
+test('start() uses CUSTOM_LLM_URL when set; without it uses window.location.origin (requires HTTPS)', async () => {
   delete process.env.NEXT_PUBLIC_CUSTOM_LLM_URL;
-  // jsdom sets window.location.origin to 'http://localhost'
+  // In jsdom window.location.origin is http://localhost, so provider emits error (requires HTTPS) and does not call vapi.start()
   const provider = new VapiVoiceProvider();
+  const errors: string[] = [];
+  provider.on('error', (msg: string) => errors.push(msg));
   await provider.start({ childName: 'Leo', topics: [], difficultyProfile: 'beginner', activeMission: null });
 
-  const [, overrides] = mockStart.mock.calls[0];
-  expect(overrides.model.url).toContain('/api/vapi/llm');
+  expect(mockStart).not.toHaveBeenCalled();
+  expect(errors.some((e) => e.includes('HTTPS') || e.includes('NEXT_PUBLIC_CUSTOM_LLM_URL'))).toBe(true);
 });
 
 test('start() passes childName in variableValues', async () => {

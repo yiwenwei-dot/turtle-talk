@@ -109,9 +109,6 @@ export function useVoiceSession(
   }, [provider]);
 
   const endConversation = useCallback(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7379/ingest/9dfc6de0-1d29-4c43-9b59-25a539942869',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'83bf97'},body:JSON.stringify({sessionId:'83bf97',location:'useVoiceSession.ts:endConversation',message:'End call clicked',data:{providerName:provider.name},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
     provider.stop();
   }, [provider]);
 

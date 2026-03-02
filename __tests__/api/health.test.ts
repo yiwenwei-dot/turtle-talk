@@ -1,7 +1,5 @@
-/**
- * @jest-environment node
- * Tests for GET /api/health
- */
+/** @jest-environment node */
+/** Tests for GET /api/health */
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/health/route';
 
