@@ -35,12 +35,13 @@ export async function POST(request: NextRequest) {
 
   const childId = session.childId;
 
-  const { data: enc, error: encError } = await supabase
+  const { data: encRaw, error: encError } = await supabase
     .from('parent_encouragement')
     .select('id, child_id, emoji')
     .eq('id', encouragementId)
     .is('used_at', null)
     .single();
+  const enc = encRaw as { id: string; child_id: string; emoji: string } | null;
 
   if (encError || !enc) {
     return NextResponse.json({ error: 'Encouragement not found or already used' }, { status: 404 });
