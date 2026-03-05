@@ -49,6 +49,7 @@ function MissionCard({
 }) {
   const isActive = mission.status === 'active';
   const [menuOpen, setMenuOpen] = useState(false);
+  const [doneSuccess, setDoneSuccess] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,9 +62,21 @@ function MissionCard({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!doneSuccess) return;
+    const t = setTimeout(() => setDoneSuccess(false), 500);
+    return () => clearTimeout(t);
+  }, [doneSuccess]);
+
   function handleMenuAction(fn: () => void) {
     fn();
     setMenuOpen(false);
+  }
+
+  function handleDoneClick() {
+    if (!onComplete) return;
+    setDoneSuccess(true);
+    onComplete(mission.id);
   }
 
   const showRemove = onDelete;
@@ -98,6 +111,30 @@ function MissionCard({
         >
           {mission.title}
         </p>
+        {isActive && mission.difficulty && (
+          <span
+            style={{
+              display: 'inline-block',
+              marginTop: 4,
+              padding: '2px 8px',
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              background:
+                mission.difficulty === 'easy' ? 'rgba(34,197,94,0.25)' :
+                mission.difficulty === 'medium' ? 'rgba(234,179,8,0.25)' :
+                'rgba(239,68,68,0.25)',
+              color:
+                mission.difficulty === 'easy' ? '#86efac' :
+                mission.difficulty === 'medium' ? '#fde047' :
+                '#fca5a5',
+            }}
+          >
+            {mission.difficulty}
+          </span>
+        )}
         <p
           style={{
             color: 'var(--tt-text-secondary)',
@@ -123,7 +160,9 @@ function MissionCard({
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flexShrink: 0 }}>
         {isActive && onComplete && (
           <button
-            onClick={() => onComplete(mission.id)}
+            type="button"
+            className={`tt-tap-shake ${doneSuccess ? 'tt-success-pop' : ''}`}
+            onClick={handleDoneClick}
             style={{
               background: 'rgba(34, 197, 94, 0.8)',
               color: 'white',
@@ -145,6 +184,7 @@ function MissionCard({
         <div ref={menuRef} style={{ position: 'relative' }}>
           <button
             type="button"
+            className="tt-tap-shake"
             onClick={() => setMenuOpen((o) => !o)}
             aria-expanded={menuOpen}
             aria-haspopup="menu"
@@ -186,8 +226,9 @@ function MissionCard({
                 <button
                   type="button"
                   role="menuitem"
+                  className="tt-tap-shake"
                   style={menuItemStyle}
-                  onClick={() => handleMenuAction(() => onComplete?.(mission.id))}
+                  onClick={() => handleMenuAction(() => handleDoneClick())}
                 >
                   <Check size={16} strokeWidth={2.5} /> Mark as done
                 </button>
