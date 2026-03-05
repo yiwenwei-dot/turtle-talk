@@ -16,7 +16,12 @@ function NavItem({ href, icon: Icon, label, color, active }: {
   href: string; icon: typeof Home; label: string; color: string; active: boolean;
 }) {
   return (
-    <Link href={href} aria-label={label} style={{ textDecoration: 'none', flex: 1, display: 'flex', justifyContent: 'center' }}>
+    <Link
+      href={href}
+      aria-label={label}
+      className="tt-tap-shake"
+      style={{ textDecoration: 'none', flex: 1, display: 'flex', justifyContent: 'center' }}
+    >
       <div
         style={{
           display: 'flex',
@@ -30,7 +35,9 @@ function NavItem({ href, icon: Icon, label, color, active }: {
           transition: 'opacity 0.15s',
         }}
       >
-        <Icon size={22} color={active ? color : 'var(--tt-text-primary)'} strokeWidth={active ? 2.5 : 1.75} aria-hidden />
+        <span className="tt-icon-wiggle" style={{ display: 'inline-flex' }}>
+          <Icon size={22} color={active ? color : 'var(--tt-text-primary)'} strokeWidth={active ? 2.5 : 1.75} aria-hidden />
+        </span>
         <span
           className="nav-item-label"
           style={{
@@ -108,6 +115,7 @@ export default function BottomNav() {
       <Link
         href="/talk"
         aria-label="Talk to Shelly (long-press for journal)"
+        className="tt-tap-shake"
         style={{
           textDecoration: 'none',
           flex: 1,
@@ -141,7 +149,9 @@ export default function BottomNav() {
           }}
           className="active:scale-[0.98] active:opacity-90"
         >
-          <Mic size={22} color="white" strokeWidth={2} aria-hidden />
+          <span className="tt-icon-wiggle" style={{ display: 'inline-flex' }}>
+            <Mic size={22} color="white" strokeWidth={2} aria-hidden />
+          </span>
           <span
             style={{
               fontSize: '0.95rem',

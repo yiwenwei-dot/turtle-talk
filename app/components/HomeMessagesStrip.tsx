@@ -72,6 +72,7 @@ function MessagesModal({ onClose }: { onClose: () => void }) {
           </h2>
           <button
             type="button"
+            className="tt-tap-shake"
             aria-label="Close"
             onClick={onClose}
             style={{
@@ -136,6 +137,7 @@ export default function HomeMessagesStrip() {
     <>
       <button
         type="button"
+        className="tt-tap-shake active:opacity-90"
         onClick={openModal}
         style={{
           width: '100%',
@@ -149,7 +151,6 @@ export default function HomeMessagesStrip() {
           transition: 'background 0.15s, opacity 0.15s',
           textAlign: 'left',
         }}
-        className="active:opacity-90"
       >
         <p
           style={{

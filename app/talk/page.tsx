@@ -200,16 +200,18 @@ function ConversationView() {
         </p>
       )}
 
-      {/* ── Contextual bottom bar: Mute, Try again (when error), End call (in-call) or post-call actions (Continue, My Missions, Home) ── */}
-      <TalkBottomBar
-        callEnded={callEnded}
-        onEndCall={endConversation}
-        onContinueConversation={startListening}
-        isMuted={isMuted}
-        onToggleMute={toggleMute}
-        hasError={!!error}
-        onTryAgain={error ? startListening : undefined}
-      />
+      {/* ── Contextual bottom bar: hidden in idle (before session starts), shows Mute/End once active, post-call actions after ended ── */}
+      {state !== 'idle' && (
+        <TalkBottomBar
+          callEnded={callEnded}
+          onEndCall={endConversation}
+          onContinueConversation={startListening}
+          isMuted={isMuted}
+          onToggleMute={state === 'connecting' ? undefined : toggleMute}
+          hasError={!!error}
+          onTryAgain={error ? startListening : undefined}
+        />
+      )}
     </main>
   );
 }

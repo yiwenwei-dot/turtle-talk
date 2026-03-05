@@ -59,6 +59,7 @@ export default function DecorationBox({
             <button
               key={item.id}
               type="button"
+              className="tt-tap-shake"
               onClick={() => onSelect(selectedId === item.id ? null : item.id)}
               style={{
                 width: 44,
@@ -82,6 +83,7 @@ export default function DecorationBox({
       {selectedId && (
         <button
           type="button"
+          className="tt-tap-shake"
           onClick={() => onPlaceOnTree(selectedId)}
           disabled={isPlacing}
           style={{

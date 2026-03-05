@@ -61,6 +61,7 @@ export default function TalkBottomBar({
             <Link
               href="/missions"
               aria-label="My Missions"
+              className="tt-tap-shake"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
             >
               <div
@@ -90,6 +91,7 @@ export default function TalkBottomBar({
           </div>
           <button
             type="button"
+            className="tt-tap-shake active:scale-[0.98] active:opacity-90"
             onClick={onContinueConversation}
             style={{
               flex: 0,
@@ -110,7 +112,6 @@ export default function TalkBottomBar({
               whiteSpace: 'nowrap',
               transition: 'transform 0.15s, opacity 0.15s',
             }}
-            className="active:scale-[0.98] active:opacity-90"
           >
             <Mic size={22} strokeWidth={2} />
             Keep talking
@@ -119,6 +120,7 @@ export default function TalkBottomBar({
             <Link
               href="/"
               aria-label="Home"
+              className="tt-tap-shake"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
             >
               <div
@@ -180,10 +182,10 @@ export default function TalkBottomBar({
         {onToggleMute && (
           <button
             type="button"
+            className="tt-tap-shake active:scale-[0.98] active:opacity-90"
             onClick={onToggleMute}
             aria-label={isMuted ? 'Unmute' : 'Mute'}
             style={secondaryBtnStyle}
-            className="active:scale-[0.98] active:opacity-90"
           >
             {isMuted ? (
               <MicOff size={22} strokeWidth={2} color="#fbbf24" />
@@ -195,6 +197,7 @@ export default function TalkBottomBar({
         {hasError && onTryAgain && (
           <button
             type="button"
+            className="tt-tap-shake active:scale-[0.98] active:opacity-90"
             onClick={onTryAgain}
             aria-label="Try again"
             style={{
@@ -202,7 +205,6 @@ export default function TalkBottomBar({
               borderColor: 'rgba(34, 197, 94, 0.5)',
               background: 'rgba(34, 197, 94, 0.2)',
             }}
-            className="active:scale-[0.98] active:opacity-90"
           >
             <RotateCcw size={20} strokeWidth={2} />
             Try again
@@ -210,6 +212,7 @@ export default function TalkBottomBar({
         )}
         <button
           type="button"
+          className="tt-tap-shake active:scale-[0.98] active:opacity-90"
           onClick={onEndCall}
           aria-label="End call"
           style={{
@@ -230,7 +233,6 @@ export default function TalkBottomBar({
             whiteSpace: 'nowrap',
             transition: 'transform 0.15s, opacity 0.15s',
           }}
-          className="active:scale-[0.98] active:opacity-90"
         >
           <PhoneOff size={22} strokeWidth={2} />
           End call

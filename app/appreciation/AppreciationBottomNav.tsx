@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Home, Gift, MessageCircle } from 'lucide-react';
 
 const HOME_ITEM = { href: '/', icon: Home, label: 'Home', color: '#06b6d4' };
-const WISH_LIST_ITEM = { href: '/appreciation/wish-list', icon: Gift, label: 'Wish list', color: '#f97316' };
+/** Gift = decorate tree: select earned cheers & gifts from parents/missions and put on tree */
+const DECORATE_ITEM = { href: '/appreciation?open=decorate', icon: Gift, label: 'Decorate', color: '#f97316' };
 const MESSAGES_ITEM = { href: '/messages', icon: MessageCircle, label: 'Messages', color: '#a855f7' };
 
 function NavItem({
@@ -25,6 +26,7 @@ function NavItem({
     <Link
       href={href}
       aria-label={label}
+      className="tt-tap-shake"
       style={{ textDecoration: 'none', flex: 1, display: 'flex', justifyContent: 'center' }}
     >
       <div
@@ -40,7 +42,9 @@ function NavItem({
           transition: 'opacity 0.15s',
         }}
       >
-        <Icon size={22} color={active ? color : 'var(--tt-text-primary)'} strokeWidth={active ? 2.5 : 1.75} aria-hidden />
+        <span className="tt-icon-wiggle" style={{ display: 'inline-flex' }}>
+          <Icon size={22} color={active ? color : 'var(--tt-text-primary)'} strokeWidth={active ? 2.5 : 1.75} aria-hidden />
+        </span>
         <span
           className="nav-item-label"
           style={{
@@ -83,8 +87,8 @@ export default function AppreciationBottomNav() {
         boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
       }}
     >
-      <NavItem {...HOME_ITEM} active={pathname === HOME_ITEM.href} />
-      <NavItem {...WISH_LIST_ITEM} active={pathname === WISH_LIST_ITEM.href} />
+      <NavItem {...HOME_ITEM} active={pathname === '/'} />
+      <NavItem {...DECORATE_ITEM} active={pathname === '/appreciation'} />
       <NavItem {...MESSAGES_ITEM} active={pathname === MESSAGES_ITEM.href} />
     </nav>
   );

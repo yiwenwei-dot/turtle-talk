@@ -8,6 +8,7 @@ import * as openai from '@livekit/agents-plugin-openai';
 import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { appendFileSync } from 'node:fs';
 import dotenv from 'dotenv';
 import { ShellyAgent } from './agent.js';
 
@@ -15,15 +16,35 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: join(__dirname, '.env.local') });
 dotenv.config({ path: join(__dirname, '..', '.env.local') });
 
-const DEBUG_LOG_URL = 'http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e';
+// #region agent log
+const DEBUG_LOG_PATH = join(__dirname, '..', 'debug-6febbf.log');
+function debugLog(location: string, message: string, data: Record<string, unknown>, hypothesisId?: string, runId?: string): void {
+  try { appendFileSync(DEBUG_LOG_PATH, JSON.stringify({ sessionId: '6febbf', location, message, data, timestamp: Date.now(), hypothesisId, runId }) + '\n'); } catch {}
+}
+// #endregion
+
+// Workaround for a race condition in @livekit/agents-plugin-openai@1.0.48:
+// When a participant disconnects while OpenAI is still streaming a response,
+// handleResponseOutputItemAdded throws "currentGeneration is not set" because
+// the session teardown clears it before the WebSocket delivers remaining events.
+// This unhandled exception crashes the child process and permanently breaks the
+// worker's proc pool (all subsequent jobs get ERR_IPC_CHANNEL_CLOSED).
+const KNOWN_RACE_ERRORS = ['currentGeneration is not set', 'item.type is not set'];
+process.on('uncaughtException', (err) => {
+  // #region agent log
+  debugLog('main.ts:uncaughtException', 'uncaught exception intercepted', { message: err.message, stack: err.stack }, 'FIX', 'post-fix');
+  // #endregion
+  if (KNOWN_RACE_ERRORS.some((msg) => err.message === msg)) {
+    console.warn('[shelly] suppressed known OpenAI Realtime race condition:', err.message);
+    return;
+  }
+  console.error('[shelly] fatal uncaught exception:', err);
+  process.exit(1);
+});
+
 function sendTranscript(room: { localParticipant?: { publishData(data: Uint8Array, opts: { reliable?: boolean }): Promise<void> } }, role: 'user' | 'assistant', text: string): void {
   const payload = new TextEncoder().encode(JSON.stringify({ type: 'transcript', role, text }));
-  // #region agent log
-  fetch(DEBUG_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c0ac4b' }, body: JSON.stringify({ sessionId: 'c0ac4b', location: 'livekit-agent/main.ts:sendTranscript', message: 'agent sendTranscript', data: { role, textLen: text.length, hasLocalParticipant: !!room.localParticipant }, timestamp: Date.now(), hypothesisId: 'H4' }) }).catch(() => {});
-  // #endregion
-  room.localParticipant?.publishData(payload, { reliable: true }).catch((err) => {
-    fetch(DEBUG_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c0ac4b' }, body: JSON.stringify({ sessionId: 'c0ac4b', location: 'livekit-agent:publishData error', message: 'publishData failed', data: { err: String(err) }, timestamp: Date.now(), hypothesisId: 'H4' }) }).catch(() => {});
-  });
+  room.localParticipant?.publishData(payload, { reliable: true }).catch(() => {});
 }
 
 /** Parse dispatch metadata from the job (childName, topics). Works on LiveKit Cloud; may be empty on self-hosted. */

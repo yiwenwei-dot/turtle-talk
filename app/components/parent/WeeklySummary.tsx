@@ -30,7 +30,7 @@ function ScoreDots({ score, max }: { score: number; max: number }) {
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: i < score ? '#3b82f6' : '#e5e7eb',
+            background: i < score ? 'var(--pd-accent)' : 'rgba(0, 0, 0, 0.12)',
           }}
         />
       ))}
@@ -40,38 +40,37 @@ function ScoreDots({ score, max }: { score: number; max: number }) {
 
 export function WeeklySummary({ data }: Props) {
   return (
-    <section>
-      <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
+    <div>
+      <h2 style={{ fontSize: 17, fontWeight: 600, color: 'var(--pd-text-primary)', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
         Weekly Summary
       </h2>
-      <p style={{ fontSize: 14, color: '#6b7280', margin: '0 0 20px' }}>
+      <p style={{ fontSize: 15, color: 'var(--pd-text-secondary)', margin: '0 0 18px' }}>
         This week your explorer practised:
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
         {data.areas.map((area) => (
           <div
             key={area.id}
+            className="pd-card-elevated"
             style={{
-              background: '#fff',
-              border: '1px solid #e5e7eb',
               borderRadius: 16,
-              padding: '18px 20px',
+              padding: '18px 18px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <span style={{ fontSize: 24 }}>{area.icon}</span>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{area.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--pd-text-primary)' }}>{area.label}</div>
                 <ScoreDots score={area.score} max={area.maxScore} />
               </div>
             </div>
-            <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 10px', lineHeight: 1.4 }}>
+            <p style={{ fontSize: 13, color: 'var(--pd-text-secondary)', margin: '0 0 10px', lineHeight: 1.4 }}>
               {area.description}
             </p>
             {area.highlights.length > 0 && (
               <ul style={{ margin: 0, paddingLeft: 16 }}>
                 {area.highlights.map((h, i) => (
-                  <li key={i} style={{ fontSize: 12, color: '#374151', marginBottom: 2 }}>
+                  <li key={i} style={{ fontSize: 13, color: 'var(--pd-text-primary)', marginBottom: 2 }}>
                     {h}
                   </li>
                 ))}
@@ -80,6 +79,6 @@ export function WeeklySummary({ data }: Props) {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

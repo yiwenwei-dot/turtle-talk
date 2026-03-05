@@ -35,6 +35,7 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
   const [state, setState] = useState<'idle' | 'recording' | 'recorded'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const recordedBlobRef = useRef<Blob | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -94,8 +95,11 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
     try {
       const base64 = await blobToBase64(recordedBlobRef.current);
       await db.addJournal(childId, base64);
-      onClose();
-      router.push('/journals');
+      setSaveSuccess(true);
+      setTimeout(() => {
+        onClose();
+        router.push('/journals');
+      }, 550);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save.');
       setSaving(false);
@@ -146,6 +150,7 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
       >
         <button
           type="button"
+          className="tt-tap-shake"
           onClick={onClose}
           aria-label="Close"
           style={{
@@ -223,6 +228,7 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
         {state === 'idle' && canJournal && (
           <button
             type="button"
+            className="tt-tap-shake"
             onClick={startRecording}
             style={{
               display: 'inline-flex',
@@ -258,6 +264,7 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
             />
             <button
               type="button"
+              className="tt-tap-shake"
               onClick={stopRecording}
               style={{
                 display: 'inline-flex',
@@ -290,57 +297,75 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
               alignItems: 'center',
             }}
           >
-            <audio
-              ref={audioRef}
-              controls
-              style={{
-                width: '100%',
-                height: 48,
-                borderRadius: 12,
-              }}
-            />
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button
-                type="button"
-                onClick={playRecorded}
+            {saveSuccess ? (
+              <p
+                className="tt-success-pop"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '14px 28px',
-                  fontSize: 16,
-                  fontWeight: 600,
+                  margin: 0,
+                  fontSize: '1.35rem',
+                  fontWeight: 700,
                   color: 'var(--tt-text-primary)',
-                  background: 'rgba(255,255,255,0.15)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: 14,
-                  cursor: 'pointer',
                 }}
               >
-                <Play size={20} fill="currentColor" /> Play
-              </button>
-              <button
-                type="button"
-                onClick={saveJournal}
-                disabled={saving}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '14px 28px',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: 'white',
-                  background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-                  border: 'none',
-                  borderRadius: 14,
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  opacity: saving ? 0.7 : 1,
-                }}
-              >
-                <Save size={20} /> {saving ? 'Saving…' : 'Save'}
-              </button>
-            </div>
+                Saved!
+              </p>
+            ) : (
+              <>
+                <audio
+                  ref={audioRef}
+                  controls
+                  style={{
+                    width: '100%',
+                    height: 48,
+                    borderRadius: 12,
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    className="tt-tap-shake"
+                    onClick={playRecorded}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '14px 28px',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: 'var(--tt-text-primary)',
+                      background: 'rgba(255,255,255,0.15)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: 14,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Play size={20} fill="currentColor" /> Play
+                  </button>
+                  <button
+                    type="button"
+                    className="tt-tap-shake"
+                    onClick={saveJournal}
+                    disabled={saving}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '14px 28px',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: 'white',
+                      background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+                      border: 'none',
+                      borderRadius: 14,
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      opacity: saving ? 0.7 : 1,
+                    }}
+                  >
+                    <Save size={20} /> {saving ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

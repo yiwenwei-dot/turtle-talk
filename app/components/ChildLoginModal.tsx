@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const EMOJI_OPTIONS = ['🐢', '🦊', '🦋', '🐻', '🦁', '🐸', '🐶', '🐱', '🌟'];
 
@@ -16,6 +16,11 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
   const [emoji, setEmoji] = useState('🐢');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
+  useEffect(() => {
+    if (open) setLoginSuccess(false);
+  }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,8 +60,11 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
       setFirstName('');
       setCode('');
       setEmoji('🐢');
-      onSuccess();
-      onClose();
+      setLoginSuccess(true);
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 550);
     } finally {
       setLoading(false);
     }
@@ -116,6 +124,21 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
           Use your name, code and emoji from your grown-up
         </p>
 
+        {loginSuccess ? (
+          <p
+            className="tt-success-pop"
+            style={{
+              margin: 0,
+              fontSize: '1.35rem',
+              fontWeight: 700,
+              color: 'var(--tt-text-primary)',
+              textAlign: 'center',
+              padding: '24px 0',
+            }}
+          >
+            You&apos;re in! 🐢
+          </p>
+        ) : (
         <form onSubmit={handleSubmit}>
           <label
             htmlFor="child-login-name"
@@ -208,6 +231,7 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
               <button
                 key={e}
                 type="button"
+                className="tt-tap-shake"
                 onClick={() => setEmoji(e)}
                 style={{
                   width: 44,
@@ -242,6 +266,7 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
           <div style={{ display: 'flex', gap: 12 }}>
             <button
               type="button"
+              className="tt-tap-shake"
               onClick={onClose}
               style={{
                 flex: 1,
@@ -259,6 +284,7 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
             </button>
             <button
               type="submit"
+              className="tt-tap-shake"
               disabled={loading}
               style={{
                 flex: 1,
@@ -276,6 +302,7 @@ export default function ChildLoginModal({ open, onClose, onSuccess }: ChildLogin
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
