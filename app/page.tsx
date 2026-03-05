@@ -51,6 +51,18 @@ export default function Home() {
           Talk to Shelly
         </p>
 
+        <p
+          style={{
+            color: 'var(--tt-text-muted)',
+            fontSize: 'clamp(0.8rem, 2.5vw, 0.95rem)',
+            marginBottom: 0,
+            textAlign: 'center',
+            fontWeight: 500,
+          }}
+        >
+          Your turtle friend is ready to chat 🌿
+        </p>
+
         {/* Messages — one card per message, dismissable, up to 3 */}
         <HomeMessagesStrip />
       </main>
