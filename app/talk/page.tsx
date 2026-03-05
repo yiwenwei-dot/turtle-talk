@@ -135,7 +135,9 @@ function ConversationView() {
       </div>
 
       {/* ── Turtle (moved up) ── */}
-      <TurtleCharacter mood={mood} size={200} />
+      <div className={state === 'listening' ? 'tt-listening-ring' : undefined}>
+        <TurtleCharacter mood={mood} size={200} />
+      </div>
 
       {/* ── Conversation card: last 3 bubbles, show/hide toggle ── */}
       <div style={{ width: '100%', maxWidth: 440 }}>

@@ -180,6 +180,61 @@ body {
 }
 
 /* ============================================
+   CHILD AREA – TAP / SUCCESS FEEDBACK
+   ============================================ */
+
+/* Short horizontal shake on press */
+@keyframes ttTapShake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
+/* Subtle icon wiggle to invite tap (2–3s loop) */
+@keyframes ttIconWiggle {
+  0%, 90%, 100% { transform: rotate(0deg) scale(1); }
+  93%           { transform: rotate(-3deg) scale(1.03); }
+  96%           { transform: rotate(3deg) scale(1.03); }
+}
+
+/* One-off success bounce */
+@keyframes ttSuccessPop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.12); }
+  60%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.tt-tap-shake:active {
+  animation: ttTapShake 0.25s ease-out;
+}
+
+.tt-icon-wiggle {
+  animation: ttIconWiggle 2.5s ease-in-out infinite;
+}
+
+.tt-success-pop {
+  animation: ttSuccessPop 0.45s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-icon-wiggle {
+    animation: none;
+  }
+  .tt-tap-shake:active {
+    animation: none;
+    opacity: 0.85;
+  }
+  .tt-success-pop {
+    animation: none;
+    opacity: 1;
+  }
+  .tt-listening-ring::after {
+    animation: none;
+  }
+}
+
+/* ============================================
    TALK PAGE – TURTLE MOOD ANIMATIONS
    ============================================ */
 
@@ -256,4 +311,127 @@ body {
 @keyframes typingDot {
   0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
   40%           { opacity: 1;   transform: scale(1); }
+}
+
+/* ============================================
+   PARENT DASHBOARD – Apple-inspired hierarchy
+   Gray cards, gradients, SF-style typography
+   Light mode (default) + Dark mode (prefers-color-scheme / .dark)
+   ============================================ */
+.parent-dashboard {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
+  /* Light mode */
+  --pd-bg: #f5f5f7;
+  --pd-bg-gradient: linear-gradient(180deg, #f5f5f7 0%, #ebebed 50%, #e8e8ed 100%);
+  --pd-card: linear-gradient(180deg, #ffffff 0%, #fafafa 50%, #f5f5f7 100%);
+  --pd-card-gray: linear-gradient(165deg, #f5f5f7 0%, #ebebed 40%, #e8e8ed 100%);
+  --pd-card-border: rgba(0, 0, 0, 0.08);
+  --pd-text-primary: #0f0f11;
+  --pd-text-secondary: #3c3c40;
+  --pd-text-tertiary: #525256;
+  --pd-accent: #0f766e;
+  --pd-accent-soft: rgba(15, 118, 110, 0.12);
+  --pd-header-bg: rgba(255, 255, 255, 0.72);
+  --pd-surface-soft: rgba(255, 255, 255, 0.6);
+  --pd-surface-overlay: rgba(255, 255, 255, 0.8);
+  --pd-modal-bg: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  --pd-input-bg: rgba(255, 255, 255, 0.6);
+  --pd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --pd-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --pd-radius: 16px;
+  --pd-radius-lg: 20px;
+  --pd-cover-bg: linear-gradient(165deg, #ebebed 0%, #e8e8ed 100%);
+  /* Semantic (same in both modes or overridden in dark) */
+  --pd-error: #dc2626;
+  --pd-success: #22c55e;
+  --pd-success-soft: rgba(34, 197, 94, 0.12);
+  --pd-success-border: rgba(34, 197, 94, 0.25);
+}
+
+/* Dark mode: system preference */
+@media (prefers-color-scheme: dark) {
+  .parent-dashboard {
+    color-scheme: dark;
+    --pd-bg: #0f0f11;
+    --pd-bg-gradient: linear-gradient(180deg, #0f0f11 0%, #161618 50%, #1a1a1d 100%);
+    --pd-card: linear-gradient(180deg, #1c1c1e 0%, #18181a 50%, #161618 100%);
+    --pd-card-gray: linear-gradient(165deg, #1a1a1d 0%, #161618 40%, #141416 100%);
+    --pd-card-border: rgba(255, 255, 255, 0.08);
+    --pd-text-primary: #f5f5f7;
+    --pd-text-secondary: #b8b8bd;
+    --pd-text-tertiary: #86868b;
+    --pd-accent: #2dd4bf;
+    --pd-accent-soft: rgba(45, 212, 191, 0.18);
+    --pd-header-bg: rgba(28, 28, 30, 0.72);
+    --pd-surface-soft: rgba(40, 40, 42, 0.6);
+    --pd-surface-overlay: rgba(44, 44, 46, 0.9);
+    --pd-modal-bg: linear-gradient(180deg, #1c1c1e 0%, #18181a 100%);
+    --pd-input-bg: rgba(50, 50, 52, 0.8);
+    --pd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --pd-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --pd-success: #34d399;
+    --pd-success-soft: rgba(52, 211, 153, 0.18);
+    --pd-success-border: rgba(52, 211, 153, 0.35);
+    --pd-cover-bg: linear-gradient(165deg, #2c2c2e 0%, #252527 100%);
+  }
+}
+
+/* Dark mode: application class (e.g. theme toggle sets html.dark) */
+html.dark .parent-dashboard {
+  color-scheme: dark;
+  --pd-bg: #0f0f11;
+  --pd-bg-gradient: linear-gradient(180deg, #0f0f11 0%, #161618 50%, #1a1a1d 100%);
+  --pd-card: linear-gradient(180deg, #1c1c1e 0%, #18181a 50%, #161618 100%);
+  --pd-card-gray: linear-gradient(165deg, #1a1a1d 0%, #161618 40%, #141416 100%);
+  --pd-card-border: rgba(255, 255, 255, 0.08);
+  --pd-text-primary: #f5f5f7;
+  --pd-text-secondary: #b8b8bd;
+  --pd-text-tertiary: #86868b;
+  --pd-accent: #2dd4bf;
+  --pd-accent-soft: rgba(45, 212, 191, 0.18);
+  --pd-header-bg: rgba(28, 28, 30, 0.72);
+  --pd-surface-soft: rgba(40, 40, 42, 0.6);
+  --pd-surface-overlay: rgba(44, 44, 46, 0.9);
+  --pd-modal-bg: linear-gradient(180deg, #1c1c1e 0%, #18181a 100%);
+  --pd-input-bg: rgba(50, 50, 52, 0.8);
+  --pd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --pd-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --pd-error: #f87171;
+  --pd-success: #34d399;
+  --pd-success: #34d399;
+  --pd-success-soft: rgba(52, 211, 153, 0.18);
+  --pd-success-border: rgba(52, 211, 153, 0.35);
+  --pd-cover-bg: linear-gradient(165deg, #2c2c2e 0%, #252527 100%);
+}
+
+.parent-dashboard .pd-card {
+  background: var(--pd-card-gray);
+  border: 1px solid var(--pd-card-border);
+  border-radius: var(--pd-radius-lg);
+  box-shadow: var(--pd-shadow-card);
+}
+
+.parent-dashboard .pd-card-elevated {
+  background: var(--pd-card);
+  border: 1px solid var(--pd-card-border);
+  border-radius: var(--pd-radius-lg);
+  box-shadow: var(--pd-shadow-card);
+}
+
+/* ── Talk page: listening glow ring ── */
+@keyframes listeningRing {
+  0%   { transform: scale(1);    opacity: 0.7; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+.tt-listening-ring {
+  position: relative;
+  display: inline-flex;
+}
+.tt-listening-ring::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.4);
+  animation: listeningRing 1.4s ease-out infinite;
 }
