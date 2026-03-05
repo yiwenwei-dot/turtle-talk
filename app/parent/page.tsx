@@ -364,6 +364,7 @@ export default function ParentPage() {
                           type="button"
                           onClick={async () => {
                             setConfirmWishId(null);
+                            setWishListError(null);
                             try { await deleteWishItem(item.id); }
                             catch (e) { setWishListError(e instanceof Error ? e.message : 'Failed to delete'); }
                           }}
