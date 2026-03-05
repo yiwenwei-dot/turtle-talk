@@ -4,7 +4,7 @@
  * Default provider — identical behaviour to the original hooks.
  * Keys are scoped by childId to support multiple children on one device.
  */
-import type { DatabaseService, ChildMemory, Mission, MissionSuggestion } from '../types';
+import type { DatabaseService, ChildMemory, Journal, Mission, MissionSuggestion } from '../types';
 
 const MAX_MESSAGES = 20;
 const MAX_TOPICS = 15;
@@ -16,6 +16,7 @@ const LEGACY_KEYS: Record<string, string> = {
   name: 'turtle-talk-child-name',
   messages: 'turtle-talk-messages',
   topics: 'turtle-talk-topics',
+  journals: 'turtle-talk-journals',
 };
 
 function key(childId: string, suffix: string) {
@@ -129,5 +130,29 @@ export class LocalStorageDatabaseService implements DatabaseService {
         localStorage.removeItem(key(childId, suffix));
       } catch { /* ignore */ }
     });
+  }
+
+  async getJournals(childId: string): Promise<Journal[]> {
+    return readJSON<Journal[]>(key(childId, 'journals'), []);
+  }
+
+  async addJournal(childId: string, audioBase64: string): Promise<Journal> {
+    const journal: Journal = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      childId,
+      createdAt: new Date().toISOString(),
+      audioBase64,
+    };
+    const current = await this.getJournals(childId);
+    writeJSON(key(childId, 'journals'), [journal, ...current]);
+    return journal;
+  }
+
+  async deleteJournal(childId: string, journalId: string): Promise<void> {
+    const journals = await this.getJournals(childId);
+    writeJSON(
+      key(childId, 'journals'),
+      journals.filter((j) => j.id !== journalId),
+    );
   }
 }

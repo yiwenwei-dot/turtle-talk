@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import type { Message } from '@/lib/speech/types';
 import ConversationBubbles from './ConversationBubbles';
@@ -16,6 +16,12 @@ export default function ConversationBubblesCard({ messages, pendingUserTranscrip
   const contentRef = useRef<HTMLDivElement>(null);
 
   const hasContent = messages.length > 0 || (pendingUserTranscript?.trim() ?? '').length > 0;
+
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c0ac4b' }, body: JSON.stringify({ sessionId: 'c0ac4b', location: 'ConversationBubblesCard.tsx', message: 'card state', data: { expanded, hasContent, messagesLength: messages.length }, timestamp: Date.now(), hypothesisId: 'H2' }) }).catch(() => {});
+  }, [expanded, hasContent, messages.length]);
+  // #endregion
 
   // Measure content height when expanded or when content changes
   useLayoutEffect(() => {

@@ -38,6 +38,8 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
         body: JSON.stringify({
           roomName: options.childName ? `talk-${options.childName}` : undefined,
           participantName: 'child',
+          childName: options.childName ?? undefined,
+          topics: options.topics?.length ? options.topics : undefined,
         }),
       });
       if (!tokenRes.ok) {
@@ -71,6 +73,9 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
 
       room.on(RoomEvent.DataReceived, (payload: Uint8Array) => {
         if (this._generation !== gen) return;
+        // #region agent log - log every DataReceived (before parse) to confirm client receives any data
+        fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c0ac4b' }, body: JSON.stringify({ sessionId: 'c0ac4b', location: 'livekit.ts:DataReceived', message: 'DataReceived fired', data: { payloadLen: payload.length }, timestamp: Date.now(), hypothesisId: 'H4' }) }).catch(() => {});
+        // #endregion
         try {
           const text = new TextDecoder().decode(payload);
           const parsed = JSON.parse(text) as {

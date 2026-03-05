@@ -13,7 +13,7 @@
 import type { DatabaseService } from './types';
 
 export type { DatabaseService };
-export type { ChildMemory } from './types';
+export type { ChildMemory, Journal } from './types';
 
 let _instance: DatabaseService | null = null;
 

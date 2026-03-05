@@ -91,6 +91,12 @@ function ConversationView() {
 
   const callEnded = state === 'ended';
 
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c0ac4b' }, body: JSON.stringify({ sessionId: 'c0ac4b', location: 'app/talk/page.tsx', message: 'talk page', data: { messagesLength: messages.length, pendingLen: pendingUserTranscript?.length ?? 0, state }, timestamp: Date.now(), hypothesisId: 'H1' }) }).catch(() => {});
+  }, [messages.length, pendingUserTranscript, state]);
+  // #endregion
+
   return (
     <main
       style={{

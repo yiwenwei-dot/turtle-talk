@@ -38,7 +38,10 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseAdminOptional();
     if (!supabase) {
       return NextResponse.json(
-        { error: 'Child login not configured' },
+        {
+          error: 'Child login not configured',
+          hint: 'Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local (see .env.example).',
+        },
         { status: 503 }
       );
     }
@@ -86,7 +89,10 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     if (err instanceof Error && err.message.includes('CHILD_SESSION_SECRET')) {
       return NextResponse.json(
-        { error: 'Child login not configured' },
+        {
+          error: 'Child login not configured',
+          hint: 'Set CHILD_SESSION_SECRET in .env.local (min 16 characters). See .env.example.',
+        },
         { status: 503 }
       );
     }

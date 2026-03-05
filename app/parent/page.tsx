@@ -10,6 +10,9 @@ import type { WeeklySummaryData } from '@/app/components/parent/WeeklySummary';
 import type { DinnerQuestion } from '@/app/components/parent/DinnerQuestions';
 import type { Book } from '@/app/components/parent/BookCard';
 import { getWeekStart } from '@/lib/reports/weekly';
+import { useWishList } from '@/app/hooks/useWishList';
+import { useWishListMutations } from '@/app/hooks/useWishListMutations';
+import { useSendEncouragement } from '@/app/hooks/useSendEncouragement';
 
 import booksData from '@/app/placeholders/books.json';
 
@@ -39,6 +42,13 @@ export default function ParentPage() {
   const [dinnerQuestionsLoading, setDinnerQuestionsLoading] = useState(false);
   const [dinnerQuestionsGenerating, setDinnerQuestionsGenerating] = useState(false);
   const [childrenModalOpen, setChildrenModalOpen] = useState(false);
+  const [newWishLabel, setNewWishLabel] = useState('');
+  const [wishListError, setWishListError] = useState<string | null>(null);
+  const [encouragementSending, setEncouragementSending] = useState(false);
+
+  const { items: wishListItems, isLoading: wishListLoading, refetch: refetchWishList } = useWishList(activeChild?.id ?? null);
+  const { addItem: addWishItem, deleteItem: deleteWishItem } = useWishListMutations(activeChild?.id, refetchWishList);
+  const { send: sendEncouragement } = useSendEncouragement(activeChild?.id);
 
   const fetchChildren = useCallback(async () => {
     try {
@@ -281,6 +291,144 @@ export default function ParentPage() {
               No summary or dinner questions yet. When {activeChild.name} completes missions and you have reports, they’ll appear here.
             </p>
           )}
+
+          <section>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
+              Wish list
+            </h2>
+            <p style={{ fontSize: 14, color: '#6b7280', margin: '0 0 12px' }}>
+              Items for {activeChild.name} (e.g. for Christmas). They see these on their tree page; a full tree unlocks one wish.
+            </p>
+            {wishListError && (
+              <p style={{ fontSize: 14, color: '#dc2626', margin: '0 0 8px' }}>{wishListError}</p>
+            )}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <input
+                type="text"
+                placeholder="e.g. LEGO set"
+                value={newWishLabel}
+                onChange={(e) => { setNewWishLabel(e.target.value); setWishListError(null); }}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb',
+                  fontSize: 14,
+                }}
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  const label = newWishLabel.trim();
+                  if (!label) return;
+                  setWishListError(null);
+                  try {
+                    await addWishItem(label);
+                    setNewWishLabel('');
+                  } catch (e) {
+                    setWishListError(e instanceof Error ? e.message : 'Failed to add');
+                  }
+                }}
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: '#0f766e',
+                  color: 'white',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Add
+              </button>
+            </div>
+            {wishListLoading ? (
+              <p style={{ color: '#6b7280', fontSize: 14 }}>Loading wish list…</p>
+            ) : wishListItems.length === 0 ? (
+              <p style={{ color: '#6b7280', fontSize: 14 }}>No items yet. Add one above.</p>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {wishListItems.map((item) => (
+                  <li
+                    key={item.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      borderRadius: 8,
+                      background: item.unlocked_at ? '#dcfce7' : '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                    }}
+                  >
+                    <span style={{ fontSize: 14, color: '#111827' }}>
+                      {item.unlocked_at ? '🎉 ' : ''}{item.label}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await deleteWishItem(item.id);
+                        } catch (e) {
+                          setWishListError(e instanceof Error ? e.message : 'Failed to delete');
+                        }
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 6,
+                        border: '1px solid #e5e7eb',
+                        background: '#fff',
+                        fontSize: 12,
+                        color: '#6b7280',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
+              Send a cheer
+            </h2>
+            <p style={{ fontSize: 14, color: '#6b7280', margin: '0 0 12px' }}>
+              Send {activeChild.name} an emoji. They can use it to decorate their tree and grow it.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {['🌟', '💪', '❤️', '🎉', '⭐', '🌈', '🦸', '👏'].map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  disabled={encouragementSending}
+                  onClick={async () => {
+                    setEncouragementSending(true);
+                    try {
+                      await sendEncouragement(emoji);
+                    } finally {
+                      setEncouragementSending(false);
+                    }
+                  }}
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    border: '2px solid #e5e7eb',
+                    background: '#fff',
+                    fontSize: 24,
+                    cursor: encouragementSending ? 'wait' : 'pointer',
+                  }}
+                  aria-label={`Send ${emoji} to ${activeChild.name}`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </section>
 
           <section>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>

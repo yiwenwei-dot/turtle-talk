@@ -17,15 +17,35 @@ function sendTranscript(room, role, text) {
     const payload = new TextEncoder().encode(JSON.stringify({ type: 'transcript', role, text }));
     room.localParticipant?.publishData(payload, { reliable: true }).catch(() => { });
 }
+/** Parse dispatch metadata from the job (childName, topics). Works on LiveKit Cloud; may be empty on self-hosted. */
+function parseDispatchMetadata(ctx) {
+    const raw = ctx.job?.metadata;
+    if (!raw || typeof raw !== 'string' || !raw.trim())
+        return {};
+    try {
+        const parsed = JSON.parse(raw);
+        const childName = typeof parsed.childName === 'string' && parsed.childName.trim()
+            ? parsed.childName.trim()
+            : undefined;
+        const topics = Array.isArray(parsed.topics)
+            ? parsed.topics.filter((t) => typeof t === 'string')
+            : undefined;
+        return { childName, topics };
+    }
+    catch {
+        return {};
+    }
+}
 export default defineAgent({
     entry: async (ctx) => {
+        const { childName, topics } = parseDispatchMetadata(ctx);
         const session = new voice.AgentSession({
             llm: new openai.realtime.RealtimeModel({
                 voice: 'coral',
             }),
         });
         await session.start({
-            agent: new ShellyAgent(),
+            agent: new ShellyAgent({ childName, topics }),
             room: ctx.room,
             inputOptions: {
                 noiseCancellation: BackgroundVoiceCancellation(),
@@ -46,8 +66,11 @@ export default defineAgent({
                 }
             }
         });
+        const firstMessageInstruction = childName
+            ? `Greet ${childName} warmly and ask how they are or what they did today. One sentence and one question.`
+            : 'Greet the child warmly and ask how they are or what they did today. One sentence and one question.';
         const handle = session.generateReply({
-            instructions: 'Greet the child warmly and ask how they are or what they did today. One sentence and one question.',
+            instructions: firstMessageInstruction,
         });
         await handle?.waitForPlayout?.();
     },

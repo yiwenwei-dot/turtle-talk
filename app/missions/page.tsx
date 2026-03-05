@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Zap, CheckCircle2, Check, MessageCircle } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Zap, CheckCircle2, Check, MoreVertical, Trash2 } from 'lucide-react';
 import { useMissions } from '@/app/hooks/useMissions';
 import { useChildSession } from '@/app/hooks/useChildSession';
+import BottomNav from '@/app/components/BottomNav';
 import type { Mission, MissionTheme } from '@/lib/speech/types';
 
 const THEME_EMOJI: Record<MissionTheme, string> = {
@@ -21,6 +21,23 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+const menuItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  width: '100%',
+  padding: '10px 14px',
+  border: 'none',
+  borderRadius: 8,
+  background: 'transparent',
+  color: 'var(--tt-text-primary)',
+  fontSize: 14,
+  fontWeight: 500,
+  cursor: 'pointer',
+  textAlign: 'left',
+  whiteSpace: 'nowrap',
+};
+
 function MissionCard({
   mission,
   onComplete,
@@ -31,6 +48,27 @@ function MissionCard({
   onDelete?: (id: string) => void;
 }) {
   const isActive = mission.status === 'active';
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  function handleMenuAction(fn: () => void) {
+    fn();
+    setMenuOpen(false);
+  }
+
+  const showRemove = onDelete;
+  const showMarkDone = isActive && onComplete;
+
   return (
     <div
       style={{
@@ -55,6 +93,7 @@ function MissionCard({
             fontSize: 17,
             margin: 0,
             textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+            ...(isActive ? {} : { textDecoration: 'line-through' }),
           }}
         >
           {mission.title}
@@ -65,6 +104,7 @@ function MissionCard({
             fontSize: 14,
             margin: '4px 0 0',
             textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+            ...(isActive ? {} : { textDecoration: 'line-through' }),
           }}
         >
           {mission.description}
@@ -80,7 +120,7 @@ function MissionCard({
           </p>
         )}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flexShrink: 0 }}>
         {isActive && onComplete && (
           <button
             onClick={() => onComplete(mission.id)}
@@ -102,23 +142,69 @@ function MissionCard({
             <Check size={14} strokeWidth={2.5} /> Done!
           </button>
         )}
-        {!isActive && onDelete && (
+        <div ref={menuRef} style={{ position: 'relative' }}>
           <button
-            onClick={() => onDelete(mission.id)}
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
             style={{
-              background: 'rgba(255,255,255,0.15)',
-              color: 'var(--tt-text-tertiary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 36,
+              height: 36,
+              padding: 0,
               border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: 10,
-              padding: '6px 12px',
-              fontSize: 12,
+              background: 'rgba(255,255,255,0.1)',
+              color: 'var(--tt-text-secondary)',
               cursor: 'pointer',
-              whiteSpace: 'nowrap',
             }}
           >
-            Remove
+            <MoreVertical size={18} strokeWidth={2} />
           </button>
-        )}
+          {menuOpen && (showMarkDone || showRemove) && (
+            <div
+              role="menu"
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '100%',
+                marginTop: 4,
+                minWidth: 160,
+                padding: 4,
+                background: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: 12,
+                zIndex: 20,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              }}
+            >
+              {showMarkDone && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  style={menuItemStyle}
+                  onClick={() => handleMenuAction(() => onComplete?.(mission.id))}
+                >
+                  <Check size={16} strokeWidth={2.5} /> Mark as done
+                </button>
+              )}
+              {showRemove && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  style={{ ...menuItemStyle, color: 'var(--tt-text-tertiary)' }}
+                  onClick={() => handleMenuAction(() => onDelete?.(mission.id))}
+                >
+                  <Trash2 size={16} strokeWidth={2} /> Remove
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -165,7 +251,6 @@ function EmptyState({ tab }: { tab: 'active' | 'completed' }) {
 }
 
 export default function MissionsPage() {
-  const router = useRouter();
   const { child } = useChildSession();
   const { activeMissions, completedMissions, completeMission, deleteMission } = useMissions(child?.childId);
   const [tab, setTab] = useState<'active' | 'completed'>('active');
@@ -181,7 +266,7 @@ export default function MissionsPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '24px 16px 48px',
+        padding: '24px 16px 120px',
       }}
     >
       {/* Header */}
@@ -190,29 +275,10 @@ export default function MissionsPage() {
           width: '100%',
           maxWidth: 560,
           display: 'flex',
-          alignItems: 'center',
+          justifyContent: 'center',
           marginBottom: 28,
         }}
       >
-        <button
-          onClick={() => router.push('/')}
-          style={{
-            background: 'rgba(255,255,255,0.15)',
-            border: '1px solid rgba(255,255,255,0.25)',
-            borderRadius: 12,
-            color: 'var(--tt-text-primary)',
-            padding: '8px 16px',
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-            backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          }}
-        >
-          <ArrowLeft size={16} strokeWidth={2.5} style={{ flexShrink: 0 }} /> Home
-        </button>
         <h1
           style={{
             color: 'var(--tt-text-primary)',
@@ -220,14 +286,11 @@ export default function MissionsPage() {
             fontWeight: 800,
             textShadow: '0 2px 8px rgba(0,0,0,0.4)',
             margin: 0,
-            flex: 1,
             textAlign: 'center',
           }}
         >
           🐢 My Missions
         </h1>
-        {/* Spacer to balance back button */}
-        <div style={{ width: 80 }} />
       </div>
 
       {/* Tab switcher */}
@@ -282,6 +345,32 @@ export default function MissionsPage() {
         })}
       </div>
 
+      {/* Section tile */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 560,
+          marginBottom: 16,
+          padding: '12px 20px',
+          borderRadius: 14,
+          background: 'rgba(0,0,0,0.25)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255,255,255,0.15)',
+        }}
+      >
+        <h2
+          style={{
+            color: 'var(--tt-text-primary)',
+            fontSize: 18,
+            fontWeight: 700,
+            margin: 0,
+            textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+          }}
+        >
+          {tab === 'active' ? "Today's Missions" : 'Completed'}
+        </h2>
+      </div>
+
       {/* Mission list */}
       <div
         style={{
@@ -300,35 +389,13 @@ export default function MissionsPage() {
               key={m.id}
               mission={m}
               onComplete={tab === 'active' ? completeMission : undefined}
-              onDelete={tab === 'completed' ? deleteMission : undefined}
+              onDelete={deleteMission}
             />
           ))
         )}
       </div>
 
-      {/* Talk to Shelly CTA */}
-      <button
-        onClick={() => router.push('/talk')}
-        style={{
-          marginTop: 36,
-          background: 'rgba(255,255,255,0.18)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          borderRadius: 16,
-          color: 'var(--tt-text-primary)',
-          padding: '14px 32px',
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: 'pointer',
-          textShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-        }}
-      >
-        <MessageCircle size={18} strokeWidth={2} /> Talk to Shelly
-      </button>
+      <BottomNav />
     </main>
   );
 }

@@ -74,6 +74,43 @@ export interface AdminDatabase {
         Record<string, unknown>,
         Record<string, unknown>
       >;
+      wish_list: TableShape<
+        {
+          id: string;
+          child_id: string;
+          label: string;
+          sort_order: number;
+          unlocked_at: string | null;
+          created_at: string;
+        },
+        { child_id: string; label: string; sort_order?: number },
+        { label?: string; sort_order?: number; unlocked_at?: string | null }
+      >;
+      parent_encouragement: TableShape<
+        {
+          id: string;
+          child_id: string;
+          from_parent_id: string;
+          emoji: string;
+          created_at: string;
+          used_at: string | null;
+        },
+        { child_id: string; from_parent_id: string; emoji: string },
+        { used_at?: string | null }
+      >;
+      child_tree: TableShape<
+        {
+          child_id: string;
+          placed_count: number;
+          placed_decorations: { emoji: string; slotId: string }[];
+          growth_stage: number;
+          last_unlock_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        { child_id: string; placed_count?: number; placed_decorations?: unknown; growth_stage?: number },
+        { placed_count?: number; placed_decorations?: unknown; growth_stage?: number; last_unlock_at?: string | null }
+      >;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

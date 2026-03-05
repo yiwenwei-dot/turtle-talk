@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx main.ts dev",
-    "start": "node main.js start"
+    "start": "node --no-deprecation main.js start"
   },
   "dependencies": {
     "@livekit/agents": "^1.0.0",

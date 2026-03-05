@@ -173,6 +173,12 @@ body {
   50%      { transform: scale(1.035); }
 }
 
+/* Recording indicator pulse (journal modal) */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
 /* ============================================
    TALK PAGE – TURTLE MOOD ANIMATIONS
    ============================================ */

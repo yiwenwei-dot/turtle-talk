@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import type { Message } from '@/lib/speech/types';
 
 const MAX_BUBBLES = 3;
@@ -30,6 +31,12 @@ export default function ConversationBubbles({ messages, pendingUserTranscript }:
 
   // Keep only last MAX_BUBBLES
   const displayItems = items.slice(-MAX_BUBBLES);
+
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c0ac4b' }, body: JSON.stringify({ sessionId: 'c0ac4b', location: 'ConversationBubbles.tsx', message: 'bubbles display', data: { messagesLength: messages.length, pendingLen: pending?.length ?? 0, displayItemsLength: displayItems.length, fromMessagesLen: fromMessages.length }, timestamp: Date.now(), hypothesisId: 'H3' }) }).catch(() => {});
+  }, [messages.length, pending]);
+  // #endregion
 
   if (displayItems.length === 0) {
     return (

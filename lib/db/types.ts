@@ -2,6 +2,15 @@ import type { Mission, MissionSuggestion } from '@/lib/speech/types';
 
 export type { Mission, MissionSuggestion };
 
+/** Journal entry: recorded audio for later (journaling mode). */
+export interface Journal {
+  id: string;
+  childId: string;
+  createdAt: string;
+  /** Base64-encoded audio (e.g. webm). */
+  audioBase64: string;
+}
+
 // Child memory stored per device (no auth required in first phase)
 export interface ChildMemory {
   childId: string;
@@ -31,4 +40,9 @@ export interface DatabaseService {
   saveMessages(childId: string, messages: ChildMemory['messages']): Promise<void>;
   addTopic(childId: string, topic: string): Promise<void>;
   clearMemory(childId: string): Promise<void>;
+
+  // Journals (optional; only localStorage in first phase)
+  getJournals?(childId: string): Promise<Journal[]>;
+  addJournal?(childId: string, audioBase64: string): Promise<Journal>;
+  deleteJournal?(childId: string, journalId: string): Promise<void>;
 }
