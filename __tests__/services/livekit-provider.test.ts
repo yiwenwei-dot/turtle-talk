@@ -87,6 +87,7 @@ describe('LiveKitVoiceProvider', () => {
           body: JSON.stringify({
             roomName: 'talk-Max',
             participantName: 'child',
+            childName: 'Max',
           }),
         })
       );
