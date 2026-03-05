@@ -17,10 +17,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Child session required' }, { status: 401 });
   }
 
-  const supabase = getSupabaseAdminOptional();
-  if (!supabase) {
+  const supabaseTyped = getSupabaseAdminOptional();
+  if (!supabaseTyped) {
     return NextResponse.json({ error: 'Tree not configured' }, { status: 503 });
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = supabaseTyped as any;
 
   let body: { encouragementId?: string };
   try {
@@ -35,13 +37,12 @@ export async function POST(request: NextRequest) {
 
   const childId = session.childId;
 
-  const { data: encRaw, error: encError } = await supabase
+  const { data: enc, error: encError } = await supabase
     .from('parent_encouragement')
     .select('id, child_id, emoji')
     .eq('id', encouragementId)
     .is('used_at', null)
     .single();
-  const enc = encRaw as { id: string; child_id: string; emoji: string } | null;
 
   if (encError || !enc) {
     return NextResponse.json({ error: 'Encouragement not found or already used' }, { status: 404 });
