@@ -37,7 +37,6 @@ export function ParentHeader({
   const router = useRouter();
   const [me, setMe] = useState<ParentMe | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [coparentModalOpen, setCoparentModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,11 +69,14 @@ export function ParentHeader({
   return (
     <>
       <header
+        className="parent-dashboard"
         style={{
-          background: '#fff',
-          borderBottom: '1px solid #e5e7eb',
+          background: 'var(--pd-header-bg)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
           padding: '0 20px',
-          height: 60,
+          height: 56,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -84,7 +86,7 @@ export function ParentHeader({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>
+          <span style={{ fontSize: 17, fontWeight: 600, color: 'var(--pd-text-primary)', letterSpacing: '-0.02em' }}>
             Parent Dashboard
           </span>
           {activeChild && children.length > 0 && (
@@ -108,12 +110,12 @@ export function ParentHeader({
               gap: 8,
               padding: '6px 12px',
               borderRadius: 24,
-              border: '1px solid #e5e7eb',
-              background: '#f9fafb',
+              border: '1px solid rgba(0, 0, 0, 0.06)',
+              background: 'rgba(245, 245, 247, 0.8)',
               cursor: 'pointer',
               fontSize: 14,
               fontWeight: 500,
-              color: '#374151',
+              color: 'var(--pd-text-primary)',
             }}
           >
             <span
@@ -121,13 +123,13 @@ export function ParentHeader({
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                background: '#0f766e',
+                background: 'var(--pd-accent)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 14,
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
               {initial}
@@ -145,12 +147,14 @@ export function ParentHeader({
                 position: 'absolute',
                 top: '100%',
                 right: 0,
-                marginTop: 4,
+                marginTop: 8,
                 minWidth: 220,
-                background: '#fff',
-                border: '1px solid #e5e7eb',
-                borderRadius: 12,
-                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                background: 'var(--pd-surface-overlay)',
+                backdropFilter: 'saturate(180%) blur(20px)',
+                WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+                borderRadius: 14,
+                boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
                 padding: '8px 0',
                 zIndex: 50,
               }}
@@ -159,8 +163,8 @@ export function ParentHeader({
                 style={{
                   padding: '10px 14px',
                   fontSize: 13,
-                  color: '#6b7280',
-                  borderBottom: '1px solid #f3f4f6',
+                  color: 'var(--pd-text-tertiary)',
+                  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
                 }}
               >
                 {me?.email || me?.phone || 'Signed in'}
@@ -182,7 +186,7 @@ export function ParentHeader({
                   background: 'transparent',
                   cursor: 'pointer',
                   fontSize: 14,
-                  color: '#111827',
+                  color: 'var(--pd-text-primary)',
                   textAlign: 'left',
                 }}
               >
@@ -192,10 +196,8 @@ export function ParentHeader({
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => {
-                  setDropdownOpen(false);
-                  setCoparentModalOpen(true);
-                }}
+                disabled
+                title="Coming soon"
                 style={{
                   width: '100%',
                   display: 'flex',
@@ -204,14 +206,18 @@ export function ParentHeader({
                   padding: '10px 14px',
                   border: 'none',
                   background: 'transparent',
-                  cursor: 'pointer',
+                  cursor: 'not-allowed',
                   fontSize: 14,
-                  color: '#111827',
+                  color: 'var(--pd-text-tertiary)',
                   textAlign: 'left',
+                  opacity: 0.5,
                 }}
               >
                 <UserPlus size={18} />
                 Co-parent
+                <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, background: 'var(--pd-surface-soft)', border: '1px solid var(--pd-card-border)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.03em' }}>
+                  Soon
+                </span>
               </button>
               <button
                 type="button"
@@ -227,7 +233,7 @@ export function ParentHeader({
                   background: 'transparent',
                   cursor: 'pointer',
                   fontSize: 14,
-                  color: '#dc2626',
+                  color: 'var(--pd-error)',
                   textAlign: 'left',
                 }}
               >
@@ -247,54 +253,6 @@ export function ParentHeader({
         onSelectChild={onSelectChild}
         onChildrenChange={onChildrenChange}
       />
-
-      {coparentModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.4)',
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 24,
-          }}
-          onClick={() => setCoparentModalOpen(false)}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 16,
-              padding: 24,
-              maxWidth: 360,
-              width: '100%',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>Co-parent</h2>
-            <p style={{ margin: '0 0 20px', fontSize: 14, color: '#6b7280' }}>
-              Invite another parent to access the same children. Coming soon.
-            </p>
-            <button
-              type="button"
-              onClick={() => setCoparentModalOpen(false)}
-              style={{
-                padding: '10px 16px',
-                borderRadius: 8,
-                border: 'none',
-                background: '#0f766e',
-                color: 'white',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
