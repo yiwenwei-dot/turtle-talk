@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Child } from './ChildSwitcher';
 
 const EMOJI_OPTIONS = ['🐢', '🦊', '🦋', '🐻', '🦁', '🐸', '🐶', '🐱', '🌟'];
@@ -29,6 +29,16 @@ export function ChildrenModal({
   const [addError, setAddError] = useState<string | null>(null);
   const [newChildLoginKey, setNewChildLoginKey] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   async function handleAddChild(e: React.FormEvent) {
     e.preventDefault();
@@ -94,22 +104,24 @@ export function ChildrenModal({
       <div
         role="dialog"
         aria-labelledby="children-modal-title"
+        className="parent-dashboard"
         style={{
-          background: '#fff',
+          background: 'var(--pd-modal-bg)',
           borderRadius: 20,
           padding: 28,
           width: '100%',
           maxWidth: 400,
           maxHeight: '90vh',
           overflow: 'auto',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.06)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="children-modal-title" style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: '#111827' }}>
+        <h2 id="children-modal-title" style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, color: 'var(--pd-text-primary)', letterSpacing: '-0.02em' }}>
           Children
         </h2>
-        <p style={{ margin: '0 0 20px', fontSize: 13, color: '#6b7280' }}>
+        <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--pd-text-secondary)' }}>
           Add or remove children. Each child has a login code for device sign-in.
         </p>
 
@@ -123,16 +135,43 @@ export function ChildrenModal({
                   alignItems: 'center',
                   gap: 12,
                   padding: '12px 14px',
-                  background: child.id === activeChild?.id ? '#f0fdfa' : '#f9fafb',
-                  border: `1px solid ${child.id === activeChild?.id ? '#0f766e' : '#e5e7eb'}`,
+                  background: child.id === activeChild?.id ? 'var(--pd-accent-soft)' : 'var(--pd-surface-soft)',
+                  border: `1px solid ${child.id === activeChild?.id ? 'var(--pd-accent)' : 'var(--pd-card-border)'}`,
                   borderRadius: 14,
                 }}
               >
                 <span style={{ fontSize: 28 }} aria-hidden>{child.avatar}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{child.name}</div>
-                  <div style={{ fontSize: 12, color: '#6b7280', fontFamily: 'monospace', letterSpacing: 1 }}>
-                    Login code: {child.loginKey ?? '—'}
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--pd-text-primary)' }}>{child.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 12, color: 'var(--pd-text-secondary)', fontFamily: 'monospace', letterSpacing: 1 }}>
+                      {child.loginKey ?? '—'}
+                    </span>
+                    {child.loginKey && (
+                      <button
+                        type="button"
+                        title="Copy login code"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(child.loginKey!);
+                            setCopiedId(child.id);
+                            if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+                            copyTimerRef.current = setTimeout(() => setCopiedId(null), 1500);
+                          } catch {
+                            // clipboard API unavailable — silent fail
+                          }
+                        }}
+                        style={{
+                          padding: '2px 6px', fontSize: 11,
+                          border: '1px solid var(--pd-card-border)',
+                          borderRadius: 6, background: 'var(--pd-surface-overlay)',
+                          cursor: 'pointer',
+                          color: copiedId === child.id ? 'var(--pd-success)' : 'var(--pd-text-tertiary)',
+                        }}
+                      >
+                        {copiedId === child.id ? '✓' : 'Copy'}
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -141,31 +180,58 @@ export function ChildrenModal({
                     onClick={() => { onSelectChild(child); onClose(); }}
                     style={{
                       padding: '6px 10px',
-                      fontSize: 12,
-                      border: '1px solid #e5e7eb',
+                      fontSize: 13,
+                      border: '1px solid var(--pd-card-border)',
                       borderRadius: 8,
-                      background: '#fff',
+                      background: 'var(--pd-surface-overlay)',
                       cursor: 'pointer',
+                      color: 'var(--pd-text-primary)',
                     }}
                   >
                     View
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(child.id)}
-                    disabled={removingId === child.id}
-                    style={{
-                      padding: '6px 10px',
-                      fontSize: 12,
-                      border: '1px solid #fecaca',
-                      borderRadius: 8,
-                      background: '#fff',
-                      color: '#dc2626',
-                      cursor: removingId === child.id ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    {removingId === child.id ? '…' : 'Remove'}
-                  </button>
+                  {confirmRemoveId === child.id ? (
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmRemoveId(null)}
+                        style={{
+                          padding: '6px 8px', fontSize: 12,
+                          border: '1px solid var(--pd-card-border)',
+                          borderRadius: 8, background: 'var(--pd-surface-overlay)',
+                          cursor: 'pointer', color: 'var(--pd-text-secondary)',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setConfirmRemoveId(null); handleRemove(child.id); }}
+                        disabled={removingId === child.id}
+                        style={{
+                          padding: '6px 8px', fontSize: 12,
+                          border: '1px solid rgba(220,38,38,0.3)',
+                          borderRadius: 8, background: 'var(--pd-surface-overlay)',
+                          color: 'var(--pd-error)', cursor: removingId === child.id ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {removingId === child.id ? '…' : 'Sure?'}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmRemoveId(child.id)}
+                      style={{
+                        padding: '6px 10px', fontSize: 13,
+                        border: '1px solid rgba(220,38,38,0.3)',
+                        borderRadius: 8, background: 'var(--pd-surface-overlay)',
+                        color: 'var(--pd-error)', cursor: 'pointer',
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
@@ -177,7 +243,7 @@ export function ChildrenModal({
             style={{
               marginBottom: 16,
               padding: 12,
-              background: '#f0fdf4',
+              background: 'var(--pd-success-soft)',
               borderRadius: 10,
               fontSize: 13,
               color: '#166534',
@@ -195,10 +261,10 @@ export function ChildrenModal({
               width: '100%',
               padding: '12px 16px',
               borderRadius: 12,
-              border: '1px dashed #0f766e',
-              background: '#f0fdfa',
-              color: '#0f766e',
-              fontSize: 14,
+              border: '1px dashed var(--pd-accent)',
+              background: 'var(--pd-accent-soft)',
+              color: 'var(--pd-accent)',
+              fontSize: 15,
               fontWeight: 600,
               cursor: 'pointer',
             }}
@@ -224,9 +290,9 @@ export function ChildrenModal({
                   style={{
                     fontSize: 22,
                     padding: 8,
-                    border: addEmoji === em ? '2px solid #0f766e' : '1px solid #e5e7eb',
-                    borderRadius: 8,
-                    background: addEmoji === em ? '#f0fdfa' : '#fff',
+                  border: addEmoji === em ? '2px solid var(--pd-accent)' : '1px solid var(--pd-card-border)',
+                  borderRadius: 8,
+                  background: addEmoji === em ? 'var(--pd-accent-soft)' : 'var(--pd-surface-soft)',
                     cursor: 'pointer',
                   }}
                 >
@@ -234,7 +300,7 @@ export function ChildrenModal({
                 </button>
               ))}
             </div>
-            {addError && <p style={{ color: '#dc2626', fontSize: 14, margin: 0 }}>{addError}</p>}
+            {addError && <p style={{ color: 'var(--pd-error)', fontSize: 14, margin: 0 }}>{addError}</p>}
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 type="button"
@@ -245,7 +311,7 @@ export function ChildrenModal({
                   padding: '10px 16px',
                   borderRadius: 8,
                   border: '1px solid #e5e7eb',
-                  background: '#fff',
+                  background: 'var(--pd-surface-overlay)',
                   cursor: 'pointer',
                 }}
               >
@@ -257,9 +323,9 @@ export function ChildrenModal({
                 style={{
                   flex: 1,
                   padding: '10px 16px',
-                  borderRadius: 8,
+                  borderRadius: 10,
                   border: 'none',
-                  background: '#0f766e',
+                  background: 'var(--pd-accent)',
                   color: 'white',
                   fontWeight: 600,
                   cursor: addSubmitting ? 'not-allowed' : 'pointer',
@@ -278,11 +344,12 @@ export function ChildrenModal({
             marginTop: 20,
             width: '100%',
             padding: '10px 16px',
-            borderRadius: 8,
-            border: '1px solid #e5e7eb',
-            background: '#fff',
+            borderRadius: 10,
+            border: '1px solid var(--pd-card-border)',
+            background: 'var(--pd-surface-overlay)',
             cursor: 'pointer',
-            fontSize: 14,
+            fontSize: 15,
+            color: 'var(--pd-text-primary)',
           }}
         >
           Close
