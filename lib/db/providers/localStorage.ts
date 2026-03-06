@@ -156,3 +156,15 @@ export class LocalStorageDatabaseService implements DatabaseService {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Tree decoration helpers (localStorage-only, not on DatabaseService interface)
+// ---------------------------------------------------------------------------
+
+export function getPlacedMissionIds(childId: string): string[] {
+  return readJSON<string[]>(key(childId, 'placed-missions'), []);
+}
+
+export function savePlacedMissionIds(childId: string, ids: string[]): void {
+  writeJSON(key(childId, 'placed-missions'), ids);
+}
