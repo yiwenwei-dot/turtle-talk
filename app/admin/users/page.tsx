@@ -84,6 +84,7 @@ interface UserModalProps {
 function UserModal({ user, onClose, onUpdated }: UserModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
 
   async function patch(body: Record<string, unknown>): Promise<boolean> {
     setLoading(true);
@@ -121,6 +122,30 @@ function UserModal({ user, onClose, onUpdated }: UserModalProps) {
   async function toggleRole() {
     const role = user.role === 'admin' ? 'parent' : 'admin';
     if (await patch({ role })) onUpdated({ role });
+  }
+
+  async function sendPasswordReset() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/reset-password`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError((d as { error?: string }).error ?? 'Could not send reset email');
+      } else {
+        setError(null);
+        // surface success inline via a transient message
+        setResetSent(true);
+        setTimeout(() => setResetSent(false), 4000);
+      }
+    } catch {
+      setError('Network error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -280,6 +305,32 @@ function UserModal({ user, onClose, onUpdated }: UserModalProps) {
               {user.suspended_at ? 'Unsuspend' : 'Suspend'}
             </button>
           </div>
+
+          {/* Password reset */}
+          <button
+            onClick={sendPasswordReset}
+            disabled={loading || !user.email}
+            style={{
+              width: '100%', padding: '11px 8px', borderRadius: 10,
+              border: '1px solid rgba(99,102,241,0.3)',
+              background: 'rgba(99,102,241,0.07)',
+              color: '#6366f1',
+              fontSize: 13, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1,
+              transition: 'opacity 0.15s',
+            }}
+          >
+            {loading ? 'Sending…' : 'Send password reset email'}
+          </button>
+
+          {resetSent && (
+            <div style={{
+              fontSize: 13, color: '#16a34a', textAlign: 'center',
+              padding: '8px 12px', background: 'rgba(22,163,74,0.08)', borderRadius: 8,
+            }}>
+              Reset email sent to {user.email}
+            </div>
+          )}
 
           {error && (
             <div style={{
