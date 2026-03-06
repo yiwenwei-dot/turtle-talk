@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
+import { AdminPageHeader } from '@/app/components/admin/AdminPageHeader';
 
 interface AdminUser {
   id: string;
@@ -378,34 +378,19 @@ export default function AdminUsersPage() {
     setSelectedUser((prev) => (prev?.id === userId ? { ...prev, ...updated } : prev));
   }
 
+  const countBadge = !loading ? (
+    <span style={{
+      fontSize: 12, fontWeight: 600, color: 'var(--pd-text-tertiary)',
+      background: 'var(--pd-surface-soft)', padding: '3px 10px', borderRadius: 20,
+      border: '1px solid var(--pd-card-border)',
+    }}>
+      {filtered.length}
+    </span>
+  ) : null;
+
   return (
-    <div className="parent-dashboard" style={{ minHeight: '100vh', background: 'var(--pd-bg-gradient)' }}>
-      <header style={{
-        background: 'var(--pd-header-bg)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--pd-card-border)',
-        padding: '14px 24px',
-        display: 'flex', alignItems: 'center', gap: 10,
-        position: 'sticky', top: 0, zIndex: 10,
-      }}>
-        <Link href="/admin" style={{ fontSize: 13, color: 'var(--pd-accent)', textDecoration: 'none', flexShrink: 0 }}>
-          ← Admin
-        </Link>
-        <span style={{ color: 'var(--pd-card-border)', fontSize: 18, flexShrink: 0 }}>/</span>
-        <h1 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--pd-text-primary)', flex: 1 }}>
-          Users
-        </h1>
-        {!loading && (
-          <span style={{
-            fontSize: 12, fontWeight: 600, color: 'var(--pd-text-tertiary)',
-            background: 'var(--pd-surface-soft)', padding: '3px 10px', borderRadius: 20,
-            border: '1px solid var(--pd-card-border)', flexShrink: 0,
-          }}>
-            {filtered.length}
-          </span>
-        )}
-      </header>
+    <>
+      <AdminPageHeader title="Users" parentHref="/admin" right={countBadge} />
 
       <main style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px 60px' }}>
         <div style={{ marginBottom: 16 }}>
@@ -540,6 +525,6 @@ export default function AdminUsersPage() {
           onUpdated={(updated) => handleUpdated(selectedUser.id, updated)}
         />
       )}
-    </div>
+    </>
   );
 }

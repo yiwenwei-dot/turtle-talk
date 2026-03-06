@@ -1,10 +1,5 @@
 import Link from 'next/link';
-
-export const metadata = {
-  title: 'Admin | TurtleTalk',
-  description: 'User and application management',
-  robots: { index: false, follow: false },
-};
+import { AdminPageHeader } from '@/app/components/admin/AdminPageHeader';
 
 interface AdminCard {
   title: string;
@@ -20,43 +15,20 @@ const cards: AdminCard[] = [
 ];
 
 export default function AdminPage() {
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#f9fafb',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
+  const backToParent = (
+    <Link
+      href="/parent"
+      style={{ fontSize: 13, color: 'var(--pd-accent)', textDecoration: 'none' }}
     >
-      <header
-        style={{
-          background: '#fff',
-          borderBottom: '1px solid #e5e7eb',
-          padding: '16px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#111827' }}>Admin</h1>
-        <Link
-          href="/parent"
-          style={{ fontSize: 14, color: '#0f766e', textDecoration: 'none' }}
-        >
-          ← Parent dashboard
-        </Link>
-      </header>
-      <main
-        style={{
-          maxWidth: 900,
-          margin: '0 auto',
-          padding: 32,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 24,
-        }}
-      >
-        <section
+      Parent dashboard →
+    </Link>
+  );
+
+  return (
+    <>
+      <AdminPageHeader title="Admin" right={backToParent} />
+      <main style={{ maxWidth: 900, margin: '0 auto', padding: '28px 20px 60px' }}>
+        <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -66,10 +38,10 @@ export default function AdminPage() {
           {cards.map((card) => {
             const inner = (
               <>
-                <h2 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600, color: '#111827' }}>
+                <h2 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600, color: 'var(--pd-text-primary)' }}>
                   {card.title}
                 </h2>
-                <p style={{ margin: 0, fontSize: 13, color: card.href ? '#0f766e' : '#6b7280' }}>
+                <p style={{ margin: 0, fontSize: 13, color: card.href ? 'var(--pd-accent)' : 'var(--pd-text-tertiary)' }}>
                   {card.href ? card.description : 'Coming soon'}
                 </p>
               </>
@@ -77,30 +49,27 @@ export default function AdminPage() {
 
             const sharedStyle: React.CSSProperties = {
               padding: 20,
-              background: '#fff',
-              border: '1px solid #e5e7eb',
-              borderRadius: 12,
+              background: 'var(--pd-card)',
+              border: '1px solid var(--pd-card-border)',
+              borderRadius: 16,
               display: 'block',
               textDecoration: 'none',
-              transition: 'box-shadow 0.15s, border-color 0.15s',
+              boxShadow: 'var(--pd-shadow-card)',
+              transition: 'box-shadow 0.15s',
             };
 
             return card.href ? (
-              <Link
-                key={card.title}
-                href={card.href}
-                style={sharedStyle}
-              >
+              <Link key={card.title} href={card.href} style={sharedStyle}>
                 {inner}
               </Link>
             ) : (
-              <div key={card.title} style={sharedStyle}>
+              <div key={card.title} style={{ ...sharedStyle, opacity: 0.6 }}>
                 {inner}
               </div>
             );
           })}
-        </section>
+        </div>
       </main>
-    </div>
+    </>
   );
 }

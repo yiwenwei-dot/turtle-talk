@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
+import { AdminPageHeader } from '@/app/components/admin/AdminPageHeader';
 
 interface WaitingListEntry {
   id: string;
@@ -171,34 +171,19 @@ export default function AdminWaitingListPage() {
     );
   }
 
+  const pendingBadge = !loading && counts.pending > 0 ? (
+    <span style={{
+      fontSize: 12, fontWeight: 600, color: '#d97706',
+      background: 'rgba(217,119,6,0.12)', padding: '3px 10px', borderRadius: 20,
+      border: '1px solid rgba(217,119,6,0.2)',
+    }}>
+      {counts.pending} pending
+    </span>
+  ) : null;
+
   return (
-    <div className="parent-dashboard" style={{ minHeight: '100vh', background: 'var(--pd-bg-gradient)' }}>
-      <header style={{
-        background: 'var(--pd-header-bg)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--pd-card-border)',
-        padding: '14px 24px',
-        display: 'flex', alignItems: 'center', gap: 10,
-        position: 'sticky', top: 0, zIndex: 10,
-      }}>
-        <Link href="/admin" style={{ fontSize: 13, color: 'var(--pd-accent)', textDecoration: 'none', flexShrink: 0 }}>
-          ← Admin
-        </Link>
-        <span style={{ color: 'var(--pd-card-border)', fontSize: 18, flexShrink: 0 }}>/</span>
-        <h1 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--pd-text-primary)', flex: 1 }}>
-          Waiting List
-        </h1>
-        {!loading && counts.pending > 0 && (
-          <span style={{
-            fontSize: 12, fontWeight: 600, color: '#d97706',
-            background: 'rgba(217,119,6,0.12)', padding: '3px 10px', borderRadius: 20,
-            border: '1px solid rgba(217,119,6,0.2)', flexShrink: 0,
-          }}>
-            {counts.pending} pending
-          </span>
-        )}
-      </header>
+    <>
+      <AdminPageHeader title="Waiting List" parentHref="/admin" right={pendingBadge} />
 
       <main style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px 60px' }}>
         {/* Filter pills */}
@@ -319,6 +304,6 @@ export default function AdminWaitingListPage() {
           )}
         </div>
       </main>
-    </div>
+    </>
   );
 }

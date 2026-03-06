@@ -98,150 +98,175 @@ export function ParentHeader({
           )}
         </div>
 
-        <div ref={dropdownRef} style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Visible sign-out button */}
           <button
             type="button"
-            onClick={() => setDropdownOpen((o) => !o)}
-            aria-expanded={dropdownOpen}
-            aria-haspopup="true"
+            onClick={handleLogOff}
+            title="Sign out"
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 6,
               padding: '6px 12px',
-              borderRadius: 24,
-              border: '1px solid rgba(0, 0, 0, 0.06)',
-              background: 'rgba(245, 245, 247, 0.8)',
+              borderRadius: 20,
+              border: '1px solid var(--pd-card-border)',
+              background: 'var(--pd-surface-soft)',
               cursor: 'pointer',
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 500,
-              color: 'var(--pd-text-primary)',
+              color: 'var(--pd-text-secondary)',
             }}
           >
-            <span
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                background: 'var(--pd-accent)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 14,
-                fontWeight: 600,
-              }}
-            >
-              {initial}
-            </span>
-            <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {label}
-            </span>
-            <ChevronDown size={16} style={{ flexShrink: 0, opacity: dropdownOpen ? 1 : 0.7 }} />
+            <LogOut size={14} />
+            <span>Sign out</span>
           </button>
 
-          {dropdownOpen && (
-            <div
-              role="menu"
+          {/* Account dropdown */}
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((o) => !o)}
+              aria-expanded={dropdownOpen}
+              aria-haspopup="true"
               style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: 8,
-                minWidth: 220,
-                background: 'var(--pd-surface-overlay)',
-                backdropFilter: 'saturate(180%) blur(20px)',
-                WebkitBackdropFilter: 'saturate(180%) blur(20px)',
-                border: '1px solid rgba(0, 0, 0, 0.06)',
-                borderRadius: 14,
-                boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-                padding: '8px 0',
-                zIndex: 50,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '6px 10px 6px 6px',
+                borderRadius: 24,
+                border: '1px solid var(--pd-card-border)',
+                background: 'var(--pd-surface-soft)',
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 500,
+                color: 'var(--pd-text-primary)',
               }}
             >
+              <span
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: 'var(--pd-accent)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  flexShrink: 0,
+                }}
+              >
+                {initial}
+              </span>
+              <ChevronDown size={15} style={{ flexShrink: 0, opacity: 0.6 }} />
+            </button>
+
+            {dropdownOpen && (
               <div
+                role="menu"
                 style={{
-                  padding: '10px 14px',
-                  fontSize: 13,
-                  color: 'var(--pd-text-tertiary)',
-                  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: 8,
+                  minWidth: 220,
+                  background: 'var(--pd-surface-overlay)',
+                  backdropFilter: 'saturate(180%) blur(20px)',
+                  WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+                  border: '1px solid var(--pd-card-border)',
+                  borderRadius: 14,
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                  padding: '8px 0',
+                  zIndex: 50,
                 }}
               >
-                {me?.email || me?.phone || 'Signed in'}
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    fontSize: 13,
+                    color: 'var(--pd-text-tertiary)',
+                    borderBottom: '1px solid var(--pd-card-border)',
+                  }}
+                >
+                  {me?.email || me?.phone || 'Signed in'}
+                </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    onOpenChildrenModal();
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    color: 'var(--pd-text-primary)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <Users size={18} />
+                  Children
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled
+                  title="Coming soon"
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'not-allowed',
+                    fontSize: 14,
+                    color: 'var(--pd-text-tertiary)',
+                    textAlign: 'left',
+                    opacity: 0.5,
+                  }}
+                >
+                  <UserPlus size={18} />
+                  Co-parent
+                  <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, background: 'var(--pd-surface-soft)', border: '1px solid var(--pd-card-border)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.03em' }}>
+                    Soon
+                  </span>
+                </button>
+                <div style={{ borderTop: '1px solid var(--pd-card-border)', margin: '4px 0' }} />
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleLogOff}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    color: 'var(--pd-error)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <LogOut size={18} />
+                  Sign out
+                </button>
               </div>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setDropdownOpen(false);
-                  onOpenChildrenModal();
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 14px',
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  color: 'var(--pd-text-primary)',
-                  textAlign: 'left',
-                }}
-              >
-                <Users size={18} />
-                Children
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                disabled
-                title="Coming soon"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 14px',
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'not-allowed',
-                  fontSize: 14,
-                  color: 'var(--pd-text-tertiary)',
-                  textAlign: 'left',
-                  opacity: 0.5,
-                }}
-              >
-                <UserPlus size={18} />
-                Co-parent
-                <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, background: 'var(--pd-surface-soft)', border: '1px solid var(--pd-card-border)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.03em' }}>
-                  Soon
-                </span>
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={handleLogOff}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 14px',
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  color: 'var(--pd-error)',
-                  textAlign: 'left',
-                }}
-              >
-                <LogOut size={18} />
-                Log off
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
 
