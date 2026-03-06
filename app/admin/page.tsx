@@ -90,14 +90,6 @@ export default function AdminPage() {
                 key={card.title}
                 href={card.href}
                 style={sharedStyle}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)';
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = '#0f766e';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = '#e5e7eb';
-                }}
               >
                 {inner}
               </Link>
