@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { getDeviceId } from '@/lib/db';
 import { getPlacedMissionIds, savePlacedMissionIds } from '@/lib/db/providers/localStorage';
 import { useMissions } from '@/app/hooks/useMissions';
@@ -23,7 +23,10 @@ export interface EarnedDecoration {
 }
 
 export function useLocalTree(childId?: string) {
-  const id = childId ?? (typeof window !== 'undefined' ? getDeviceId() : 'default');
+  const id = useMemo(
+    () => childId ?? (typeof window !== 'undefined' ? getDeviceId() : 'default'),
+    [childId],
+  );
   const { completedMissions } = useMissions(id);
 
   const [placedMissionIds, setPlacedMissionIds] = useState<string[]>(
