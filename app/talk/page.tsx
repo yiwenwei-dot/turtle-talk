@@ -200,6 +200,33 @@ function ConversationView() {
         </p>
       )}
 
+      {/* ── Dev-only: trigger MissionSelectView without a full conversation ── */}
+      {process.env.NODE_ENV !== 'production' && (
+        <button
+          type="button"
+          onClick={() => setPendingMissionChoices([
+            { title: 'Draw a turtle', description: 'Draw your best sea turtle picture.', difficulty: 'easy' },
+            { title: 'Help at home', description: 'Do one helpful thing without being asked.', difficulty: 'medium' },
+            { title: 'Write a story', description: 'Write 5 sentences about an ocean adventure.', difficulty: 'stretch' },
+          ])}
+          style={{
+            position: 'fixed',
+            bottom: 80,
+            right: 12,
+            padding: '6px 10px',
+            borderRadius: 8,
+            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'rgba(0,0,0,0.4)',
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: '0.75rem',
+            cursor: 'pointer',
+            zIndex: 50,
+          }}
+        >
+          🧪 Test Missions
+        </button>
+      )}
+
       {/* ── Contextual bottom bar: hidden in idle (before session starts), shows Mute/End once active, post-call actions after ended ── */}
       {state !== 'idle' && (
         <TalkBottomBar

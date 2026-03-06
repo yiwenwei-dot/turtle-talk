@@ -29,7 +29,7 @@ export function useMissions(childId?: string) {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         title: suggestion.title,
         description: suggestion.description,
-        theme: suggestion.theme,
+        theme: suggestion.theme ?? 'curious',
         difficulty: suggestion.difficulty,
         status: 'active',
         createdAt: new Date().toISOString(),

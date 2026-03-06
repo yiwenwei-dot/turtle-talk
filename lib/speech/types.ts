@@ -47,7 +47,7 @@ export interface TTSProvider {
 export interface MissionSuggestion {
   title: string;
   description: string;
-  theme: MissionTheme;
+  theme?: MissionTheme;
   difficulty: 'easy' | 'medium' | 'stretch';
 }
 
