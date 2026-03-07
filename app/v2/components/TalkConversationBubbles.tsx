@@ -28,7 +28,7 @@ export default function TalkConversationBubbles({
     }
   }
 
-  const displayItems = items.slice(-MAX_VISIBLE * 2).slice(-MAX_VISIBLE * 2);
+  const displayItems = items.slice(-MAX_VISIBLE * 2);
   const isEmpty = displayItems.length === 0;
 
   return (
