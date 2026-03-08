@@ -103,7 +103,7 @@ export default function Error({
             Try again
           </button>
           <Link
-            href="/v2"
+            href="/"
             style={{
               fontSize: '0.95rem',
               color: 'var(--v2-primary-dark)',

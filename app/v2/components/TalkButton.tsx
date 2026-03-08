@@ -49,7 +49,7 @@ export default function TalkButton() {
 
   return (
     <Link
-      href="/v2/talk"
+      href="/talk"
       aria-label="Talk to Shelly"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

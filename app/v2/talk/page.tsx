@@ -176,7 +176,7 @@ function V2ConversationView() {
           }}
           onGoHome={() => {
             setShowPostCallModal(false);
-            router.push('/v2');
+            router.push('/');
           }}
         />
       )}
@@ -256,7 +256,7 @@ export default function V2TalkPage() {
     return (
       <MicPermissionV2
         onGranted={requestPermission}
-        onDenied={() => router.push('/v2')}
+        onDenied={() => router.push('/')}
       />
     );
   }

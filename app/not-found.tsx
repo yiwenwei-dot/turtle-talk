@@ -65,7 +65,7 @@ export default function NotFound() {
           We couldn’t find what you’re looking for. No worries — head back home and keep exploring!
         </p>
         <Link
-          href="/v2"
+          href="/"
           className="v2-btn-primary-pill"
           style={{
             display: 'inline-flex',

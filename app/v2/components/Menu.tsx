@@ -6,11 +6,11 @@ import { useChildSession } from '@/app/hooks/useChildSession';
 import MenuItem from './MenuItem';
 
 const ITEMS = [
-  { href: '/v2', label: 'Home', icon: Home },
-  { href: '/v2/garden', label: 'My Garden', icon: Leaf },
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/garden', label: 'My Garden', icon: Leaf },
   { href: '/appreciation/wish-list', label: 'Wish List', icon: Heart },
-  { href: '/v2/talk', label: 'Conversation', icon: MessageCircle },
-  { href: '/v2/missions', label: 'Missions', icon: Flag },
+  { href: '/talk', label: 'Conversation', icon: MessageCircle },
+  { href: '/missions', label: 'Missions', icon: Flag },
   { href: '/messages', label: 'Messages', icon: Mail },
 ] as const;
 
