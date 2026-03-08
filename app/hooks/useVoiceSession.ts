@@ -2,7 +2,13 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { TurtleMood, Message, MissionSuggestion } from '@/lib/speech/types';
-import type { VoiceConversationProvider, VoiceSessionState, VoiceSessionOptions } from '@/lib/speech/voice/types';
+import type {
+  VoiceConversationProvider,
+  VoiceSessionState,
+  VoiceSessionOptions,
+  AppToolCallEvent,
+} from '@/lib/speech/voice/types';
+import { handleAppToolCall } from '@/lib/speech/appTools';
 
 interface UseVoiceSessionOptions extends VoiceSessionOptions {
   onEnd?: () => void;
@@ -74,11 +80,11 @@ export function useVoiceSession(
     const onChoices = (choices: MissionSuggestion[]) => optsRef.current.onMissionChoices?.(choices);
     const onName    = (name: string) => optsRef.current.onChildName?.(name);
     const onTopic   = (topic: string) => optsRef.current.onTopic?.(topic);
+    const onAppTool = (call: AppToolCallEvent) => {
+      void handleAppToolCall(call);
+    };
     const onError   = (msg: string) => {
-      console.info('[Shelly] error from provider:', msg ? 'received' : 'empty');
-      // #region agent log
-      fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'd47add' }, body: JSON.stringify({ sessionId: 'd47add', location: 'app/hooks/useVoiceSession.ts:onError', message: 'provider emitted error', data: { msg }, timestamp: Date.now(), hypothesisId: 'H1,H4' }) }).catch(() => {});
-      // #endregion
+      console.info('[Shelly] error from provider:', msg || '(empty)');
       setError(msg);
     };
     const onEnd     = () => optsRef.current.onEnd?.();
@@ -90,6 +96,7 @@ export function useVoiceSession(
     provider.on('missionChoices',  onChoices);
     provider.on('childName',      onName);
     provider.on('topic',          onTopic);
+    provider.on('appToolCall',   onAppTool);
     provider.on('error',          onError);
     provider.on('end',            onEnd);
 
@@ -101,6 +108,7 @@ export function useVoiceSession(
       provider.off('missionChoices',  onChoices);
       provider.off('childName',      onName);
       provider.off('topic',          onTopic);
+      provider.off('appToolCall',   onAppTool);
       provider.off('error',          onError);
       provider.off('end',            onEnd);
       // Clean up the provider when unmounting or when provider changes
@@ -111,9 +119,6 @@ export function useVoiceSession(
 
   const startListening = useCallback(async () => {
     console.info('[Shelly] startListening called');
-    // #region agent log
-    fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'd47add' }, body: JSON.stringify({ sessionId: 'd47add', location: 'app/hooks/useVoiceSession.ts:startListening', message: 'startListening called', data: {}, timestamp: Date.now(), hypothesisId: 'v2_talk' }) }).catch(() => {});
-    // #endregion
     setError(null);
     setIsMeaningful(false);
     const opts = optsRef.current;

@@ -35,7 +35,7 @@ All tool logic lives in the agent. The client receives results via the LiveKit d
 
 Two tools added to `RealtimeModel`:
 
-- **`propose_missions`** — `choices: MissionSuggestion[]` (array of 3, each with `title`, `description`, `difficulty: 'easy'|'medium'|'stretch'`). Shelly calls this when wrapping up.
+- **`propose_missions`** — `choices: MissionSuggestion[]` (array of 3, each with `title`, `description`, `theme: MissionTheme`, `difficulty: 'easy'|'medium'|'stretch'`). Shelly calls this when wrapping up.
 - **`end_conversation`** — no args. Called after missions are proposed. Agent disconnects room after a short delay so farewell audio can finish.
 
 `ShellyAgent` instructions amended: "At the end of every conversation, call `propose_missions` with 3 age-appropriate challenges based on what the child mentioned, then call `end_conversation`."
@@ -50,13 +50,14 @@ Tool call handler:
 New message types (alongside existing `transcript`):
 
 ```ts
-{ type: 'missionChoices', choices: MissionSuggestion[] }
-{ type: 'endConversation' }
+type LiveKitControlMessage =
+  | { type: 'missionChoices'; choices: MissionSuggestion[] }
+  | { type: 'endConversation' };
 ```
 
 - Both sent with `{ reliable: true }`
 - Order guaranteed: `missionChoices` before `endConversation`
-- `MissionSuggestion` matches the existing type in `lib/speech/types.ts`
+- `MissionSuggestion` matches the existing type in `lib/speech/types.ts` (title, description, optional theme, difficulty).
 
 ## Section 3: Client (`lib/speech/voice/livekit.ts`)
 

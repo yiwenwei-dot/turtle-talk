@@ -88,3 +88,31 @@ export interface TextProcessResult {
 export interface ProcessResult extends TextProcessResult {
   responseAudio: ArrayBuffer;
 }
+
+/**
+ * Discriminated union for control messages sent over the LiveKit data channel.
+ *
+ * These are produced by the LiveKit agent process (see `livekit-agent/main.ts`)
+ * and consumed by `LiveKitVoiceProvider` on the client. Shapes are kept in
+ * sync with the other providers so mission handling stays provider-agnostic.
+ */
+export type LiveKitControlMessage =
+  | {
+      type: 'transcript';
+      role: 'user' | 'assistant';
+      text: string;
+    }
+  | {
+      type: 'missionChoices';
+      choices: MissionSuggestion[];
+    }
+  | {
+    type: 'endConversation';
+  }
+  | {
+      type: 'appToolCall';
+      tool: string;
+      // Intentionally loose — concrete tools define their own argument shapes.
+      args: unknown;
+    };
+

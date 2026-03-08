@@ -23,6 +23,7 @@ Use this to verify the pipeline is healthy after changes or when debugging.
 1. **Mic and permissions**
    - User grants microphone access; no persistent "Could not access microphone" in UI.
    - If denied, the app shows the mic-permission screen and does not call the provider.
+   - **System/browser mic:** On Windows (and other OSes), the system or browser may be using the wrong input device. If Shelly doesn’t hear you or hears silence, ask the user to check: Windows Sound settings → Input device; browser (e.g. Chrome) site settings → Microphone → ensure the correct device is selected.
 
 2. **State flow**
    - After start: state moves to `listening`. UI shows "Shelly is listening".

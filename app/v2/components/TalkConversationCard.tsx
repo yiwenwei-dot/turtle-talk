@@ -1,16 +1,21 @@
 'use client';
 
 import type { Message } from '@/lib/speech/types';
+import type { VoiceSessionState } from '@/lib/speech/voice/types';
 import TalkConversationBubbles from './TalkConversationBubbles';
 
 export interface TalkConversationCardProps {
   messages: Message[];
   pendingUserTranscript?: string | null;
+  isThinking?: boolean;
+  state?: VoiceSessionState;
 }
 
 export default function TalkConversationCard({
   messages,
   pendingUserTranscript,
+  isThinking,
+  state,
 }: TalkConversationCardProps) {
   return (
     <div
@@ -29,6 +34,8 @@ export default function TalkConversationCard({
       <TalkConversationBubbles
         messages={messages}
         pendingUserTranscript={pendingUserTranscript}
+        isThinking={isThinking}
+        state={state}
       />
     </div>
   );

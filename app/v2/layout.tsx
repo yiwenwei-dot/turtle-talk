@@ -13,11 +13,13 @@ export default function V2Layout({
       className="v2-ui"
       style={{
         minHeight: "100vh",
-        background: "transparent",
+        background: "var(--v2-bg)",
         fontFamily: "var(--font-varela), 'Varela Round', sans-serif",
       }}
     >
-      {children}
+      <main className="v2-page-shell">
+        {children}
+      </main>
     </div>
   );
 }

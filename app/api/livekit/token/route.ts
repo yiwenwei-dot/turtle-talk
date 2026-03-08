@@ -31,7 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         ? body.participantName.trim()
         : 'child';
     const childName =
-      typeof body.childName === 'string' && body.childName.trim() ? body.childName.trim() : undefined;
+      typeof body.childName === 'string' && body.childName.trim() ? body.childName.trim() : 'little explorer';
     const topics = Array.isArray(body.topics) ? (body.topics as string[]).filter((t): t is string => typeof t === 'string') : [];
     if (childName !== undefined || topics.length > 0) {
       dispatchMetadata = JSON.stringify({ childName: childName ?? null, topics });

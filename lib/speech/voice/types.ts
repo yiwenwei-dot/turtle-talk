@@ -20,6 +20,13 @@ export interface VoiceSessionOptions {
   activeMission?: Mission | null;
 }
 
+/** Payload for an app-side tool call requested by a voice provider (e.g. LiveKit agent). */
+export interface AppToolCallEvent {
+  tool: string;
+  // Concrete tools define their own argument shapes.
+  args: unknown;
+}
+
 /** Typed event payloads — one value per event name */
 export interface VoiceEventMap {
   stateChange:    VoiceSessionState;
@@ -30,6 +37,7 @@ export interface VoiceEventMap {
   missionChoices: MissionSuggestion[];
   childName:      string;
   topic:          string;
+  appToolCall:    AppToolCallEvent;
   error:          string;
   end:            void;
 }

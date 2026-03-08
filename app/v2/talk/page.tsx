@@ -16,16 +16,12 @@ import BraveMissionsView from '../components/BraveMissionsView';
 import PostCallModal from '../components/PostCallModal';
 import MenuButton from '../components/MenuButton';
 import TalkStatusIndicator from '../components/TalkStatusIndicator';
-import TalkTitleTile from '../components/TalkTitleTile';
 import ShellyLogoPlaceholder from '../components/ShellyLogoPlaceholder';
 import TalkConversationCard from '../components/TalkConversationCard';
 import TalkEndCallButton from '../components/TalkEndCallButton';
 import TalkMuteToggle from '../components/TalkMuteToggle';
 import MicPermissionV2 from '../components/MicPermissionV2';
 import HowWasYourCallModal from '../components/HowWasYourCallModal';
-
-const DEBUG_INGEST = 'http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e';
-const DEBUG_SESSION = 'd47add';
 
 const ACTIVE_STATES = new Set([
   'listening',
@@ -94,16 +90,6 @@ function V2ConversationView() {
     activeMission,
   });
 
-  // #region agent log — v2/talk conversation view mounted and startListening wrapper
-  useEffect(() => {
-    fetch(DEBUG_INGEST, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': DEBUG_SESSION }, body: JSON.stringify({ sessionId: DEBUG_SESSION, location: 'app/v2/talk/page.tsx:conversation_mount', message: 'v2/talk conversation view mounted', data: {}, timestamp: Date.now(), hypothesisId: 'v2_talk' }) }).catch(() => {});
-  }, []);
-  const startListeningWrapped = useCallback(async () => {
-    fetch(DEBUG_INGEST, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': DEBUG_SESSION }, body: JSON.stringify({ sessionId: DEBUG_SESSION, location: 'app/v2/talk/page.tsx:startListening', message: 'v2/talk startListening called', data: {}, timestamp: Date.now(), hypothesisId: 'v2_talk' }) }).catch(() => {});
-    await startListening();
-  }, [startListening]);
-  // #endregion
-
   const hasError = !!error;
   const status = hasError ? 'error' : state === 'connecting' ? 'warning' : 'ok';
   const callActive = ACTIVE_STATES.has(state);
@@ -138,15 +124,19 @@ function V2ConversationView() {
       callEndedAt,
       source: 'v2',
       ...(timeToDismissMs != null && { timeToDismissMs }),
-    }).finally(() => {
+    })
+      .catch((err) => {
+        // Avoid crashing the UI if feedback persistence fails (e.g. table missing in Supabase).
+        console.error('[CallFeedback] save failed', err);
+      })
+      .finally(() => {
       callEndedAtRef.current = null;
       feedbackRatingRef.current = null;
       if (showFeedbackThenPostCall) {
         setShowFeedbackThenPostCall(false);
-        setShowPostCallModal(true);
-      } else {
-        setFeedbackModalDismissed(true);
       }
+      setFeedbackModalDismissed(true);
+      setShowPostCallModal(true);
     });
   }, [childId, saveCallFeedback, showFeedbackThenPostCall]);
 
@@ -182,7 +172,7 @@ function V2ConversationView() {
         <PostCallModal
           onNewCall={() => {
             setShowPostCallModal(false);
-            startListeningWrapped();
+            startListening();
           }}
           onGoHome={() => {
             setShowPostCallModal(false);
@@ -219,18 +209,22 @@ function V2ConversationView() {
           margin: '0 auto',
         }}
       >
-        <TalkTitleTile />
-        <ShellyLogoPlaceholder />
+        <ShellyLogoPlaceholder
+          animate={state === 'connecting'}
+          compact={state !== 'idle'}
+        />
         <TalkConversationCard
           messages={messages}
           pendingUserTranscript={pendingUserTranscript}
+          isThinking={state === 'processing'}
+          state={state}
         />
         <TalkEndCallButton
           state={state}
           hasError={hasError}
           onEnd={endConversation}
-          onRetry={startListeningWrapped}
-          onStart={startListeningWrapped}
+          onRetry={startListening}
+          onStart={startListening}
         />
         <TalkMuteToggle isMuted={isMuted} onToggle={toggleMute} callActive={callActive} />
       </main>

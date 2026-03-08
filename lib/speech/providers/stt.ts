@@ -3,7 +3,6 @@ import { toFile } from 'openai/uploads';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { STTProvider } from '../types';
 import { speechConfig } from '../config';
-import { debugLog } from '../debug-log';
 
 // ---------------------------------------------------------------------------
 // OpenAI STT (Whisper / gpt-4o-mini-transcribe)
@@ -25,9 +24,6 @@ export class OpenAISTTProvider implements STTProvider {
       : mimeType.startsWith('audio/wav') ? 'wav'
       : 'webm';
     const file = await toFile(buffer, `audio.${ext}`, { type: mimeType });
-    // #region agent log
-    debugLog({ location: 'lib/speech/providers/stt.ts:OpenAI_before', message: 'OpenAI STT input', data: { blobSize: buffer.length, mimeType }, hypothesisId: 'H3' });
-    // #endregion
 
     const transcription = await this.client.audio.transcriptions.create({
       file,
@@ -36,9 +32,6 @@ export class OpenAISTTProvider implements STTProvider {
     });
 
     const text = transcription.text ?? '';
-    // #region agent log
-    debugLog({ location: 'lib/speech/providers/stt.ts:OpenAI_after', message: 'OpenAI STT output', data: { textLen: text.length, textSnippet: text.slice(0, 80) }, hypothesisId: 'H1,H4' });
-    // #endregion
     return text;
   }
 }
@@ -69,9 +62,6 @@ export class GeminiSTTProvider implements STTProvider {
     const arrayBuffer = await audio.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     const mimeType = (audio.type || 'audio/webm') as string;
-    // #region agent log
-    debugLog({ location: 'lib/speech/providers/stt.ts:Gemini_before', message: 'Gemini STT input', data: { blobSize: arrayBuffer.byteLength, mimeType }, hypothesisId: 'H3' });
-    // #endregion
 
     const model = this.genAI.getGenerativeModel({ model: speechConfig.stt.geminiModel });
     const prompt =
@@ -82,9 +72,6 @@ export class GeminiSTTProvider implements STTProvider {
         const t = result.response.text();
         return (t ?? '').trim();
       } catch (e) {
-        // #region agent log
-        debugLog({ location: 'lib/speech/providers/stt.ts:Gemini_no_text', message: 'Gemini response.text() failed', data: { message: e instanceof Error ? e.message : String(e) }, hypothesisId: 'H4' });
-        // #endregion
         return '';
       }
     };
@@ -95,9 +82,6 @@ export class GeminiSTTProvider implements STTProvider {
         prompt,
       ]);
       const text = readText(result);
-      // #region agent log
-      debugLog({ location: 'lib/speech/providers/stt.ts:Gemini_after', message: 'Gemini STT output', data: { textLen: text.length, textSnippet: text.slice(0, 80) }, hypothesisId: 'H1,H4' });
-      // #endregion
       return text;
     } catch (firstErr) {
       if (!GeminiSTTProvider.isRetryable503(firstErr)) throw firstErr;
@@ -107,9 +91,6 @@ export class GeminiSTTProvider implements STTProvider {
         prompt,
       ]);
       const text = readText(result);
-      // #region agent log
-      debugLog({ location: 'lib/speech/providers/stt.ts:Gemini_after_retry', message: 'Gemini STT output after retry', data: { textLen: text.length, textSnippet: text.slice(0, 80) }, hypothesisId: 'H1,H4' });
-      // #endregion
       return text;
     }
   }

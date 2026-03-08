@@ -2,10 +2,14 @@
 
 import { useState } from 'react';
 import { Signpost } from 'lucide-react';
+import { useChildSession } from '@/app/hooks/useChildSession';
 import Menu from './Menu';
+import ChildLoginModalV2 from './ChildLoginModalV2';
 
 export default function MenuButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { refetch } = useChildSession();
 
   return (
     <>
@@ -45,7 +49,21 @@ export default function MenuButton() {
       >
         <Signpost size={24} strokeWidth={2} aria-hidden />
       </button>
-      <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <Menu
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onOpenLogin={() => {
+          setIsOpen(false);
+          setShowLoginModal(true);
+        }}
+      />
+      <ChildLoginModalV2
+        open={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </>
   );
 }

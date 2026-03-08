@@ -117,6 +117,17 @@ End-to-end flow from "Talk to Shelly" until the conversation is done: interrupti
 
 ---
 
+## LiveKit path (agent on server)
+
+- `createVoiceProvider()` → `LiveKitVoiceProvider` (when configured); `provider.start()` POSTs to `/api/livekit/token` to mint a room token and LiveKit URL.
+- Browser joins the room; a `shelly` LiveKit agent (see `livekit-agent/`) runs the OpenAI Realtime pipeline and sends:
+  - `{ type: 'transcript', role, text }` messages for captions.
+  - `{ type: 'missionChoices', choices: MissionSuggestion[] }` once per call end, where each choice has `title`, `description`, optional `theme`, and `difficulty: 'easy'|'medium'|'stretch'`.
+  - `{ type: 'endConversation' }` when the call should end.
+- `LiveKitVoiceProvider` parses these as `LiveKitControlMessage` values and emits the same high-level events as other providers (`missionChoices`, `end`, `userTranscript`, etc.), so `useVoiceSession` and the missions UI behave identically.
+
+---
+
 ## Error surfacing (browser)
 
 - **useVoiceSession**: subscribes to `provider.on('error', setError)`. UI shows `error` with "Oops! Shelly had a little hiccup", the **actual error message** below it, and "Try again".

@@ -2,7 +2,7 @@
 
 import { Room, RoomEvent, Track } from 'livekit-client';
 import type { VoiceSessionOptions } from './types';
-import type { Message } from '../types';
+import type { LiveKitControlMessage, Message, MissionSuggestion } from '../types';
 import { BaseVoiceProvider } from './base';
 
 /**
@@ -36,9 +36,9 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          roomName: options.childName ? `talk-${options.childName}` : undefined,
+          roomName: options.childName?.trim() ? `talk-${options.childName.trim()}` : undefined,
           participantName: 'child',
-          childName: options.childName ?? undefined,
+          childName: options.childName?.trim() || 'little explorer',
           topics: options.topics?.length ? options.topics : undefined,
         }),
       });
@@ -149,26 +149,38 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
   }
 
   private handleData(payload: Uint8Array): void {
+    let message: LiveKitControlMessage;
     try {
       const text = new TextDecoder().decode(payload);
-      const parsed = JSON.parse(text) as {
-        type?: string;
-        text?: string;
-        role?: 'user' | 'assistant';
-        choices?: unknown[];
-      };
-      if (parsed.type === 'transcript' && typeof parsed.text === 'string') {
-        const role = parsed.role === 'assistant' ? 'assistant' : 'user';
-        this.emit('userTranscript', parsed.text);
-        this._messages = [...this._messages, { role, content: parsed.text }];
-        this.emit('messages', this._messages);
-      } else if (parsed.type === 'missionChoices' && Array.isArray(parsed.choices)) {
-        this.emit('missionChoices', parsed.choices as import('../types').MissionSuggestion[]);
-      } else if (parsed.type === 'endConversation') {
-        this.stop();
-      }
+      message = JSON.parse(text) as LiveKitControlMessage;
     } catch {
       // ignore non-JSON or other data
+      return;
+    }
+
+    switch (message.type) {
+      case 'transcript': {
+        if (typeof message.text !== 'string') return;
+        const role = message.role === 'assistant' ? 'assistant' : 'user';
+        this.emit('userTranscript', message.text);
+        this._messages = [...this._messages, { role, content: message.text }];
+        this.emit('messages', this._messages);
+        break;
+      }
+      case 'missionChoices': {
+        if (Array.isArray(message.choices) && message.choices.length > 0) {
+          this.emit('missionChoices', message.choices as MissionSuggestion[]);
+        }
+        break;
+      }
+      case 'endConversation': {
+        this.stop();
+        break;
+      }
+      case 'appToolCall': {
+        this.emit('appToolCall', { tool: message.tool, args: message.args });
+        break;
+      }
     }
   }
 

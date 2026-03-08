@@ -11,7 +11,6 @@ import { ChildSafeGuardrail } from '@/lib/speech/guardrails/ChildSafeGuardrail';
 import type { ConversationContext, Message } from '@/lib/speech/types';
 import { SpeechServiceError, isProviderUnusualActivityError } from '@/lib/speech/errors';
 import { speechConfig } from '@/lib/speech/config';
-import { debugLog } from '@/lib/speech/debug-log';
 
 /** When the LLM returns empty responseText, we send this so the user always gets a spoken reply. */
 const FALLBACK_EMPTY_RESPONSE = "Hmm, I didn't quite get that. Can you say it again?";
@@ -86,10 +85,6 @@ export async function POST(req: NextRequest) {
       try {
         console.info('[Shelly] route: stream start');
         logAgent.logEvent('api_talk', 'stream_start', { blobSize: audioFile.size });
-        // #region agent log
-        fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'd47add' }, body: JSON.stringify({ sessionId: 'd47add', location: 'app/api/talk/route.ts:stream_start', message: 'route received audio', data: { blobSize: audioFile.size, blobType: audioFile.type }, timestamp: Date.now(), hypothesisId: 'H3' }) }).catch(() => {});
-        debugLog({ location: 'app/api/talk/route.ts:stream_start', message: 'route received audio', data: { blobSize: audioFile.size, blobType: audioFile.type }, hypothesisId: 'H3' });
-        // #endregion
         // Phase 0: STT first so we can send user_text immediately (UI shows "You said: ..." while LLM runs)
         let userText: string;
         try {
@@ -99,10 +94,6 @@ export async function POST(req: NextRequest) {
         }
         if (!userText.trim()) {
           logAgent.logEvent('api_talk', 'early_exit_empty_user');
-          debugLog({ location: 'app/api/talk/route.ts:early_exit', message: 'early exit empty user', hypothesisId: 'H5' });
-          // #region agent log
-          fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'd47add' }, body: JSON.stringify({ sessionId: 'd47add', location: 'app/api/talk/route.ts:early_exit_empty', message: 'closing stream without meta (empty user text)', data: {}, timestamp: Date.now(), hypothesisId: 'H5' }) }).catch(() => {});
-          // #endregion
           console.info('[Shelly] route: empty user text, closing');
           return;
         }
@@ -114,10 +105,6 @@ export async function POST(req: NextRequest) {
           userTextLen: textResult.userText.length,
           responseLen: textResult.responseText?.length ?? 0,
         });
-        // #region agent log
-        const earlyExit = !textResult.userText.trim();
-        debugLog({ location: 'app/api/talk/route.ts:processToText_done', message: 'processToText result', data: { userTextLen: textResult.userText.length, responseLen: textResult.responseText?.length ?? 0, userTextSnippet: (textResult.userText || '').slice(0, 80), earlyExit }, hypothesisId: 'H1,H5' });
-        // #endregion
 
         // When LLM returns empty, use a fallback phrase so we always send meta + TTS
         if (!textResult.responseText?.trim()) {
@@ -130,12 +117,6 @@ export async function POST(req: NextRequest) {
         const userSnippet = (textResult.userText || '').slice(0, 100);
         const responseSnippet = (textResult.responseText || '').slice(0, 100);
         console.info('[Shelly] turn — user:', userSnippet, '| response:', responseSnippet);
-        debugLog({
-          location: 'app/api/talk/route.ts:conversation_turn',
-          message: 'conversation turn',
-          data: { userSnippet, responseSnippet, historyLen: context.messages.length },
-          hypothesisId: 'conversation_log',
-        });
 
         // Only include missionProgressNote in meta if it was set
         const metaPayload = textResult.missionProgressNote
@@ -187,15 +168,23 @@ export async function POST(req: NextRequest) {
           console.info('[Shelly] route: no audio (empty response)');
         }
       } catch (err) {
-        logAgent.logEvent('api_talk', 'error', {
-          stage: err instanceof SpeechServiceError ? err.stage : 'unexpected',
-          message: err instanceof Error ? err.message : String(err),
-        }, 'error');
-        console.info('[Shelly] route: error', err instanceof SpeechServiceError ? err.stage : 'unexpected');
+        logAgent.logEvent(
+          'api_talk',
+          'error',
+          {
+            stage: err instanceof SpeechServiceError ? err.stage : 'unexpected',
+            message: err instanceof Error ? err.message : String(err),
+          },
+          'error',
+        );
+        console.info(
+          '[Shelly] route: error',
+          err instanceof SpeechServiceError ? err.stage : 'unexpected',
+        );
         const stageModels: Record<string, string> = {
-          stt:  `${speechConfig.stt.provider}/${speechConfig.stt.provider === 'gemini' ? speechConfig.stt.geminiModel : speechConfig.stt.model}`,
+          stt: `${speechConfig.stt.provider}/${speechConfig.stt.provider === 'gemini' ? speechConfig.stt.geminiModel : speechConfig.stt.model}`,
           chat: `${speechConfig.chat.provider}/${speechConfig.chat.provider === 'gemini' ? speechConfig.chat.geminiModel : speechConfig.chat.provider === 'openai' ? speechConfig.chat.openaiModel : speechConfig.chat.anthropicModel}`,
-          tts:  `${speechConfig.tts.provider}/${speechConfig.tts.provider === 'gemini' ? speechConfig.tts.geminiModel : speechConfig.tts.model}`,
+          tts: `${speechConfig.tts.provider}/${speechConfig.tts.provider === 'gemini' ? speechConfig.tts.geminiModel : speechConfig.tts.model}`,
         };
 
         let error = 'Something went wrong.';
@@ -210,9 +199,6 @@ export async function POST(req: NextRequest) {
         }
         send({ type: 'error', error });
         console.info('[Shelly] route: error sent to client');
-        // #region agent log
-        fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'd47add' }, body: JSON.stringify({ sessionId: 'd47add', location: 'app/api/talk/route.ts:error_sent', message: 'route sent error to client', data: { error }, timestamp: Date.now(), hypothesisId: 'H4' }) }).catch(() => {});
-        // #endregion
       } finally {
         controller.close();
       }

@@ -77,11 +77,12 @@ export default function TalkEndCallButton({
   if (isConnecting) {
     return (
       <div
+        className="v2-shelly-connecting"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 8,
+          gap: 10,
           minHeight: ROUND_SIZE,
           padding: '12px 24px',
           borderRadius: 'var(--v2-radius-pill)',
@@ -89,11 +90,12 @@ export default function TalkEndCallButton({
           color: 'white',
           fontSize: '1rem',
           fontWeight: 700,
-          opacity: 0.9,
+          opacity: 0.95,
         }}
+        aria-live="polite"
       >
-        <Phone size={22} strokeWidth={2} aria-hidden />
-        Connecting...
+        <span style={{ fontSize: 22, lineHeight: 1 }} aria-hidden>🐢</span>
+        Shelly is getting ready...
       </div>
     );
   }
@@ -150,9 +152,9 @@ export default function TalkEndCallButton({
     return (
       <button
         type="button"
-        className="v2-btn-nudge-green"
+        className="v2-btn-nudge-green v2-btn-primary-pill"
         onClick={handleClick}
-        aria-label="Start call"
+        aria-label="Tap to speak"
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
         style={{
@@ -161,11 +163,10 @@ export default function TalkEndCallButton({
           justifyContent: 'center',
           gap: 10,
           height: ROUND_SIZE,
-          width: expanded ? 'auto' : ROUND_SIZE,
-          minWidth: ROUND_SIZE,
-          padding: expanded ? '0 24px' : 0,
-          borderRadius: expanded ? 'var(--v2-radius-pill)' : '50%',
-          background: 'var(--v2-primary)',
+          width: 'auto',
+          minWidth: 150,
+          padding: '0 28px',
+          borderRadius: 'var(--v2-radius-pill)',
           color: 'white',
           border: 'none',
           cursor: 'pointer',
@@ -182,13 +183,13 @@ export default function TalkEndCallButton({
         <span
           style={{
             overflow: 'hidden',
-            maxWidth: expanded ? 90 : 0,
-            opacity: expanded ? 1 : 0,
+              maxWidth: 'none',
+              opacity: 1,
             transition: 'max-width 0.28s ease, opacity 0.2s ease',
             whiteSpace: 'nowrap',
           }}
         >
-          Start call
+          Tap to speak
         </span>
       </button>
     );
@@ -197,7 +198,7 @@ export default function TalkEndCallButton({
   return (
     <button
       type="button"
-      className="v2-btn-nudge-red"
+      className="v2-btn-nudge-red v2-btn-primary-pill"
       onClick={handleClick}
       aria-label="End call"
       onPointerEnter={handlePointerEnter}
@@ -208,10 +209,10 @@ export default function TalkEndCallButton({
         justifyContent: 'center',
         gap: 10,
         height: ROUND_SIZE,
-        width: expanded ? 'auto' : ROUND_SIZE,
-        minWidth: ROUND_SIZE,
-        padding: expanded ? '0 24px' : 0,
-        borderRadius: expanded ? 'var(--v2-radius-pill)' : '50%',
+        width: 'auto',
+        minWidth: 150,
+        padding: '0 28px',
+        borderRadius: 'var(--v2-radius-pill)',
         background: 'var(--v2-end-call-red)',
         color: 'white',
         border: 'none',
@@ -229,8 +230,8 @@ export default function TalkEndCallButton({
       <span
         style={{
           overflow: 'hidden',
-          maxWidth: expanded ? 80 : 0,
-          opacity: expanded ? 1 : 0,
+          maxWidth: 'none',
+          opacity: 1,
           transition: 'max-width 0.28s ease, opacity 0.2s ease',
           whiteSpace: 'nowrap',
         }}

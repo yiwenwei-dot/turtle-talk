@@ -1,7 +1,6 @@
 import type { SpeechServiceConfig, ConversationContext, ProcessResult, TextProcessResult, TurtleMood, ChatResponse } from './types';
 import type { GuardrailAgent } from './guardrails/types';
 import { SpeechServiceError, GuardrailBlockedError } from './errors';
-import { debugLog } from './debug-log';
 
 const FALLBACK_RESPONSE = "Oh my! Let's talk about something else. What's your favourite animal?";
 const FALLBACK_MOOD: TurtleMood = 'confused';
@@ -84,13 +83,7 @@ export class SpeechService {
         if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
           console.info('[Shelly] service: STT done');
         }
-        // #region agent log
-        debugLog({ location: 'lib/speech/SpeechService.ts:after_stt', message: 'STT result', data: { userTextLen: (userText || '').length, userTextSnippet: (userText || '').slice(0, 80), isEmpty: !(userText || '').trim() }, hypothesisId: 'H1' });
-        // #endregion
       } catch (err) {
-        // #region agent log
-        debugLog({ location: 'lib/speech/SpeechService.ts:stt_throw', message: 'STT threw', data: { message: err instanceof Error ? err.message : String(err) }, hypothesisId: 'H2' });
-        // #endregion
         throw new SpeechServiceError('Speech-to-text failed', 'stt', err);
       }
     }
@@ -98,9 +91,6 @@ export class SpeechService {
     // Guard: empty transcription means the audio was silent or noise-only.
     // Return a sentinel result so the route can discard the turn cleanly.
     if (!userText.trim()) {
-      // #region agent log
-      debugLog({ location: 'lib/speech/SpeechService.ts:empty_sentinel', message: 'returning empty sentinel', hypothesisId: 'H1' });
-      // #endregion
       return { userText, responseText: '', mood: 'idle' };
     }
 
