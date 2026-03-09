@@ -1,8 +1,11 @@
 /**
  * Returns a getter that lazily creates and caches a singleton instance.
  * Eliminates null-typed module-level vars and the ! workaround.
+ * If the factory throws, no instance is cached and the next call will retry.
+ * T extends NonNullable<unknown> prevents undefined/null factories, which would
+ * bypass the ?? memoization check and call the factory on every invocation.
  */
-export function createLazySingleton<T>(factory: () => T): () => T {
+export function createLazySingleton<T extends NonNullable<unknown>>(factory: () => T): () => T {
   let instance: T | undefined;
   return () => instance ?? (instance = factory());
 }
