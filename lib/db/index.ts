@@ -46,7 +46,7 @@ export function getGuestDb(): DatabaseService {
   if (_guestInstance) return _guestInstance;
   const { LocalStorageDatabaseService } = require('./providers/localStorage');
   _guestInstance = new LocalStorageDatabaseService();
-  return _guestInstance;
+  return _guestInstance!;
 }
 
 /**
