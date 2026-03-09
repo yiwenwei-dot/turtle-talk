@@ -11,43 +11,43 @@
  * and will show data from Supabase (e.g. mission counts from Supabase missions table).
  */
 import type { DatabaseService } from './types';
+import { createLazySingleton, pickProvider } from '@/lib/utils/singleton';
 
 export type { DatabaseService };
 export type { ChildMemory, Journal } from './types';
 
-let _instance: DatabaseService | null = null;
-let _guestInstance: DatabaseService | null = null;
+const DB_PROVIDERS = ['localStorage', 'supabase', 'convex'] as const;
+type DbProvider = (typeof DB_PROVIDERS)[number];
 
-export function getDb(): DatabaseService {
-  if (_instance) return _instance;
-
-  const provider = process.env.NEXT_PUBLIC_DB_PROVIDER ?? 'localStorage';
+export const getDb = createLazySingleton((): DatabaseService => {
+  const provider = pickProvider<DbProvider>(
+    'NEXT_PUBLIC_DB_PROVIDER',
+    process.env.NEXT_PUBLIC_DB_PROVIDER,
+    DB_PROVIDERS,
+    'localStorage',
+  );
 
   if (provider === 'supabase') {
-    // Dynamic import keeps Supabase client-side only when needed
+    // Dynamic require keeps Supabase client-side only when needed
     const { SupabaseDatabaseService } = require('./providers/supabase');
-    _instance = new SupabaseDatabaseService();
-  } else if (provider === 'convex') {
-    const { ConvexDatabaseService } = require('./providers/convex');
-    _instance = new ConvexDatabaseService();
-  } else {
-    const { LocalStorageDatabaseService } = require('./providers/localStorage');
-    _instance = new LocalStorageDatabaseService();
+    return new SupabaseDatabaseService();
   }
-
-  return _instance!;
-}
+  if (provider === 'convex') {
+    const { ConvexDatabaseService } = require('./providers/convex');
+    return new ConvexDatabaseService();
+  }
+  const { LocalStorageDatabaseService } = require('./providers/localStorage');
+  return new LocalStorageDatabaseService();
+});
 
 /**
  * Database for guest (no logged-in child). Always uses localStorage so guest
  * missions and memory persist on this device regardless of NEXT_PUBLIC_DB_PROVIDER.
  */
-export function getGuestDb(): DatabaseService {
-  if (_guestInstance) return _guestInstance;
+export const getGuestDb = createLazySingleton((): DatabaseService => {
   const { LocalStorageDatabaseService } = require('./providers/localStorage');
-  _guestInstance = new LocalStorageDatabaseService();
-  return _guestInstance!;
-}
+  return new LocalStorageDatabaseService();
+});
 
 /**
  * Returns a stable device UUID, creating one on first call.
