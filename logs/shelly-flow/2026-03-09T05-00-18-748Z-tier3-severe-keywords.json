@@ -1,0 +1,24 @@
+{
+  "caseId": "tier3-severe-keywords",
+  "timestamp": "2026-03-09T05-00-18-748Z",
+  "payload": {
+    "description": "Tier 3: severe keywords, Shelly uses pre-approved template and triggers quiet parent alert.",
+    "input": {
+      "primaryMode": "venting",
+      "escalationTier": 3,
+      "signals": [
+        "severe_safety_keywords"
+      ]
+    },
+    "output": {
+      "systemBlock": "CURRENT MODE — VENTING:\n- The child needs to let out feelings. Use mostly empathy and validation. Ask very few questions.\n- Reflect back what they feel and normalize it: \"That's really hard.\", \"It's okay to feel that way.\"\n- Do NOT suggest solutions, missions, or next steps until they have had several turns. Do not minimize their feelings.\n- Only after multiple supportive turns, you may gently offer one grounding option (e.g. calm-down game).",
+      "escalationResponse": "I'm really glad you told me. Can you find an adult you trust right now and tell them what you told me? They can help.",
+      "parentAlert": {
+        "escalationTier": 3,
+        "reasonCode": "severe_safety_keywords",
+        "suggestedParentMessage": "Shelly had a conversation with your child that touched on something serious. We recommend talking with your child and, if needed, reaching out to a professional for support.",
+        "triggeredAt": "2026-03-09T05:00:18.748Z"
+      }
+    }
+  }
+}

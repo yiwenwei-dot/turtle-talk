@@ -1,0 +1,24 @@
+{
+  "caseId": "tier2-pattern-over-days",
+  "timestamp": "2026-03-09T05-00-18-746Z",
+  "payload": {
+    "description": "Tier 2: pattern over days, suggest grown-up.",
+    "input": {
+      "primaryMode": "listening",
+      "escalationTier": 2,
+      "signals": [
+        "pattern_over_days"
+      ]
+    },
+    "output": {
+      "systemBlock": "CURRENT MODE — LISTENING (default):\n- Your main job is to make the child feel heard. Use mostly reflections and short paraphrasing.\n- Keep follow-ups to one short reflection and one gentle question. Do not give advice or suggest missions unless they ask.\n- Use phrases like \"Sounds like...\", \"So that happened...\", \"I hear you.\" Avoid analysis or problem-solving.",
+      "escalationResponse": "This feels like a big one. Would you like to talk to a grown-up too? I can help you think of what to say if you want.",
+      "parentAlert": {
+        "escalationTier": 2,
+        "reasonCode": "pattern_over_days",
+        "suggestedParentMessage": "Your child has had some tough conversations with Shelly lately. You might want to check in and see how they're doing.",
+        "triggeredAt": "2026-03-09T05:00:18.746Z"
+      }
+    }
+  }
+}

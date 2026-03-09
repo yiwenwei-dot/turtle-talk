@@ -274,6 +274,7 @@ test('report_mood tool call → emits moodChange', async () => {
 });
 
 test('propose_missions + end_conversation → emits missionChoices and calls stop()', async () => {
+  jest.useFakeTimers();
   const { p, dc } = await startAndGetDc();
   const choices: unknown[] = [];
   let ended = false;
@@ -300,7 +301,10 @@ test('propose_missions + end_conversation → emits missionChoices and calls sto
   });
   dc.simulateMessage({ type: 'response.done' });
   expect(choices).toHaveLength(3);
+  expect(ended).toBe(false); // graceful delay: stop() not yet called
+  jest.advanceTimersByTime(2000);
   expect(ended).toBe(true);
+  jest.useRealTimers();
 });
 
 test('note_child_info → emits childName and topic', async () => {

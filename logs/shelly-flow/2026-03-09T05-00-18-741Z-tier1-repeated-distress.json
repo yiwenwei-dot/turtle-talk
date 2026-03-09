@@ -1,0 +1,18 @@
+{
+  "caseId": "tier1-repeated-distress",
+  "timestamp": "2026-03-09T05-00-18-741Z",
+  "payload": {
+    "description": "Tier 1: repeated distress, slightly longer empathy.",
+    "input": {
+      "primaryMode": "venting",
+      "escalationTier": 1,
+      "signals": [
+        "repeated_distress"
+      ]
+    },
+    "output": {
+      "systemBlock": "CURRENT MODE — VENTING:\n- The child needs to let out feelings. Use mostly empathy and validation. Ask very few questions.\n- Reflect back what they feel and normalize it: \"That's really hard.\", \"It's okay to feel that way.\"\n- Do NOT suggest solutions, missions, or next steps until they have had several turns. Do not minimize their feelings.\n- Only after multiple supportive turns, you may gently offer one grounding option (e.g. calm-down game).",
+      "escalationResponse": "That sounds really hard, and it's okay to feel that way. Do you want to keep talking about this or take a tiny break?"
+    }
+  }
+}
