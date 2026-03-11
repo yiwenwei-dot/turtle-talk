@@ -50,3 +50,12 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# logs
+logs/
+.cursor/
+.cursorrules
+.cursor/settings.json
+.cursor/settings.local.json
+.cursor/settings.local.jsonc
+.cursor/settings.local.jsonc
