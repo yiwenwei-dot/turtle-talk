@@ -25,7 +25,7 @@ const LONG_PRESS_MS = 500;
 const ACTIVE_CALL_STATES = new Set(['listening', 'recording', 'processing', 'speaking']);
 
 const LEFT_ITEM = { href: '/v2/garden', icon: Leaf, label: 'Garden', color: '#06b6d4' };
-const RIGHT_ITEM  = { href: '/missions', icon: Star, label: 'My Missions', color: '#f97316' };
+const RIGHT_ITEM  = { href: '/v2/missions', icon: Star, label: 'My Missions', color: '#f97316' };
 
 function NavItem({ href, icon: Icon, label, color, active }: {
   href: string; icon: typeof Home; label: string; color: string; active: boolean;
@@ -172,7 +172,7 @@ export default function BottomNav({ talkProps }: BottomNavProps = {}) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 12 }}>
             {/* My Missions */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-              <Link href="/missions" aria-label="My Missions" className="tt-tap-shake" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+              <Link href="/v2/missions" aria-label="My Missions" className="tt-tap-shake" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 44, minWidth: 44, padding: '10px 16px', borderRadius: 9999, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.1)', color: 'white', fontSize: '0.9rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
                   <Star size={20} strokeWidth={2} aria-hidden />
                   <span>My Missions</span>
@@ -289,7 +289,7 @@ export default function BottomNav({ talkProps }: BottomNavProps = {}) {
 
       {/* Centre pill — mic only; short tap = brave call (/talk), long-press = /journal */}
       <Link
-        href="/talk"
+        href="/v2/talk"
         aria-label="Start a Brave Call with Shelly (long-press for journal)"
         className="tt-tap-shake"
         style={{

@@ -6,6 +6,8 @@ import { GET } from '@/app/api/child-session/route';
 jest.mock('@/lib/child-session', () => ({
   getChildSessionCookieName: jest.fn(() => 'child_session'),
   parseChildSessionCookieValue: jest.fn(),
+  isSessionStale: jest.fn(() => false),
+  touchSession: jest.fn(),
 }));
 
 const childSession = require('@/lib/child-session') as {

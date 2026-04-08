@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./components/ui/tokens.css";
 
 :root {
   --background: #ffffff;
@@ -19,14 +20,6 @@ body {
 /* ============================================
    HOME PAGE – HERO TOKENS (simple UI, mobile-first)
    ============================================ */
-/* App-wide text hierarchy (on dark/ambient backgrounds): grey scale */
-:root {
-  --tt-text-primary: #ffffff;
-  --tt-text-secondary: rgba(255, 255, 255, 0.88);
-  --tt-text-tertiary: rgba(255, 255, 255, 0.7);
-  --tt-text-muted: rgba(255, 255, 255, 0.5);
-}
-
 :root {
   --hero-title-size: clamp(2.4rem, 8vw, 4rem);
   --hero-title-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
@@ -145,13 +138,9 @@ body {
   50%       { transform: scale(1.6); opacity: 0.5; }
 }
 
-/* Cloud drift */
-@keyframes cloudDrift1 {
+/* Cloud drift — single keyframe, speed varies per cloud instance */
+@keyframes cloudDrift {
   from { transform: translateX(-30vw); }
-  to   { transform: translateX(100vw); }
-}
-@keyframes cloudDrift2 {
-  from { transform: translateX(-22vw); }
   to   { transform: translateX(100vw); }
 }
 
@@ -400,7 +389,6 @@ html.dark .parent-dashboard {
   --pd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --pd-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
   --pd-error: #f87171;
-  --pd-success: #34d399;
   --pd-success: #34d399;
   --pd-success-soft: rgba(52, 211, 153, 0.18);
   --pd-success-border: rgba(52, 211, 153, 0.35);

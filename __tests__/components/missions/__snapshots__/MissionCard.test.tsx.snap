@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`MissionCard matches snapshot for active mission 1`] = `
+<div
+  class=""
+  data-variant="default"
+  style="background: var(--tt-surface); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: var(--tt-shadow-glass); border-radius: 16px; padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; background-color: rgba(255, 255, 255, 0.14);"
+>
+  <span
+    style="font-size: 36px; line-height: 1; flex-shrink: 0;"
+  >
+    💛
+  </span>
+  <div
+    style="flex: 1 1 0%; min-width: 0;"
+  >
+    <p
+      style="color: var(--tt-text-primary); font-weight: 700; font-size: 17px; margin: 0px; text-shadow: 0 1px 4px rgba(0,0,0,0.4);"
+    >
+      Be kind to a friend
+    </p>
+    <span
+      data-difficulty="easy"
+      style="display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; background: rgba(34, 197, 94, 0.25); color: rgb(134, 239, 172);"
+    >
+      easy
+    </span>
+    <p
+      style="color: var(--tt-text-secondary); font-size: 14px; margin: 4px 0px 0px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);"
+    >
+      Do something nice for someone today.
+    </p>
+    <p
+      style="color: var(--tt-text-muted); font-size: 11px; margin: 6px 0px 0px;"
+    >
+      Started 
+      Jan 15, 2024
+    </p>
+  </div>
+  <div
+    style="display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0;"
+  >
+    <button
+      class="tt-tap-shake "
+      style="background: rgba(34, 197, 94, 0.8); color: white; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-check"
+        fill="none"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2.5"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 6 9 17l-5-5"
+        />
+      </svg>
+       Done!
+    </button>
+    <div
+      style="position: relative;"
+    >
+      <button
+        aria-expanded="false"
+        aria-haspopup="menu"
+        class="tt-tap-shake"
+        style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: var(--tt-text-secondary); cursor: pointer;"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-ellipsis-vertical"
+          fill="none"
+          height="18"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="1"
+          />
+          <circle
+            cx="12"
+            cy="5"
+            r="1"
+          />
+          <circle
+            cx="12"
+            cy="19"
+            r="1"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MissionCard matches snapshot for completed mission 1`] = `
+<div
+  class=""
+  data-variant="default"
+  style="background: var(--tt-surface); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: var(--tt-shadow-glass); border-radius: 16px; padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; background-color: rgba(255, 255, 255, 0.07);"
+>
+  <span
+    style="font-size: 36px; line-height: 1; flex-shrink: 0;"
+  >
+    💛
+  </span>
+  <div
+    style="flex: 1 1 0%; min-width: 0;"
+  >
+    <p
+      style="color: var(--tt-text-primary); font-weight: 700; font-size: 17px; margin: 0px; text-shadow: 0 1px 4px rgba(0,0,0,0.4); text-decoration: line-through;"
+    >
+      Be kind to a friend
+    </p>
+    <p
+      style="color: var(--tt-text-secondary); font-size: 14px; margin: 4px 0px 0px; text-shadow: 0 1px 3px rgba(0,0,0,0.3); text-decoration: line-through;"
+    >
+      Do something nice for someone today.
+    </p>
+    <p
+      style="color: var(--tt-text-muted); font-size: 12px; margin: 6px 0px 0px;"
+    >
+      Completed 
+      Jan 16, 2024
+    </p>
+  </div>
+  <div
+    style="display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0;"
+  >
+    <div
+      style="position: relative;"
+    >
+      <button
+        aria-expanded="false"
+        aria-haspopup="menu"
+        class="tt-tap-shake"
+        style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: var(--tt-text-secondary); cursor: pointer;"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-ellipsis-vertical"
+          fill="none"
+          height="18"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="1"
+          />
+          <circle
+            cx="12"
+            cy="5"
+            r="1"
+          />
+          <circle
+            cx="12"
+            cy="19"
+            r="1"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;

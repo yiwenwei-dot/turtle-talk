@@ -1,0 +1,57 @@
+/* app/components/ui/tokens.css
+   ─────────────────────────────────────────────────────────────────────────────
+   TurtleTalk design tokens — single source of truth for the child-facing UI.
+   Parent dashboard tokens stay scoped to .parent-dashboard in globals.css.
+   ─────────────────────────────────────────────────────────────────────────────
+*/
+
+:root {
+  /* ── Brand colours ─────────────────────────────────────────────────────── */
+  --tt-primary:        #22c55e;
+  --tt-primary-dark:   #16a34a;
+  --tt-danger:         #ef4444;
+  --tt-danger-dark:    #dc2626;
+  --tt-gold:           #d97706;
+  --tt-gold-dark:      #b45309;
+  --tt-surface:        rgba(8, 22, 48, 0.88);
+  --tt-surface-border: rgba(255, 255, 255, 0.12);
+  --tt-ghost-bg:       rgba(255, 255, 255, 0.10);
+  --tt-ghost-border:   rgba(255, 255, 255, 0.25);
+
+  /* ── Gradients ──────────────────────────────────────────────────────────── */
+  --tt-grad-primary: linear-gradient(135deg, var(--tt-primary-dark), var(--tt-primary));
+  --tt-grad-danger:  linear-gradient(135deg, var(--tt-danger-dark),  var(--tt-danger));
+  --tt-grad-gold:    linear-gradient(135deg, var(--tt-gold-dark),    var(--tt-gold));
+  --tt-grad-connect: linear-gradient(135deg, var(--tt-primary-dark), var(--tt-primary-dark));
+
+  /* ── Shadows ────────────────────────────────────────────────────────────── */
+  --tt-shadow-primary: 0 4px 20px rgba(22, 163, 74, 0.45);
+  --tt-shadow-danger:  0 4px 20px rgba(220, 38, 38, 0.50);
+  --tt-shadow-gold:    0 4px 20px rgba(217, 119, 6, 0.50);
+  --tt-shadow-glass:   0 8px 40px rgba(0, 0, 0, 0.40);
+
+  /* ── Radii ──────────────────────────────────────────────────────────────── */
+  --tt-radius-pill:    9999px;
+  --tt-radius-card:    20px;
+  --tt-radius-card-sm: 16px;
+  --tt-radius-sm:      8px;
+
+  /* ── Button sizing ──────────────────────────────────────────────────────── */
+  --tt-btn-height:      44px;
+  --tt-icon-btn-size:   64px;
+  --tt-btn-font-size:   0.95rem;
+  --tt-btn-font-weight: 700;
+  --tt-btn-color:          #ffffff;
+  --tt-btn-border-overlay: rgba(255, 255, 255, 0.25);
+
+  /* ── Text ───────────────────────────────────────────────────────────────── */
+  --tt-text-primary:   #ffffff;
+  --tt-text-secondary: rgba(255, 255, 255, 0.88);
+  --tt-text-tertiary:  rgba(255, 255, 255, 0.7);
+  --tt-text-muted:     rgba(255, 255, 255, 0.5);
+
+  /* ── Motion ─────────────────────────────────────────────────────────────── */
+  --tt-transition-fast:   0.15s ease;
+  --tt-transition-mid:    0.25s ease;
+  --tt-transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
