@@ -1,9 +1,0 @@
-{"sessionId":"d47add","location":"app/v2/talk/page.tsx:conversation_mount","message":"v2/talk conversation view mounted","data":{},"timestamp":1772896625055,"hypothesisId":"v2_talk"}
-{"sessionId":"d47add","location":"app/v2/talk/page.tsx:conversation_mount","message":"v2/talk conversation view mounted","data":{},"timestamp":1772896625057,"hypothesisId":"v2_talk"}
-{"sessionId":"d47add","location":"app/v2/talk/page.tsx:startListening","message":"v2/talk startListening called","data":{},"timestamp":1772896626094,"hypothesisId":"v2_talk"}
-{"sessionId":"d47add","location":"app/hooks/useVoiceSession.ts:startListening","message":"startListening called","data":{},"timestamp":1772896626095,"hypothesisId":"v2_talk"}
-{"sessionId":"d47add","location":"app/api/talk/route.ts:stream_start","message":"route received audio","data":{"blobSize":23480,"blobType":"audio/webm;codecs=opus"},"timestamp":1772896634832,"hypothesisId":"H3"}
-{"sessionId":"d47add","location":"app/api/talk/route.ts:error_sent","message":"route sent error to client","data":{"error":"[vapi\n/gpt-4o-mini-transcribe] Connection error."},"timestamp":1772896636177,"hypothesisId":"H4"}
-{"sessionId":"d47add","location":"lib/speech/voice/native.ts:stream_error","message":"server sent error event","data":{"error":"[vapi\n/gpt-4o-mini-transcribe] Connection error."},"timestamp":1772896636182,"hypothesisId":"H4"}
-{"sessionId":"d47add","location":"app/hooks/useVoiceSession.ts:onError","message":"provider emitted error","data":{"msg":"[vapi\n/gpt-4o-mini-transcribe] Connection error."},"timestamp":1772896636191,"hypothesisId":"H1,H4"}
-{"sessionId":"d47add","location":"lib/speech/voice/native.ts:sendAudio_catch","message":"sendAudio threw","data":{"msg":"[vapi\n/gpt-4o-mini-transcribe] Connection error."},"timestamp":1772896636189,"hypothesisId":"H1,H4"}

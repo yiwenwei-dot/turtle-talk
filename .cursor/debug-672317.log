@@ -1,4 +1,0 @@
-{"sessionId":"672317","location":"parent/children/route.ts:GET:entry","message":"GET parent/children started","data":{"step":"entry"},"timestamp":1772651101917,"hypothesisId":"H3"}
-{"sessionId":"672317","location":"parent/children/route.ts:GET:afterGetUser","message":"after getUser","data":{"userId":"82132f53"},"timestamp":1772651102356,"hypothesisId":"H2"}
-{"sessionId":"672317","location":"parent/children/route.ts:GET:beforeParentChild","message":"before parent_child select","data":{"step":"before_parent_child"},"timestamp":1772651102358,"hypothesisId":"H2"}
-{"sessionId":"672317","location":"parent/children/route.ts:GET:afterParentChild","message":"after parent_child select","data":{"step":"after_parent_child","linkError":"42P17","message":"infinite recursion detected in policy for relation \"profiles\""},"timestamp":1772651102788,"hypothesisId":"H5"}

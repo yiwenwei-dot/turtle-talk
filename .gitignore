@@ -25,7 +25,8 @@ livekit-agent/node_modules
 .DS_Store
 *.pem
 
-# debug
+# debug / local agent NDJSON (may contain user text, session ids, telemetry)
+debug-*.log
 .cursor/debug-*.log
 npm-debug.log*
 yarn-debug.log*
@@ -51,11 +52,10 @@ next-env.d.ts
 .vercel
 .env*.local
 
-# logs
+# logs (runtime + guardrail captures — do not ship)
 logs/
+!/logs/.gitkeep
+
+# Cursor IDE local (never commit)
 .cursor/
 .cursorrules
-.cursor/settings.json
-.cursor/settings.local.json
-.cursor/settings.local.jsonc
-.cursor/settings.local.jsonc

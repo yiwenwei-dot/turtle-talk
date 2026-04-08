@@ -1,2 +1,0 @@
-{"sessionId":"c6dc50","location":"livekit.ts:token_response","message":"token response","data":{"ok":true,"status":200,"hasToken":true,"hasLivekitUrl":true,"roomName":"talk-1772670335914-awzcnocn"},"hypothesisId":"H1","timestamp":1772670335922}
-{"sessionId":"c6dc50","location":"livekit.ts:room_connected","message":"room connect succeeded","data":{"roomName":"talk-1772670335914-awzcnocn"},"hypothesisId":"H2","timestamp":1772670336969}
