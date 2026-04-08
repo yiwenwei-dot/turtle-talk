@@ -58,7 +58,7 @@ lib/speech/
   SpeechService.ts                ← Orchestrator: STT → guardrails → chat → guardrails → TTS
   index.ts                        ← Barrel export
   providers/
-    chat.ts                       ← AnthropicChatProvider (haiku-4-5) / OpenAIChatProvider (gpt-4o-mini)
+    chat.ts                       ← AnthropicChatProvider (haiku-4-5) / OpenAIChatProvider (gpt-4.1-nano)
     stt.ts                        ← OpenAISTTProvider (whisper-1)
     tts.ts                        ← OpenAITTSProvider (nova, mp3)
   guardrails/
@@ -113,7 +113,7 @@ All providers implement simple interfaces from `lib/speech/types.ts`. Swap via `
 
 ### Chat — `AnthropicChatProvider` / `OpenAIChatProvider`
 - Anthropic: `claude-haiku-4-5-20251001`, maxTokens: 256 (overrides: `SPEECH_ANTHROPIC_MODEL`, `SPEECH_CHAT_MAX_TOKENS`)
-- OpenAI: `gpt-4o-mini`, maxTokens: 256 (overrides: `SPEECH_OPENAI_MODEL`, `SPEECH_CHAT_MAX_TOKENS`)
+- OpenAI: `gpt-4.1-nano`, maxTokens: 256 (overrides: `SPEECH_OPENAI_MODEL`, `SPEECH_CHAT_MAX_TOKENS`)
 - Both extend `BaseChatProvider` which handles message history formatting via LangChain
 - Interface: `ChatProvider { chat(input: string, ctx: ConversationContext): Promise<ChatResponse> }`
 - History is passed as alternating `HumanMessage` / `SystemMessage` (note: assistant turns use `SystemMessage` — intentional LangChain quirk)
@@ -122,7 +122,7 @@ All providers implement simple interfaces from `lib/speech/types.ts`. Swap via `
 
 ## Shelly System Prompt (`lib/speech/providers/chat.ts` → `SHELLY_SYSTEM_PROMPT`)
 The full prompt enforces:
-1. **Persona** — kind, curious sea turtle for ages 4–10; 2–3 sentence max; simple words
+1. **Persona** — kind, curious sea turtle for ages 5–13; 2–3 sentence max; simple words
 2. **Strict JSON output** — every response must be valid JSON: `{ "text": "...", "mood": "..." }`
 3. **Mood selection rules**:
    - `happy` — good news, fun facts, joy

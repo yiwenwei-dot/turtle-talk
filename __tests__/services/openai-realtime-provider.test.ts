@@ -390,3 +390,27 @@ test('buildSystemPrompt includes difficulty instruction for confident', () => {
   const prompt = buildSystemPrompt({ difficultyProfile: 'confident' });
   expect(prompt).toContain('stretch challenge');
 });
+
+test('buildSystemPrompt includes time awareness when clientLocalTime provided', () => {
+  const prompt = buildSystemPrompt({
+    clientLocalTime: '2026-03-14T15:30:00.000Z',
+  });
+  expect(prompt).toContain('AWARENESS');
+  expect(prompt).toContain('Current date and time');
+});
+
+test('buildSystemPrompt includes location when provided', () => {
+  const prompt = buildSystemPrompt({
+    location: { city: 'San Francisco', region: 'California', country: 'US' },
+  });
+  expect(prompt).toContain('San Francisco');
+  expect(prompt).toContain('California');
+  expect(prompt).toContain('US');
+});
+
+test('buildSystemPrompt includes weather when weatherDescription provided', () => {
+  const prompt = buildSystemPrompt({
+    weatherDescription: 'sunny, 72°F',
+  });
+  expect(prompt).toContain('sunny, 72°F');
+});

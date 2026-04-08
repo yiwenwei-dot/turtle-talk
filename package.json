@@ -24,6 +24,8 @@
     "@react-three/fiber": "^8.17.10",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.98.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "@vapi-ai/web": "^2.5.2",
     "@vercel/analytics": "^1.6.1",
     "canvas-confetti": "^1.9.4",

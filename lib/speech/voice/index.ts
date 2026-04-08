@@ -58,3 +58,18 @@ export function createVoiceProvider(name?: string): import('./types').VoiceConve
   }
   return _getDefaultVoiceProvider();
 }
+
+/**
+ * Always creates a fresh (non-singleton) provider instance using the
+ * configured NEXT_PUBLIC_VOICE_PROVIDER. Use this when you need to
+ * discard internal state from a previous session (e.g. "Start over").
+ */
+export function createFreshVoiceProvider(): import('./types').VoiceConversationProvider {
+  const name = pickProvider<VoiceProvider>(
+    'NEXT_PUBLIC_VOICE_PROVIDER',
+    process.env.NEXT_PUBLIC_VOICE_PROVIDER,
+    VOICE_PROVIDERS,
+    'livekit',
+  );
+  return buildVoiceProvider(name);
+}

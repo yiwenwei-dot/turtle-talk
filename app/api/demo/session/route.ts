@@ -13,6 +13,7 @@ type DemoSessionPayload = {
   messagesSummary?: unknown;
   parentFeedback?: string | null;
   parentWantsFullVersion?: boolean | null;
+  consentedAt?: string | null;
 };
 
 /**
@@ -58,6 +59,9 @@ export async function POST(request: NextRequest) {
   }
   if ('parentWantsFullVersion' in body) {
     record.parent_wants_full_version = body.parentWantsFullVersion ?? null;
+  }
+  if ('consentedAt' in body) {
+    record.consented_at = body.consentedAt ?? null;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

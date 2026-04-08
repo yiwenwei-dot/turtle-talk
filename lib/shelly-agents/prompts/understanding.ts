@@ -23,7 +23,7 @@ TASKS:
 
 RULES:
 - Be conservative: only flag safety signals when you have reasonable confidence. False positives are harmful.
-- For children aged 4–10, use age-appropriate interpretation (e.g. "I hate myself" in play vs. repeated in distress).
+- For children aged 5–13, use age-appropriate interpretation (e.g. "I hate myself" in play vs. repeated in distress).
 - Output valid JSON only.`;
 
 export const SIGNAL_DETECTION_OUTPUT_SCHEMA = {

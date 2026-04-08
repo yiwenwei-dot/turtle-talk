@@ -27,6 +27,15 @@ export interface Message {
   content: string;
 }
 
+/** Coarse location for time/weather awareness. */
+export interface AwarenessLocation {
+  city?: string;
+  region?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 export interface ConversationContext {
   messages: Message[];
   childName?: string;
@@ -34,6 +43,14 @@ export interface ConversationContext {
   difficultyProfile?: 'beginner' | 'intermediate' | 'confident';
   /** The child's currently active challenge, if any. Passed to the agent each turn. */
   activeMission?: Mission | null;
+  /** IANA timezone (e.g. "America/New_York") for time awareness. */
+  timezone?: string;
+  /** Client's local time as ISO string; used when timezone is not provided. */
+  clientLocalTime?: string;
+  /** Child's location for weather and place-aware replies. */
+  location?: AwarenessLocation;
+  /** Pre-computed weather summary (set by server when location has lat/lon). */
+  weatherDescription?: string;
 }
 
 export interface STTProvider {

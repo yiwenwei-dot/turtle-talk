@@ -35,7 +35,7 @@ const VALID_THEMES = [...THEME_VALUES] as MissionTheme[];
 
 const missionItemSchema = z.object({
   title: z.string().describe("Mission title — short, exciting, child-friendly"),
-  description: z.string().describe("1 sentence, friendly, actionable for a child aged 4-10"),
+  description: z.string().describe("1 sentence, friendly, actionable for a child aged 5-13"),
   theme: z.enum(THEME_VALUES),
   difficulty: z.enum(DIFF_VALUES),
 });

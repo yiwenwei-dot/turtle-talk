@@ -5,7 +5,7 @@
  */
 
 export const INPUT_SAFETY_PROMPT = `
-You are a content safety checker for TurtleTalk, a voice app for children aged 4–10.
+You are a content safety checker for TurtleTalk, a voice app for children aged 5–13.
 
 Task: Decide if the CHILD'S MESSAGE is safe for a child audience.
 
@@ -20,7 +20,7 @@ Reply in JSON with:
 `.trim();
 
 export const OUTPUT_SAFETY_PROMPT = `
-You are a content safety checker for TurtleTalk, a voice app for children aged 4–10.
+You are a content safety checker for TurtleTalk, a voice app for children aged 5–13.
 
 Task: Decide if SHELLY'S REPLY is safe and appropriate for a child audience.
 

@@ -27,6 +27,8 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
   private messages: Message[] = [];
   private pendingEnd = false;
   private options: VoiceSessionOptions = {};
+  /** Epoch ms before which VAD must not trigger — prevents Shelly's echo from being queued as user input. */
+  private vadGraceUntil = 0;
 
   // ---------------------------------------------------------------------------
   // Public API
@@ -45,6 +47,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
     }
     // Always enter listening when starting a new session, even if we were previously 'ended'
     // (transitionToListening() returns early when state is 'ended', which left us stuck)
+    this.vadGraceUntil = 0;
     this.setState('listening');
     this.emit('moodChange', 'listening');
 
@@ -107,6 +110,13 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
       vadTicks += 1;
       const s = this.state;
       if (s === 'ended' || s === 'muted' || s === 'processing' || s === 'speaking') {
+        return;
+      }
+
+      // After Shelly finishes speaking, suppress VAD for the grace period to prevent
+      // acoustic echo or residual mic energy from triggering an immediate recording.
+      if (Date.now() < this.vadGraceUntil) {
+        aboveThresholdSince = null;
         return;
       }
 
@@ -188,6 +198,9 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
     if (opts.topics?.length) formData.append('topics', JSON.stringify(opts.topics));
     if (opts.difficultyProfile) formData.append('difficultyProfile', opts.difficultyProfile);
     if (opts.activeMission) formData.append('activeMission', JSON.stringify(opts.activeMission));
+    if (opts.timezone) formData.append('timezone', opts.timezone);
+    if (opts.clientLocalTime) formData.append('clientLocalTime', opts.clientLocalTime);
+    if (opts.location && typeof opts.location === 'object') formData.append('location', JSON.stringify(opts.location));
 
     try {
       const res = await fetch('/api/talk', { method: 'POST', body: formData });
@@ -347,6 +360,10 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
   /** Single place to transition to listening so state + mood stay in sync (seamless event management). */
   private transitionToListening(): void {
     if (this.state === 'ended' || this.state === 'muted') return;
+    // After speaking, set a grace period so the VAD doesn't immediately pick up echo.
+    if (this.state === 'speaking') {
+      this.vadGraceUntil = Date.now() + 500;
+    }
     this.setState('listening');
     this.emit('moodChange', 'listening');
   }

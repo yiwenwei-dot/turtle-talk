@@ -76,7 +76,7 @@ export default function OGImage() {
             display: 'flex',
           }}
         >
-          Safe AI voice chat for children aged 4–10 🌊
+          Safe AI voice chat for children aged 5–13 🌊
         </div>
 
         {/* Feature pills */}

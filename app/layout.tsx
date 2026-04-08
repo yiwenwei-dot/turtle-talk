@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: '%s | TurtleTalk',
   },
   description:
-    'TurtleTalk is a safe, friendly AI voice companion for children aged 4–10. ' +
+    'TurtleTalk is a safe, friendly AI voice companion for children aged 5–13. ' +
     'Chat with Shelly the sea turtle, complete brave challenges, and grow your courage garden — one mission at a time.',
   keywords: [
     'kids app', 'AI for children', 'educational', 'sea turtle', 'voice chat',
@@ -30,13 +30,18 @@ export const metadata: Metadata = {
   applicationName: 'TurtleTalk',
   category: 'education',
 
+  icons: {
+    icon: '/TurtleTalk---Logo.png',
+    apple: '/TurtleTalk---Logo.png',
+  },
+
   openGraph: {
     type: 'website',
     url: APP_URL,
     siteName: 'TurtleTalk',
     title: 'TurtleTalk – Chat with Shelly the Sea Turtle 🐢',
     description:
-      'A safe AI voice companion for children aged 4–10. ' +
+      'A safe AI voice companion for children aged 5–13. ' +
       'Talk to Shelly, earn brave missions, and build confidence one adventure at a time.',
     images: [
       {
@@ -53,7 +58,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TurtleTalk – Chat with Shelly 🐢',
     description:
-      'Safe AI voice chat for kids aged 4–10. Talk to Shelly, earn brave missions, grow your courage garden!',
+      'Safe AI voice chat for kids aged 5–13. Talk to Shelly, earn brave missions, grow your courage garden!',
     images: ['/opengraph-image'],
   },
 
@@ -66,12 +71,12 @@ export const metadata: Metadata = {
   // Helps AI agents understand what this app is
   other: {
     'ai:description':
-      'TurtleTalk is a child-safe AI voice application where children (aged 4–10) have short, ' +
+      'TurtleTalk is a child-safe AI voice application where children (aged 5–13) have short, ' +
       'warm conversations with Shelly, a friendly sea turtle persona powered by Claude. ' +
       'Each conversation ends with 3 graded challenge missions (easy/medium/stretch) that encourage ' +
       'real-world brave acts. The app stores missions and conversation history locally. ' +
       'There is a parent dashboard for weekly summaries and dinner-time conversation starters.',
-    'ai:audience': 'children aged 4–10 and their parents/carers',
+    'ai:audience': 'children aged 5–13 and their parents/carers',
     'ai:content-safety': 'child-safe — all content is guardrail-checked for appropriateness',
   },
 };

@@ -14,7 +14,9 @@
       "Bash(xargs grep:*)",
       "WebFetch(domain:developers.openai.com)",
       "Bash(npm run:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(cd:*)"
     ]
   }
 }

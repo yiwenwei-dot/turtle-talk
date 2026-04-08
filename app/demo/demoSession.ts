@@ -102,7 +102,7 @@ export interface DemoSession {
   survey: DemoSurvey;
   hasSeenOnboarding?: boolean;
   demoTheme?: 'dark' | 'light';
-  ageGroup?: '4-6' | '7-9' | '10-12' | 'other' | 'unknown';
+  ageGroup?: '5-7' | '8-10' | '11-13' | '13+' | 'other' | 'unknown';
   hasCompletedOnboarding?: boolean;
   /**
    * Unique ID for this demo session, used to link child + parent views.
@@ -125,6 +125,19 @@ export interface DemoSession {
    * How the child wants to make their wish in the demo.
    */
   wishChoice?: 'solo' | 'withParent' | 'withFriend' | null;
+  /**
+   * Whether the parent/guardian has acknowledged the privacy notice and
+   * consented to data collection for this demo session.
+   */
+  hasConsented?: boolean;
+  /**
+   * ISO timestamp of when consent was given.
+   */
+  consentedAt?: string;
+  /**
+   * Which sub-step of the child profile wizard the child is on.
+   */
+  profileSubstep?: 'name' | 'age' | 'book' | 'facts';
 }
 
 const STORAGE_KEY = 'turtle-talk-demo-session-v1';
@@ -153,6 +166,8 @@ export function createFreshDemoSession(): DemoSession {
     favoriteBook: '',
     funFacts: [],
     wishChoice: null,
+    hasConsented: false,
+    consentedAt: undefined,
   };
 }
 

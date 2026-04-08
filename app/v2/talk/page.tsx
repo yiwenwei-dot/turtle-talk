@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMicPermission } from '@/app/hooks/useMicPermission';
 import { useVoiceSession } from '@/app/hooks/useVoiceSession';
+import { useAwareness } from '@/app/hooks/useAwareness';
 import { useMissions } from '@/app/hooks/useMissions';
 import { usePersonalMemory } from '@/app/hooks/usePersonalMemory';
 import { useChildSession } from '@/app/hooks/useChildSession';
@@ -64,6 +65,7 @@ function V2ConversationView() {
         : 'beginner';
 
   const activeMission = activeMissions[0] ?? null;
+  const { timezone, clientLocalTime, location } = useAwareness();
 
   const providerRef = useRef<ReturnType<typeof createVoiceProvider> | null>(null);
   if (!providerRef.current) providerRef.current = createVoiceProvider();
@@ -89,6 +91,9 @@ function V2ConversationView() {
     onMessagesChange: saveMessages,
     difficultyProfile,
     activeMission,
+    timezone: timezone || undefined,
+    clientLocalTime,
+    location: location ?? undefined,
   });
 
   const hasError = !!error;

@@ -76,7 +76,7 @@ describe('LiveKitVoiceProvider', () => {
       expect(body.topics).toBeUndefined();
     });
 
-    it('sends roomName when childName is provided', async () => {
+    it('sends childName but no roomName when childName is provided', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -89,16 +89,15 @@ describe('LiveKitVoiceProvider', () => {
       const provider = new LiveKitVoiceProvider();
       await provider.start({ childName: 'Max' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/livekit/token',
-        expect.objectContaining({
-          body: JSON.stringify({
-            roomName: 'talk-Max',
-            participantName: 'child',
-            childName: 'Max',
-          }),
-        })
-      );
+      const [, options] = (global.fetch as jest.Mock).mock.calls[0] as [string, { body: string }];
+      const body = JSON.parse(options.body) as {
+        roomName?: string;
+        participantName?: string;
+        childName?: string;
+      };
+      expect(body.participantName).toBe('child');
+      expect(body.childName).toBe('Max');
+      expect(body.roomName).toBeUndefined();
     });
 
     it('connects room with token and livekitUrl from response', async () => {

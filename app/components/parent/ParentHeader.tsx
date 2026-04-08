@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { ChevronDown, Users, UserPlus, LogOut } from 'lucide-react';
+import { ChevronDown, Users, UserPlus, LogOut, Shield } from 'lucide-react';
 import type { Child } from './ChildSwitcher';
 import { ChildSwitcher } from './ChildSwitcher';
 import { ChildrenModal } from './ChildrenModal';
@@ -263,6 +263,30 @@ export function ParentHeader({
                   <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, background: 'var(--pd-surface-soft)', border: '1px solid var(--pd-card-border)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.03em' }}>
                     Soon
                   </span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    router.push('/parent/privacy');
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    color: 'var(--pd-text-primary)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <Shield size={18} />
+                  Privacy &amp; Data
                 </button>
                 <div style={{ borderTop: '1px solid var(--pd-card-border)', margin: '4px 0' }} />
                 <button

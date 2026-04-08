@@ -21,27 +21,6 @@ export async function GET(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdminOptional();
 
   if (session?.childId) {
-    // #region agent log
-    fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Debug-Session-Id': 'fb5a0a',
-      },
-      body: JSON.stringify({
-        sessionId: 'fb5a0a',
-        runId: 'pre-fix',
-        hypothesisId: 'H3',
-        location: 'app/api/wish-list/route.ts:23',
-        message: 'wish-list.GET.childSessionBranch',
-        data: {
-          hasChildSession: true,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Wish list not configured' }, { status: 503 });
     }
@@ -65,28 +44,6 @@ export async function GET(request: NextRequest) {
 
   const childId = childIdParam?.trim();
   if (!childId) {
-    // #region agent log
-    fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Debug-Session-Id': 'fb5a0a',
-      },
-      body: JSON.stringify({
-        sessionId: 'fb5a0a',
-        runId: 'pre-fix',
-        hypothesisId: 'H4',
-        location: 'app/api/wish-list/route.ts:45',
-        message: 'wish-list.GET.parentNoChildId',
-        data: {
-          hasUser: true,
-          hasChildIdParam: !!childIdParam,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-
     // No child session and no childId: child wish-list page as guest or parent forgot param — return empty
     return NextResponse.json({ items: [] });
   }
@@ -112,29 +69,6 @@ export async function GET(request: NextRequest) {
     console.error('[wish-list] GET parent', error);
     return NextResponse.json({ error: 'Failed to load wish list' }, { status: 500 });
   }
-  // #region agent log
-  fetch('http://127.0.0.1:7379/ingest/c4e58649-e133-4b9b-91a5-50c962a7060e', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Debug-Session-Id': 'fb5a0a',
-    },
-    body: JSON.stringify({
-      sessionId: 'fb5a0a',
-      runId: 'pre-fix',
-      hypothesisId: 'H5',
-      location: 'app/api/wish-list/route.ts:62',
-      message: 'wish-list.GET.parentWithChild.success',
-      data: {
-        hasUser: true,
-        hasChildIdParam: !!childIdParam,
-        itemCount: Array.isArray(data) ? data.length : 0,
-      },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion
-
   return NextResponse.json({ items: data ?? [] });
 }
 

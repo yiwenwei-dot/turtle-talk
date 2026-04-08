@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 
 export const maxDuration = 60; // seconds — STT + LLM + TTS can exceed Vercel's 10s default
 import { logAgent } from '@/lib/speech/log';
@@ -8,9 +9,49 @@ import { OpenAISTTProvider, GeminiSTTProvider } from '@/lib/speech/providers/stt
 import { ElevenLabsTTSProvider, GeminiTTSProvider } from '@/lib/speech/providers/tts';
 import { createChatProvider } from '@/lib/speech/providers/chat';
 import { ChildSafeGuardrail } from '@/lib/speech/guardrails/ChildSafeGuardrail';
-import type { ConversationContext, Message } from '@/lib/speech/types';
+import type { ConversationContext } from '@/lib/speech/types';
 import { SpeechServiceError, isProviderUnusualActivityError } from '@/lib/speech/errors';
 import { speechConfig } from '@/lib/speech/config';
+import { getWeatherDescription } from '@/lib/speech/awareness/weather';
+import { parseChildSessionCookieValue, getChildSessionCookieName } from '@/lib/child-session';
+import { talkLimiter } from '@/lib/ratelimit';
+
+// ---------------------------------------------------------------------------
+// Input validation schemas
+// ---------------------------------------------------------------------------
+
+const MessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string().max(2000),
+});
+
+const MissionThemeSchema = z.enum(['brave', 'kind', 'calm', 'confident', 'creative', 'social', 'curious']);
+
+const TalkFormSchema = z.object({
+  messages: z.array(MessageSchema).max(20).default([]),
+  childName: z.string().max(50).optional(),
+  topics: z.array(z.string().max(100)).max(15).default([]),
+  difficultyProfile: z.enum(['beginner', 'intermediate', 'confident']).default('beginner'),
+  activeMission: z.object({
+    id: z.string().max(100),
+    title: z.string().max(200),
+    description: z.string().max(500),
+    theme: MissionThemeSchema,
+    difficulty: z.enum(['easy', 'medium', 'stretch']).optional(),
+    status: z.enum(['active', 'completed']),
+    createdAt: z.string().max(50),
+    completedAt: z.string().max(50).optional(),
+  }).nullable().default(null),
+  timezone: z.string().max(100).optional(),
+  clientLocalTime: z.string().max(50).optional(),
+  location: z.object({
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    city: z.string().max(100).optional(),
+    region: z.string().max(100).optional(),
+    country: z.string().max(100).optional(),
+  }).optional(),
+});
 
 /** When the LLM returns empty responseText, we send this so the user always gets a spoken reply. */
 const FALLBACK_EMPTY_RESPONSE = "Hmm, I didn't quite get that. Can you say it again?";
@@ -27,47 +68,75 @@ export async function POST(req: NextRequest) {
   }
 
   const audioFile = formData.get('audio');
-  const messagesRaw = formData.get('messages');
-
   if (!audioFile || !(audioFile instanceof Blob)) {
     return Response.json({ error: 'Missing audio field' }, { status: 400 });
   }
 
-  let messages: Message[] = [];
-  if (messagesRaw && typeof messagesRaw === 'string') {
-    try {
-      messages = JSON.parse(messagesRaw);
-    } catch {
-      return Response.json({ error: 'Invalid messages JSON' }, { status: 400 });
+  // Rate limit: keyed on childId from signed session cookie, fallback to IP
+  const cookieHeader = req.headers.get('cookie') ?? '';
+  const cookieName = getChildSessionCookieName();
+  const cookieMatch = cookieHeader.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`));
+  const sessionPayload = cookieMatch ? parseChildSessionCookieValue(decodeURIComponent(cookieMatch[1])) : null;
+  const rateLimitKey =
+    sessionPayload?.childId ??
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    'anonymous';
+  const { success: rateLimitOk } = await talkLimiter.limit(rateLimitKey);
+  if (!rateLimitOk) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
+  // Parse and validate all text fields with Zod
+  const rawFields: Record<string, unknown> = {};
+  for (const key of ['messages', 'childName', 'topics', 'difficultyProfile', 'activeMission', 'timezone', 'clientLocalTime', 'location']) {
+    const val = formData.get(key);
+    if (val === null) continue;
+    // JSON fields
+    if (['messages', 'topics', 'activeMission', 'location'].includes(key)) {
+      if (typeof val === 'string') {
+        try { rawFields[key] = JSON.parse(val); } catch { rawFields[key] = undefined; }
+      }
+    } else {
+      rawFields[key] = val;
     }
   }
-  // Cap history so context is bounded (matches client and DB trim).
-  const MAX_HISTORY_MESSAGES = 20;
-  messages = messages.slice(-MAX_HISTORY_MESSAGES);
 
-  const childNameRaw = formData.get('childName');
-  const topicsRaw = formData.get('topics');
-  const childName =
-    typeof childNameRaw === 'string' && childNameRaw.trim() ? childNameRaw.trim() : undefined;
-  let topics: string[] = [];
-  if (topicsRaw && typeof topicsRaw === 'string') {
-    try { topics = JSON.parse(topicsRaw); } catch { /* ignore */ }
+  const parsed = TalkFormSchema.safeParse(rawFields);
+  if (!parsed.success) {
+    return Response.json({ error: 'Invalid request' }, { status: 400 });
   }
 
-  const difficultyProfileRaw = formData.get('difficultyProfile');
-  const difficultyProfile = (['beginner', 'intermediate', 'confident'] as const)
-    .includes(difficultyProfileRaw as 'beginner')
-      ? difficultyProfileRaw as ConversationContext['difficultyProfile']
-      : 'beginner';
+  const {
+    messages,
+    childName,
+    topics,
+    difficultyProfile,
+    activeMission,
+    timezone,
+    clientLocalTime,
+    location,
+  } = parsed.data;
 
-  // Active mission — the child's currently selected challenge, sent by the client.
-  let activeMission: ConversationContext['activeMission'] = null;
-  const activeMissionRaw = formData.get('activeMission');
-  if (activeMissionRaw && typeof activeMissionRaw === 'string') {
-    try { activeMission = JSON.parse(activeMissionRaw); } catch { /* ignore malformed */ }
+  let weatherDescription: string | undefined;
+  if (location?.latitude != null && location?.longitude != null) {
+    try {
+      weatherDescription = await getWeatherDescription(location.latitude, location.longitude);
+    } catch {
+      // non-fatal; Shelly works without weather
+    }
   }
 
-  const context: ConversationContext = { messages, childName, topics, difficultyProfile, activeMission };
+  const context: ConversationContext = {
+    messages,
+    childName,
+    topics,
+    difficultyProfile,
+    activeMission,
+    timezone,
+    clientLocalTime,
+    location,
+    weatherDescription,
+  };
 
   const stt = speechConfig.stt.provider === 'gemini' ? new GeminiSTTProvider() : new OpenAISTTProvider();
   const tts = speechConfig.tts.provider === 'gemini' ? new GeminiTTSProvider() : new ElevenLabsTTSProvider();

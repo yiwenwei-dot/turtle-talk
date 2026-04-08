@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Home, Leaf, Flag } from 'lucide-react';
+import { Home, Leaf, Flag, PlayCircle } from 'lucide-react';
 import { useChildSession } from '@/app/hooks/useChildSession';
 import MenuItem from './MenuItem';
 import packageJson from '../../../package.json';
@@ -10,6 +10,7 @@ const ITEMS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/garden', label: 'My Garden', icon: Leaf },
   { href: '/missions', label: 'Missions', icon: Flag },
+  { href: '/demo', label: 'Demo', icon: PlayCircle },
 ] as const;
 
 const APP_URL = 'turtletalk.io';

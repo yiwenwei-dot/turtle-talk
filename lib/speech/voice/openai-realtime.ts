@@ -8,6 +8,9 @@ import { buildSystemPrompt } from '../prompts';
 
 const SDP_ENDPOINT = 'https://api.openai.com/v1/realtime';
 
+/** Cap conversation history so context stays bounded (matches native provider). */
+const MAX_CONVERSATION_MESSAGES = 20;
+
 // ---------------------------------------------------------------------------
 // Tool definitions (JSON Schema — mirrors the LangChain tools in chat.ts)
 // ---------------------------------------------------------------------------
@@ -146,7 +149,7 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
     }
     this.emit('stateChange', 'listening');
     this.emit('moodChange', 'listening');
-    this.messages = options.initialMessages ? [...options.initialMessages] : [];
+    this.messages = (options.initialMessages ? [...options.initialMessages] : []).slice(-MAX_CONVERSATION_MESSAGES);
 
     const model = speechConfig.openaiRealtime.model;
     const voice = speechConfig.openaiRealtime.voice;
@@ -201,10 +204,10 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
         this.sendEvent({
           type: 'session.update',
           session: {
-            instructions: buildSystemPrompt(options),
+            instructions: buildSystemPrompt({ ...options, location: options.location ?? undefined }),
             tools: buildTools(),
             tool_choice: 'auto',
-            input_audio_transcription: { model: 'whisper-1' },
+            input_audio_transcription: { model: 'whisper-1', language: 'en' },
             voice,
             modalities: ['text', 'audio'],
           },
@@ -276,10 +279,10 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
         const transcript = event.transcript as string;
         if (transcript?.trim()) {
           this.emit('userTranscript', transcript);
-          this.messages = [
+          this.messages = ([
             ...this.messages,
-            { role: 'user', content: transcript },
-          ];
+            { role: 'user' as const, content: transcript },
+          ]).slice(-MAX_CONVERSATION_MESSAGES);
           this.emit('messages', this.messages);
         }
         break;
@@ -288,10 +291,10 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
       case 'response.audio_transcript.done': {
         const assistantText = event.transcript as string;
         if (assistantText?.trim()) {
-          this.messages = [
+          this.messages = ([
             ...this.messages,
-            { role: 'assistant', content: assistantText },
-          ];
+            { role: 'assistant' as const, content: assistantText },
+          ]).slice(-MAX_CONVERSATION_MESSAGES);
           this.emit('messages', this.messages);
         }
         break;

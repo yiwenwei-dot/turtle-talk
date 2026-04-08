@@ -11,6 +11,8 @@ const cards: AdminCard[] = [
   { title: 'User management', description: 'View and manage all accounts — access status, suspension, and roles.', href: '/admin/users' },
   { title: 'Waiting list', description: 'Review, invite, approve, or reject access requests.', href: '/admin/waiting-list' },
   { title: 'Call satisfaction', description: 'View ratings and feedback from the "How was your call?" modal.', href: '/admin/satisfaction' },
+  { title: 'Session settings', description: 'Configure voice session behaviour — interruptions, and more.', href: '/admin/session-settings' },
+  { title: 'Tattle Cards', description: 'Manage the conversation prompt cards shown to children.', href: '/admin/tattle-cards' },
   { title: 'Support requests', description: 'Coming soon' },
   { title: 'Feature flags', description: 'Coming soon' },
 ];

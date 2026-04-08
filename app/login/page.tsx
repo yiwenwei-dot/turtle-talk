@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 const CODE_LENGTH = 8;
@@ -180,8 +181,9 @@ const ghostBtn: React.CSSProperties = {
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<AuthMode>('otp');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
@@ -197,6 +199,11 @@ export default function LoginPage() {
   const [wlExpanded, setWlExpanded] = useState(false);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    const urlError = searchParams.get('error');
+    if (urlError) setError(urlError);
+  }, [searchParams]);
 
   function switchMode(m: 'otp' | 'password') {
     setMode(m);
@@ -274,7 +281,7 @@ export default function LoginPage() {
     if (!trimmed) { setError('Please enter your email'); return; }
     setLoading(true);
     try {
-      const redirectTo = `${window.location.origin}/reset-password`;
+      const redirectTo = `${window.location.origin}/auth/confirm`;
       const { error: err } = await supabase.auth.resetPasswordForEmail(trimmed, { redirectTo });
       if (err) { setError(err.message || 'Could not send reset email'); return; }
       setMessage('Reset link sent! Check your email.');
@@ -321,6 +328,15 @@ export default function LoginPage() {
         backdropFilter: 'blur(12px)',
         border: '1px solid rgba(255,255,255,0.2)',
       }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <Image
+            src="/TurtleTalk---Logo.png"
+            alt="TurtleTalk"
+            width={72}
+            height={72}
+            style={{ borderRadius: 20 }}
+          />
+        </div>
         <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 700, color: 'white', textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
           {mode === 'forgot' ? 'Reset password' : 'Parent login'}
         </h1>
@@ -429,5 +445,13 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   );
 }

@@ -5,6 +5,9 @@ import type { VoiceSessionOptions } from './types';
 import type { LiveKitControlMessage, Message, MissionSuggestion } from '../types';
 import { BaseVoiceProvider } from './base';
 
+/** Cap conversation history so context stays bounded (matches native provider). */
+const MAX_CONVERSATION_MESSAGES = 20;
+
 /**
  * LiveKitVoiceProvider
  *
@@ -26,7 +29,7 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
 
   async start(options: VoiceSessionOptions): Promise<void> {
     const gen = ++this._generation;
-    this._messages = options.initialMessages ? [...options.initialMessages] : [];
+    this._messages = (options.initialMessages ? [...options.initialMessages] : []).slice(-MAX_CONVERSATION_MESSAGES);
     if (this._messages.length > 0) this.emit('messages', this._messages);
     this.emit('stateChange', 'connecting');
     this.emit('moodChange', 'listening');
@@ -36,13 +39,15 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          roomName: options.childName?.trim() ? `talk-${options.childName.trim()}` : undefined,
           participantName: 'child',
           childName: options.childName?.trim() || 'little explorer',
           topics: options.topics?.length ? options.topics : undefined,
           ageGroup: options.ageGroup ?? undefined,
           favoriteBook: options.favoriteBook ?? undefined,
           funFacts: options.funFacts?.length ? options.funFacts : undefined,
+          timezone: options.timezone ?? undefined,
+          clientLocalTime: options.clientLocalTime ?? undefined,
+          location: options.location ?? undefined,
         }),
       });
       if (!tokenRes.ok) {
@@ -164,9 +169,9 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
     switch (message.type) {
       case 'transcript': {
         if (typeof message.text !== 'string') return;
-        const role = message.role === 'assistant' ? 'assistant' : 'user';
+        const role: Message['role'] = message.role === 'assistant' ? 'assistant' : 'user';
         this.emit('userTranscript', message.text);
-        this._messages = [...this._messages, { role, content: message.text }];
+        this._messages = [...this._messages, { role, content: message.text }].slice(-MAX_CONVERSATION_MESSAGES) as Message[];
         this.emit('messages', this._messages);
         break;
       }

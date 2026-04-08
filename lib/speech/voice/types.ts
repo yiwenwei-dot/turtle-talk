@@ -1,4 +1,4 @@
-import type { TurtleMood, Message, MissionSuggestion, Mission } from '../types';
+import type { TurtleMood, Message, MissionSuggestion, Mission, AwarenessLocation } from '../types';
 
 export type VoiceSessionState =
   | 'idle'
@@ -21,6 +21,12 @@ export interface VoiceSessionOptions {
   ageGroup?: string | null;
   favoriteBook?: string | null;
   funFacts?: string[];
+  /** IANA timezone for time awareness (e.g. "America/New_York"). */
+  timezone?: string | null;
+  /** Client local time as ISO string when timezone not available. */
+  clientLocalTime?: string | null;
+  /** Child's location for weather and place-aware replies. */
+  location?: AwarenessLocation | null;
 }
 
 /** Payload for an app-side tool call requested by a voice provider (e.g. LiveKit agent). */

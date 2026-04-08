@@ -30,7 +30,7 @@ export async function POST(
   const email = targetUser.user.email;
   if (!email) return NextResponse.json({ error: 'User has no email address' }, { status: 400 });
 
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/reset-password`;
+  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/auth/confirm`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (admin as any).auth.resetPasswordForEmail(email, { redirectTo });

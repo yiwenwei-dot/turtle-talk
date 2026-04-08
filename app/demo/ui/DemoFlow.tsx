@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createVoiceProvider } from '@/lib/speech/voice';
+import { createVoiceProvider, createFreshVoiceProvider } from '@/lib/speech/voice';
 import { useVoiceSession } from '@/app/hooks/useVoiceSession';
 import { usePersonalMemory } from '@/app/hooks/usePersonalMemory';
 import { useMissions } from '@/app/hooks/useMissions';
+import { useWakeLock } from '@/app/hooks/useWakeLock';
 import { getDeviceId, getGuestDb } from '@/lib/db';
 import type { Message, MissionSuggestion } from '@/lib/speech/types';
 import books from '@/app/placeholders/books.json';
@@ -22,7 +23,14 @@ import {
   type DemoStep,
 } from '../demoSession';
 import { getDemoSkippedSteps } from '@/lib/env/demo';
-import { getTattleCards } from '@/lib/tattle-cards/tattle-cards';
+import {
+  getTattleCards,
+  fetchTattleCards,
+  fetchCardDisplaySettings,
+  DEFAULT_DISPLAY_SETTINGS,
+  type TattleCard,
+  type CardDisplaySettings,
+} from '@/lib/tattle-cards/tattle-cards';
 import TalkConversationCard from '@/app/v2/components/TalkConversationCard';
 import TalkEndCallButton from '@/app/v2/components/TalkEndCallButton';
 import TalkMuteToggle from '@/app/v2/components/TalkMuteToggle';
@@ -32,6 +40,9 @@ import MicPermissionV2 from '@/app/v2/components/MicPermissionV2';
 import { useMicPermission } from '@/app/hooks/useMicPermission';
 import QRCode from 'react-qr-code';
 import confetti from 'canvas-confetti';
+import { useGuestWishes } from '@/app/hooks/useGuestWishes';
+import { resetGuestWishes } from '@/lib/db/providers/localStorage';
+import { getThemeLabel } from '@/lib/wishes/thematic-areas';
 
 type DemoMissionChoice = MissionSuggestion & { __index: number };
 
@@ -44,6 +55,13 @@ type Book = {
   title: string;
   author: string;
   shortDescription?: string;
+  coverEmoji?: string;
+  coverUrl?: string;
+  ageRange?: string;
+  ageGroup?: string;
+  goodreadsRating?: number;
+  whyKidsChoose?: string[];
+  shellySays?: string;
   whyRecommended?: string;
   fullDescription?: string;
   recommendedFor?: string[];
@@ -312,6 +330,93 @@ function StepNavigation(props: {
 /*  Modals                                                             */
 /* ------------------------------------------------------------------ */
 
+function ConsentModal(props: { open: boolean; onAgree: () => void; onDecline: () => void }) {
+  if (!props.open) return null;
+  return (
+    <ModalBackdrop onClose={props.onDecline}>
+      <div style={{ padding: 20, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 18,
+            fontWeight: 750,
+            letterSpacing: 0.2,
+            color: '#0E1020',
+          }}
+        >
+          Before We Start
+        </h2>
+        <p style={{ margin: '6px 0 0', fontSize: 13, color: '#64748b' }}>
+          A parent or guardian should review this
+        </p>
+      </div>
+      <div
+        style={{
+          padding: 20,
+          display: 'grid',
+          gap: 12,
+          fontSize: 14,
+          color: '#384165',
+          overflowY: 'auto',
+        }}
+      >
+        <p style={{ margin: 0 }}>
+          TurtleTalk collects a small amount of information during this demo so Shelly can have a
+          personalized conversation with your child:
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>
+          <li><strong>First name</strong> and <strong>age range</strong></li>
+          <li><strong>Favorite book</strong> and <strong>fun facts</strong></li>
+          <li><strong>Voice conversation</strong> (processed in real time, not stored as audio)</li>
+        </ul>
+        <p style={{ margin: 0 }}>
+          This data is used only for the demo experience. We do not sell personal information or use it
+          for advertising. Voice audio is not recorded or retained after the conversation.
+        </p>
+        <p style={{ margin: 0, fontSize: 13 }}>
+          Read our full{' '}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#6366f1', textDecoration: 'underline' }}
+          >
+            Privacy Policy
+          </a>{' '}
+          for details on data handling, retention, and your California privacy rights.
+        </p>
+      </div>
+      <div
+        style={{
+          padding: 16,
+          borderTop: '1px solid rgba(0,0,0,0.08)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <button
+          onClick={props.onDecline}
+          style={{
+            appearance: 'none',
+            border: 'none',
+            background: 'none',
+            color: '#64748b',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            padding: '8px 4px',
+          }}
+        >
+          No thanks
+        </button>
+        <PrimaryButton onClick={props.onAgree}>I Agree</PrimaryButton>
+      </div>
+    </ModalBackdrop>
+  );
+}
+
 function OnboardingModal(props: { open: boolean; onClose: () => void }) {
   if (!props.open) return null;
   return (
@@ -504,9 +609,10 @@ function DemoSettingsModal(props: {
           value={ageGroup}
           onChange={(v) => props.onUpdate({ ageGroup: v as DemoSession['ageGroup'] })}
           options={[
-            { value: '4-6', label: '4-6 years' },
-            { value: '7-9', label: '7-9 years' },
-            { value: '10-12', label: '10-12 years' },
+            { value: '5-7', label: '5-7 years' },
+            { value: '8-10', label: '8-10 years' },
+            { value: '11-13', label: '11-13 years' },
+            { value: '13+', label: '13+ years' },
             { value: 'other', label: 'Mixed ages / other' },
             { value: 'unknown', label: "I'm not sure yet" },
           ]}
@@ -873,14 +979,18 @@ function MissionChoicesCard(props: {
   );
 }
 
-type ChildAgeChoice = 'threeToFive' | 'sixToTen' | 'noShare';
+type ChildAgeChoice = 'fiveToSeven' | 'eightToTen' | 'elevenToThirteen' | 'thirteenPlus' | 'noShare';
 
 function mapChildAgeChoiceToAgeGroup(choice: ChildAgeChoice): DemoSession['ageGroup'] {
   switch (choice) {
-    case 'threeToFive':
-      return '4-6';
-    case 'sixToTen':
-      return '7-9';
+    case 'fiveToSeven':
+      return '5-7';
+    case 'eightToTen':
+      return '8-10';
+    case 'elevenToThirteen':
+      return '11-13';
+    case 'thirteenPlus':
+      return '13+';
     case 'noShare':
     default:
       return 'unknown';
@@ -892,8 +1002,20 @@ function TattleCardPicker(props: {
   onSelect: (id: string) => void;
 }) {
   const [revealAll, setRevealAll] = useState(false);
+  const [cards, setCards] = useState<readonly TattleCard[]>(getTattleCards);
+  const [displaySettings, setDisplaySettings] = useState<CardDisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
 
-  const cards = getTattleCards();
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([fetchTattleCards(), fetchCardDisplaySettings()]).then(
+      ([fetchedCards, settings]) => {
+        if (cancelled) return;
+        if (fetchedCards.length > 0) setCards(fetchedCards);
+        setDisplaySettings(settings);
+      },
+    );
+    return () => { cancelled = true; };
+  }, []);
 
   const rotationByIndex: number[] = [-4, 2, -1, 3, -3, 1];
 
@@ -943,41 +1065,103 @@ function TattleCardPicker(props: {
             const baseRotation = rotationByIndex[index % rotationByIndex.length] || 0;
 
             return (
-              <button
+              <div
                 key={card.id}
-                type="button"
-                onClick={() => props.onSelect(card.id)}
                 style={{
+                  perspective: 800,
                   width: '100%',
                   maxWidth: 120,
-                  aspectRatio: '3 / 4',
-                  textAlign: 'center',
-                  padding: '10px 10px',
-                  borderRadius: 18,
-                  border: isSelected
-                    ? '2px solid rgba(140,120,255,0.95)'
-                    : '1px solid rgba(255,255,255,0.18)',
-                  background: isFaceUp
-                    ? 'linear-gradient(145deg, rgba(60,80,180,0.9), rgba(150,110,255,0.9))'
-                    : 'radial-gradient(circle at 20% 0%, rgba(255,255,255,0.16), rgba(40,40,70,0.95))',
-                  boxShadow: isSelected
-                    ? '0 8px 22px rgba(0,0,0,0.45)'
-                    : '0 4px 14px rgba(0,0,0,0.35)',
-                  cursor: 'pointer',
-                  display: 'grid',
-                  gap: 4,
-                  alignItems: 'center',
-                  justifyItems: 'center',
-                  transform: `rotate(${isSelected ? baseRotation * 0.5 : baseRotation}deg) scale(${
-                    isSelected ? 1.05 : 1
-                  })`,
-                  transition:
-                    'transform 160ms ease-out, box-shadow 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out',
-                  overflow: 'hidden',
                 }}
               >
-                {isFaceUp ? (
-                  <>
+                <button
+                  type="button"
+                  onClick={() => props.onSelect(card.id)}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '3 / 4',
+                    position: 'relative',
+                    transformStyle: 'preserve-3d',
+                    transform: `rotate(${isSelected ? baseRotation * 0.5 : baseRotation}deg) scale(${
+                      isSelected ? 1.05 : 1
+                    }) rotateY(${isFaceUp ? 180 : 0}deg)`,
+                    transition: 'transform 0.5s ease',
+                    cursor: 'pointer',
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    outline: 'none',
+                  }}
+                >
+                  {/* Back face — TurtleTalk logo */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backfaceVisibility: 'hidden',
+                      borderRadius: 18,
+                      border: isSelected
+                        ? '2px solid rgba(140,120,255,0.95)'
+                        : '1px solid rgba(255,255,255,0.18)',
+                      background:
+                        'radial-gradient(circle at 30% 20%, rgba(40,55,120,0.95), rgba(20,20,50,0.98))',
+                      boxShadow: isSelected
+                        ? '0 8px 22px rgba(0,0,0,0.45)'
+                        : '0 4px 14px rgba(0,0,0,0.35)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <img
+                      src="/TurtleTalk---Logo.png"
+                      alt="TurtleTalk"
+                      style={{
+                        width: '70%',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        borderRadius: 8,
+                        opacity: 0.9,
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: 'rgba(220,225,255,0.8)',
+                        fontWeight: 650,
+                      }}
+                    >
+                      Tap to reveal
+                    </div>
+                  </div>
+                  {/* Front face — card content (pre-rotated 180deg so it reads correctly when flipped) */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backfaceVisibility: 'hidden',
+                      transform: 'rotateY(180deg)',
+                      borderRadius: 18,
+                      border: isSelected
+                        ? '2px solid rgba(140,120,255,0.95)'
+                        : '1px solid rgba(255,255,255,0.18)',
+                      background:
+                        'linear-gradient(145deg, rgba(60,80,180,0.9), rgba(150,110,255,0.9))',
+                      boxShadow: isSelected
+                        ? '0 8px 22px rgba(0,0,0,0.45)'
+                        : '0 4px 14px rgba(0,0,0,0.35)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                      padding: '10px 8px',
+                      textAlign: 'center',
+                      overflow: 'hidden',
+                    }}
+                  >
                     <div style={{ fontSize: 22, lineHeight: 1 }}>{card.emoji}</div>
                     <div
                       style={{
@@ -997,22 +1181,54 @@ function TattleCardPicker(props: {
                     >
                       {card.description}
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 22, lineHeight: 1 }}>{card.emoji}</div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: 'rgba(220,225,255,0.9)',
-                        fontWeight: 650,
-                      }}
-                    >
-                      Secret card
-                    </div>
-                  </>
-                )}
-              </button>
+                    {displaySettings.showSkill && card.skill && (
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: 'rgba(200,210,255,0.85)',
+                          fontWeight: 600,
+                          marginTop: 2,
+                          padding: '2px 6px',
+                          background: 'rgba(255,255,255,0.12)',
+                          borderRadius: 6,
+                        }}
+                      >
+                        {card.skill}
+                      </div>
+                    )}
+                    {displaySettings.showScenario && card.scenario && (
+                      <div
+                        style={{
+                          fontSize: 9,
+                          color: 'rgba(220,225,255,0.7)',
+                          fontStyle: 'italic',
+                          lineHeight: 1.3,
+                          marginTop: 1,
+                        }}
+                      >
+                        {card.scenario}
+                      </div>
+                    )}
+                    {displaySettings.showCategory && card.category && (
+                      <div
+                        style={{
+                          fontSize: 8,
+                          color: 'rgba(180,190,255,0.9)',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5,
+                          marginTop: 2,
+                          padding: '1px 5px',
+                          background: 'rgba(255,255,255,0.1)',
+                          borderRadius: 4,
+                        }}
+                      >
+                        {card.category}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -1202,7 +1418,38 @@ function FunFactsBubbles(props: {
   newFact: string;
   onChangeNewFact: (value: string) => void;
 }) {
-  const presets = ['I love dinosaurs', 'I can whistle', 'I like drawing', 'I love Lego'];
+  const presets = [
+    'I love dinosaurs',
+    'I can whistle',
+    'I like drawing',
+    'I love Lego',
+    "I'm a fast runner",
+    'I love animals',
+    'I like to dance',
+    'I tell funny jokes',
+    'I love reading',
+    'I play sports',
+    'I like building things',
+    'I love music',
+    'I speak two languages',
+    'I can do a cartwheel',
+    "I'm a great swimmer",
+    'I love cooking',
+    'I know a magic trick',
+    'I can ride a bike with no hands',
+    'I have a pet',
+    'I love outer space',
+    'I can make people laugh',
+    "I'm really good at puzzles",
+    'I love superheroes',
+    'I help my friends',
+    'I love nature',
+    'I can climb really high',
+    'I love making up stories',
+    "I'm learning an instrument",
+    'I love video games',
+    'I can do a funny voice',
+  ];
 
   const toggle = (fact: string) => {
     if (props.selected.includes(fact)) {
@@ -1293,8 +1540,15 @@ function ChildProfileWizard(props: {
   onChangeNewFunFact: (value: string) => void;
   onBack?: () => void;
   onComplete: () => void;
+  initialSubstep?: ProfileSubstep;
+  onSubstepChange?: (substep: ProfileSubstep) => void;
 }) {
-  const [substep, setSubstep] = useState<ProfileSubstep>('name');
+  const [substep, setSubstepRaw] = useState<ProfileSubstep>(props.initialSubstep ?? 'name');
+
+  const setSubstep = (next: ProfileSubstep) => {
+    setSubstepRaw(next);
+    props.onSubstepChange?.(next);
+  };
 
   const substepIdx = PROFILE_SUBSTEPS.indexOf(substep);
   const hasPrev = substepIdx > 0;
@@ -1310,7 +1564,11 @@ function ChildProfileWizard(props: {
   };
 
   const ageChoice: ChildAgeChoice =
-    props.ageGroup === '4-6' ? 'threeToFive' : props.ageGroup === '7-9' ? 'sixToTen' : 'noShare';
+    props.ageGroup === '5-7' ? 'fiveToSeven'
+    : props.ageGroup === '8-10' ? 'eightToTen'
+    : props.ageGroup === '11-13' ? 'elevenToThirteen'
+    : props.ageGroup === '13+' ? 'thirteenPlus'
+    : 'noShare';
 
   const pillStyle = (active: boolean): React.CSSProperties => ({
     flex: '1 1 140px',
@@ -1367,8 +1625,10 @@ function ChildProfileWizard(props: {
         <Card title="How old are you?">
           <div style={{ display: 'grid', gap: 12 }}>
             {[
-              { id: 'threeToFive' as ChildAgeChoice, label: 'Three to Five' },
-              { id: 'sixToTen' as ChildAgeChoice, label: 'Six to Ten' },
+              { id: 'fiveToSeven' as ChildAgeChoice, label: '5 to 7' },
+              { id: 'eightToTen' as ChildAgeChoice, label: '8 to 10' },
+              { id: 'elevenToThirteen' as ChildAgeChoice, label: '11 to 13' },
+              { id: 'thirteenPlus' as ChildAgeChoice, label: '13+' },
               { id: 'noShare' as ChildAgeChoice, label: "I don't wanna share" },
             ].map((opt) => {
               const active = ageChoice === opt.id;
@@ -1430,6 +1690,7 @@ function ChildProfileWizard(props: {
 function DemoParentDashboard(props: {
   parentPriority: DemoParentPriority;
   childName: string | null;
+  ageGroup: string | undefined;
   topics: string[];
   messages: Message[];
   completedCount: number;
@@ -1440,14 +1701,13 @@ function DemoParentDashboard(props: {
 }) {
   const recommendedBooks = useMemo(() => {
     const safeBooks = (books as Book[]) ?? [];
-    if (props.topics.length === 0) return safeBooks.slice(0, 4);
-    const lowerTopics = new Set(props.topics.map((t) => t.toLowerCase()));
-    const byTag = safeBooks.filter((b) => {
-      const rec = Array.isArray(b.recommendedFor) ? b.recommendedFor : [];
-      return rec.some((t) => lowerTopics.has(String(t).toLowerCase()));
-    });
-    return (byTag.length ? byTag : safeBooks).slice(0, 4);
-  }, [props.topics]);
+    const ageGroup = props.ageGroup;
+    if (ageGroup) {
+      const byAge = safeBooks.filter((b) => b.ageGroup === ageGroup);
+      if (byAge.length > 0) return byAge;
+    }
+    return safeBooks.filter((b) => b.ageGroup === '5-7');
+  }, [props.ageGroup]);
 
   const highlights = useMemo(() => {
     const lastUser = [...props.messages].reverse().find((m) => m.role === 'user')?.content ?? '';
@@ -1582,24 +1842,61 @@ function DemoParentDashboard(props: {
 
         {props.parentPriority === 'books' && (
           <Card title="Recommended books">
-            <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ display: 'grid', gap: 12 }}>
               {recommendedBooks.map((b) => (
                 <div
-                  key={b.title}
+                  key={b.id}
                   style={{
                     border: '1px solid rgba(255,255,255,0.10)',
                     borderRadius: 14,
-                    padding: 12,
+                    overflow: 'hidden',
                     background: 'rgba(0,0,0,0.16)',
-                    display: 'grid',
-                    gap: 4,
                   }}
                 >
-                  <div style={{ fontWeight: 800 }}>{b.title}</div>
-                  <div style={{ color: 'var(--v2-text-secondary)', fontSize: 13 }}>{b.author}</div>
-                  {b.whyRecommended && (
-                    <div style={{ color: 'var(--v2-text-secondary)', fontSize: 13 }}>{b.whyRecommended}</div>
+                  {b.coverUrl && (
+                    <img
+                      src={b.coverUrl}
+                      alt={b.title}
+                      style={{
+                        width: '100%',
+                        height: 140,
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
                   )}
+                  <div style={{ padding: 12, display: 'grid', gap: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                      <div style={{ fontWeight: 800 }}>{b.title}</div>
+                      {b.goodreadsRating != null && (
+                        <div style={{ fontSize: 12, color: 'var(--v2-text-secondary)', whiteSpace: 'nowrap' }}>
+                          {'\u2B50'} {b.goodreadsRating}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ color: 'var(--v2-text-secondary)', fontSize: 13 }}>
+                      {b.author}{b.ageRange ? ` · Ages ${b.ageRange}` : ''}
+                    </div>
+                    {b.whyKidsChoose && b.whyKidsChoose.length > 0 && (
+                      <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--v2-text-secondary)', fontSize: 12, lineHeight: 1.5 }}>
+                        {b.whyKidsChoose.map((reason) => (
+                          <li key={reason}>{reason}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {b.shellySays && (
+                      <div style={{
+                        fontSize: 12,
+                        color: 'var(--v2-text-secondary)',
+                        fontStyle: 'italic',
+                        borderLeft: '2px solid rgba(140,120,255,0.5)',
+                        paddingLeft: 8,
+                        marginTop: 2,
+                      }}>
+                        &ldquo;{b.shellySays}&rdquo;
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1625,6 +1922,7 @@ function DemoParentDashboard(props: {
 /* ------------------------------------------------------------------ */
 
 export default function DemoFlow() {
+  useWakeLock();
   const { status, requestPermission } = useMicPermission();
 
   const [session, setSession] = useState<DemoSession>(() => {
@@ -1636,6 +1934,7 @@ export default function DemoFlow() {
   });
   const step: DemoStep = session.step;
 
+  const [showConsent, setShowConsent] = useState<boolean>(() => !session.hasConsented);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => !session.hasSeenOnboarding);
   const [showSettings, setShowSettings] = useState(false);
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
@@ -1676,10 +1975,27 @@ export default function DemoFlow() {
   const { activeMissions, completedMissions, addMission, completeMission, deleteMission } =
     useMissions(undefined);
 
-  const providerRef = useRef<ReturnType<typeof createVoiceProvider> | null>(null);
-  if (!providerRef.current) providerRef.current = createVoiceProvider();
+  const guestWishes = useGuestWishes();
 
-  const [pendingMissionChoices, setPendingMissionChoices] = useState<MissionSuggestion[] | null>(null);
+  const [voiceProvider, setVoiceProvider] = useState(() => createVoiceProvider());
+  /** After "Start over", force empty initialMessages for the new provider so conversation is cleared. */
+  const resetJustHappenedRef = useRef(false);
+
+  const PENDING_MISSIONS_KEY = 'turtle-talk-demo-pending-missions';
+  const [pendingMissionChoices, setPendingMissionChoicesRaw] = useState<MissionSuggestion[] | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = window.localStorage.getItem(PENDING_MISSIONS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const updatePendingMissions = useCallback((choices: MissionSuggestion[] | null) => {
+    setPendingMissionChoicesRaw(choices);
+    try {
+      if (choices) window.localStorage.setItem(PENDING_MISSIONS_KEY, JSON.stringify(choices));
+      else window.localStorage.removeItem(PENDING_MISSIONS_KEY);
+    } catch {}
+  }, []);
   const pendingChoices: DemoMissionChoice[] = useMemo(
     () => (pendingMissionChoices ?? []).map((c, i) => ({ ...c, __index: i })),
     [pendingMissionChoices],
@@ -1690,9 +2006,9 @@ export default function DemoFlow() {
 
   const activeMission = activeMissions[0] ?? null;
 
-  const voice = useVoiceSession(providerRef.current, {
+  const voice = useVoiceSession(voiceProvider, {
     autoConnect: step === 'childCourageConversation' && status === 'granted',
-    initialMessages: savedMessages,
+    initialMessages: resetJustHappenedRef.current ? [] : savedMessages,
     childName,
     topics,
     difficultyProfile,
@@ -1704,13 +2020,17 @@ export default function DemoFlow() {
     onTopic: saveTopic,
     onMessagesChange: saveMessages,
     onMissionChoices: (choices) => {
-      setPendingMissionChoices(choices);
+      updatePendingMissions(choices);
     },
   });
 
   const hasError = !!voice.error;
   const statusBadge = hasError ? 'error' : voice.state === 'connecting' ? 'warning' : 'ok';
   const callActive = ACTIVE_STATES.has(voice.state);
+
+  useEffect(() => {
+    resetJustHappenedRef.current = false;
+  }, [voiceProvider]);
 
   useEffect(() => {
     if (!session.demoId && typeof window !== 'undefined') {
@@ -1735,9 +2055,10 @@ export default function DemoFlow() {
         ageGroup: session.ageGroup ?? null,
         favoriteBook: session.favoriteBook ?? '',
         funFacts: session.funFacts ?? [],
+        consentedAt: session.consentedAt ?? null,
       }),
     }).catch(() => {});
-  }, [childName, session.ageGroup, session.demoId, session.favoriteBook, session.funFacts]);
+  }, [childName, session.ageGroup, session.consentedAt, session.demoId, session.favoriteBook, session.funFacts]);
 
   useEffect(() => {
     if (step !== 'survey' || !session.demoId) return;
@@ -1751,6 +2072,7 @@ export default function DemoFlow() {
       wishChoice: session.wishChoice ?? null,
       topics,
       messagesSummary: (voice.messages ?? []).slice(-6),
+      consentedAt: session.consentedAt ?? null,
     };
     void fetch('/api/demo/session', {
       method: 'POST',
@@ -1812,7 +2134,7 @@ export default function DemoFlow() {
       if (data.childName) saveChildName(data.childName);
       if (data.topic) saveTopic(data.topic);
       if (data.missionChoices?.length) {
-        setPendingMissionChoices(data.missionChoices);
+        updatePendingMissions(data.missionChoices);
         updateSession({ step: 'missionsPick' });
       }
       setTypedInput('');
@@ -1824,12 +2146,18 @@ export default function DemoFlow() {
   const goNext = useCallback((next: DemoStep) => updateSession({ step: next }), [updateSession]);
 
   const resetAll = useCallback(() => {
+    resetJustHappenedRef.current = true;
+    voice.resetSession();
+    setVoiceProvider(createFreshVoiceProvider());
     clearDemoSession();
     const fresh = createFreshDemoSession();
     fresh.step = getFirstStep(SKIPPED_STEPS);
     setSession(fresh);
-    setPendingMissionChoices(null);
+    updatePendingMissions(null);
     clearAll();
+    resetGuestWishes();
+    guestWishes.regenerate();
+    earlyPersistDone.current = false;
     try {
       const db = getGuestDb();
       const id = typeof window !== 'undefined' ? getDeviceId() : 'default';
@@ -1837,7 +2165,7 @@ export default function DemoFlow() {
     } catch {
       // ignore
     }
-  }, [clearAll]);
+  }, [clearAll, voice, guestWishes]);
 
   // Auto-advance past skipped steps
   useEffect(() => {
@@ -1862,10 +2190,10 @@ export default function DemoFlow() {
   }, [callActive, pendingMissionChoices, step, updateSession]);
 
   useEffect(() => {
-    if (step === 'missionsPick' && pendingMissionChoices == null) {
+    if (step === 'missionsPick' && pendingMissionChoices == null && activeMissions.length === 0) {
       updateSession({ step: 'childCourageConversation' });
     }
-  }, [pendingMissionChoices, step, updateSession]);
+  }, [pendingMissionChoices, activeMissions.length, step, updateSession]);
 
   // Navigation helpers that respect the step ordering
   const previousStep = getPreviousStep(step, SKIPPED_STEPS);
@@ -1891,8 +2219,18 @@ export default function DemoFlow() {
 
   return (
     <DemoShell onResetAll={() => setConfirmResetOpen(true)} theme={session.demoTheme ?? 'dark'}>
+      <ConsentModal
+        open={showConsent}
+        onAgree={() => {
+          setShowConsent(false);
+          updateSession({ hasConsented: true, consentedAt: new Date().toISOString() });
+        }}
+        onDecline={() => {
+          window.location.href = '/';
+        }}
+      />
       <OnboardingModal
-        open={showOnboarding && step === 'tattleCard' && status === 'granted'}
+        open={!showConsent && showOnboarding && step === 'tattleCard' && status === 'granted'}
         onClose={() => {
           setShowOnboarding(false);
           updateSession({ hasSeenOnboarding: true });
@@ -2103,6 +2441,8 @@ export default function DemoFlow() {
                 onChangeNewFunFact={setNewFunFact}
                 onBack={previousStep ? goBack : undefined}
                 onComplete={goForward}
+                initialSubstep={session.profileSubstep}
+                onSubstepChange={(s) => updateSession({ profileSubstep: s })}
               />
             </div>
           )}
@@ -2135,25 +2475,25 @@ export default function DemoFlow() {
           {/* ---- missionsPick modal ---- */}
           {step === 'missionsPick' && pendingChoices.length > 0 && !callActive && (
             <ModalBackdrop onClose={() => {
-              setPendingMissionChoices(null);
+              updatePendingMissions(null);
               updateSession({ step: 'wish', missionStatus: 'dismissed' });
             }}>
               <div style={{ padding: 20, maxHeight: '80vh', overflowY: 'auto' }}>
                 <MissionChoicesCard
                   choices={pendingChoices}
                   onDismiss={() => {
-                    setPendingMissionChoices(null);
+                    updatePendingMissions(null);
                     updateSession({ step: 'wish', missionStatus: 'dismissed' });
                   }}
                   onTalkMore={() => {
-                    setPendingMissionChoices(null);
+                    updatePendingMissions(null);
                     updateSession({ step: 'childCourageConversation' });
                     void voice.startListening();
                   }}
                   onHelp={() => setHelpSection('missions')}
                   onAccept={(choice) => {
                     addMission(choice);
-                    setPendingMissionChoices(null);
+                    updatePendingMissions(null);
                     updateSession({ step: 'missionDo', missionStatus: 'active' });
                   }}
                 />
@@ -2219,67 +2559,154 @@ export default function DemoFlow() {
 
               {/* ---- wish ---- */}
               {step === 'wish' && (
-                <div style={{ display: 'grid', gap: 12, width: '100%' }}>
-                  <Card title="Make a wish">
-                    <div style={{ display: 'grid', gap: 10 }}>
-                      <InfoHint text="Pick how you'd like to make your wish!" />
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 8,
-                          marginTop: 6,
-                        }}
+                <div style={{ display: 'grid', gap: 12, width: '100%', maxWidth: 500, justifySelf: 'center' }}>
+                  {guestWishes.completed ? (
+                    <>
+                      <Card title="Your wishes are in!">
+                        <div style={{ display: 'grid', gap: 10 }}>
+                          <InfoHint text="Nice picks! Your grown-up will see these and choose one to make come true." />
+                          <div style={{ display: 'grid', gap: 8, marginTop: 4 }}>
+                            {guestWishes.options
+                              .filter((o) => guestWishes.selectedIds.has(o.id))
+                              .map((o) => (
+                                <div
+                                  key={o.id}
+                                  style={{
+                                    padding: '10px 14px',
+                                    borderRadius: 14,
+                                    border: '2px solid rgba(140,120,255,0.7)',
+                                    background: 'rgba(140,120,255,0.14)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 10,
+                                  }}
+                                >
+                                  <span style={{ fontWeight: 700, fontSize: 14 }}>{o.label}</span>
+                                  <span
+                                    style={{
+                                      fontSize: 10,
+                                      color: 'rgba(200,210,255,0.85)',
+                                      fontWeight: 600,
+                                      padding: '2px 7px',
+                                      background: 'rgba(255,255,255,0.10)',
+                                      borderRadius: 6,
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    {getThemeLabel(o.theme_slug)}
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </Card>
+                      <StepNavigation
+                        onPrevious={previousStep ? goBack : undefined}
+                        onNext={goForward}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Card
+                        title="Make a wish!"
+                        right={
+                          <button
+                            type="button"
+                            onClick={guestWishes.regenerate}
+                            style={{
+                              appearance: 'none',
+                              border: 'none',
+                              background: 'transparent',
+                              color: 'var(--v2-text-secondary)',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              fontSize: 12,
+                              textDecoration: 'underline',
+                            }}
+                          >
+                            New wishes
+                          </button>
+                        }
                       >
-                        {[
-                          { id: 'solo' as const, label: 'Just me (solo)' },
-                          { id: 'withParent' as const, label: 'With my grown-up' },
-                          { id: 'withFriend' as const, label: 'With a friend' },
-                        ].map((opt) => {
-                          const active = session.wishChoice === opt.id;
-                          return (
-                            <button
-                              key={opt.id}
-                              type="button"
-                              onClick={() => {
-                                if (session.wishChoice !== opt.id && typeof window !== 'undefined') {
-                                  void confetti({
-                                    particleCount: 60,
-                                    spread: 60,
-                                    startVelocity: 35,
-                                    gravity: 0.9,
-                                    origin: { y: 0.85 },
-                                  });
-                                }
-                                updateSession({ wishChoice: opt.id });
-                              }}
-                              style={{
-                                flex: '1 1 150px',
-                                minWidth: 0,
-                                padding: '8px 10px',
-                                borderRadius: 999,
-                                border: active
-                                  ? '2px solid rgba(140,120,255,0.95)'
-                                  : '1px solid rgba(255,255,255,0.20)',
-                                background: active ? 'rgba(140,120,255,0.22)' : 'rgba(255,255,255,0.06)',
-                                cursor: 'pointer',
-                                color: 'var(--v2-text)',
-                                fontSize: 13,
-                                fontWeight: 600,
-                                textAlign: 'center',
-                              }}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </Card>
-                  <StepNavigation
-                    onPrevious={previousStep ? goBack : undefined}
-                    onNext={goForward}
-                  />
+                        <div style={{ display: 'grid', gap: 10 }}>
+                          <InfoHint text="Tap your 3 favourites, then submit!" />
+                          <div style={{ display: 'grid', gap: 8, marginTop: 4 }}>
+                            {guestWishes.options.map((opt) => {
+                              const sel = guestWishes.selectedIds.has(opt.id);
+                              return (
+                                <button
+                                  key={opt.id}
+                                  type="button"
+                                  onClick={() => guestWishes.toggle(opt.id)}
+                                  style={{
+                                    appearance: 'none',
+                                    width: '100%',
+                                    padding: '12px 14px',
+                                    borderRadius: 14,
+                                    border: sel
+                                      ? '2px solid rgba(140,120,255,0.95)'
+                                      : '1px solid rgba(255,255,255,0.16)',
+                                    background: sel ? 'rgba(140,120,255,0.18)' : 'rgba(255,255,255,0.04)',
+                                    cursor: 'pointer',
+                                    color: 'var(--v2-text)',
+                                    textAlign: 'left',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 10,
+                                    transition: 'border-color 120ms, background 120ms',
+                                  }}
+                                >
+                                  <span style={{ fontWeight: sel ? 750 : 600, fontSize: 14 }}>
+                                    {opt.label}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: 10,
+                                      color: 'rgba(200,210,255,0.75)',
+                                      fontWeight: 600,
+                                      padding: '2px 7px',
+                                      background: 'rgba(255,255,255,0.08)',
+                                      borderRadius: 6,
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    {getThemeLabel(opt.theme_slug)}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <PrimaryButton
+                            disabled={guestWishes.selectedIds.size !== 3}
+                            onClick={() => {
+                              guestWishes.submit();
+                              if (typeof window !== 'undefined') {
+                                void confetti({
+                                  particleCount: 80,
+                                  spread: 70,
+                                  startVelocity: 35,
+                                  gravity: 0.9,
+                                  origin: { y: 0.85 },
+                                });
+                              }
+                            }}
+                            style={{
+                              marginTop: 4,
+                              opacity: guestWishes.selectedIds.size === 3 ? 1 : 0.5,
+                            }}
+                          >
+                            {`Submit ${guestWishes.selectedIds.size}/3`}
+                          </PrimaryButton>
+                        </div>
+                      </Card>
+                      <StepNavigation
+                        onPrevious={previousStep ? goBack : undefined}
+                        onNext={goForward}
+                      />
+                    </>
+                  )}
                 </div>
               )}
 
@@ -2288,6 +2715,7 @@ export default function DemoFlow() {
                 <DemoParentDashboard
                   parentPriority={session.parentPriority}
                   childName={childName}
+                  ageGroup={session.ageGroup}
                   topics={topics}
                   messages={voice.messages}
                   completedCount={completedMissions.length}
@@ -2353,7 +2781,7 @@ export default function DemoFlow() {
         </div>
       </main>
 
-      {/* Bottom bar with voice controls -- centered column layout */}
+      {/* Bottom bar with voice controls -- vertical column layout */}
       {(step === 'childCourageConversation' || (step === 'missionsPick' && callActive)) && (
         <div
           style={{
@@ -2365,26 +2793,19 @@ export default function DemoFlow() {
             padding: 'max(16px, env(safe-area-inset-bottom)) 20px',
             background: 'linear-gradient(to top, rgba(10,10,14,0.92) 60%, transparent)',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 16,
+            gap: 14,
           }}
         >
-          {previousStep && (
-            <PrimaryButton
-              tone="ghost"
-              onClick={goBack}
-              style={{ fontSize: 13, padding: '8px 12px' }}
-            >
-              Back
-            </PrimaryButton>
-          )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          {/* Primary row: mute + call button -- prominent green */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+            <TalkMuteToggle isMuted={voice.isMuted} onToggle={voice.toggleMute} callActive={callActive} />
             <TalkEndCallButton
               state={voice.state}
               hasError={hasError}
               missionGenerated={!!pendingMissionChoices && callActive}
+              label="Tap to talk to Shelly"
               onEnd={() => {
                 voice.endConversation();
                 const dest: DemoStep = pendingChoices.length > 0 ? 'missionsPick' : 'wish';
@@ -2393,19 +2814,31 @@ export default function DemoFlow() {
               onRetry={voice.startListening}
               onStart={voice.startListening}
             />
-            <TalkMuteToggle isMuted={voice.isMuted} onToggle={voice.toggleMute} callActive={callActive} />
           </div>
 
+          {/* Secondary row: back / next navigation (smaller, below call button) */}
           {!callActive && (
-            <PrimaryButton
-              onClick={() => {
-                const dest = pendingChoices.length > 0 ? 'missionsPick' : 'wish';
-                updateSession({ step: dest as DemoStep });
-              }}
-              style={{ fontSize: 13, padding: '8px 12px' }}
-            >
-              Next
-            </PrimaryButton>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, opacity: 0.85 }}>
+              {previousStep && (
+                <PrimaryButton
+                  tone="ghost"
+                  onClick={goBack}
+                  style={{ fontSize: 12, padding: '6px 10px' }}
+                >
+                  Back
+                </PrimaryButton>
+              )}
+              <PrimaryButton
+                tone="ghost"
+                onClick={() => {
+                  const dest = pendingChoices.length > 0 ? 'missionsPick' : 'wish';
+                  updateSession({ step: dest as DemoStep });
+                }}
+                style={{ fontSize: 12, padding: '6px 10px' }}
+              >
+                Skip &rarr;
+              </PrimaryButton>
+            </div>
           )}
         </div>
       )}

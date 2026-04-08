@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Html5Qrcode } from 'html5-qrcode';
 import booksData from '@/app/placeholders/books.json';
 import moviesData from '@/app/placeholders/movies.json';
+import { useWakeLock } from '@/app/hooks/useWakeLock';
 
 type ParentPreference = 'books' | 'movies' | 'garden' | 'dinner';
 
@@ -27,7 +28,12 @@ type Book = {
   author: string;
   shortDescription: string;
   coverEmoji: string;
+  coverUrl?: string;
   ageRange: string;
+  ageGroup?: string;
+  goodreadsRating?: number;
+  whyKidsChoose?: string[];
+  shellySays?: string;
   recommendedFor: string[];
   whyRecommended: string;
   fullDescription: string;
@@ -369,40 +375,151 @@ function RecommendationCard({
 // Book detail view
 // ---------------------------------------------------------------------------
 
+function BookCoverImage({ src, alt, emoji }: { src?: string; alt: string; emoji: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: '2 / 3',
+          borderRadius: 12,
+          background: 'linear-gradient(165deg, #ebebed 0%, #e0e0e8 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 48,
+        }}
+      >
+        {emoji}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setFailed(true)}
+      style={{
+        width: '100%',
+        aspectRatio: '2 / 3',
+        objectFit: 'cover',
+        borderRadius: 12,
+        display: 'block',
+      }}
+    />
+  );
+}
+
+function BookRecommendationCard({ book }: { book: Book }) {
+  return (
+    <div
+      className="pd-card-elevated"
+      style={{
+        padding: 0,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div style={{ width: '100%', maxHeight: 260, overflow: 'hidden' }}>
+        <BookCoverImage src={book.coverUrl} alt={book.title} emoji={book.coverEmoji} />
+      </div>
+      <div style={{ padding: '16px 18px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 17, color: 'var(--pd-text-primary)', marginBottom: 2 }}>
+            {book.title}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--pd-text-tertiary)' }}>
+            {book.author} · Ages {book.ageRange}
+          </div>
+          {book.goodreadsRating != null && (
+            <div style={{ marginTop: 4 }}>
+              <StarRating rating={book.goodreadsRating} source="Goodreads" />
+            </div>
+          )}
+        </div>
+
+        {book.whyKidsChoose && book.whyKidsChoose.length > 0 && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--pd-accent)', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 4 }}>
+              Why kids choose it
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontSize: 14, color: 'var(--pd-text-secondary)', lineHeight: 1.55 }}>
+              {book.whyKidsChoose.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {book.shellySays && (
+          <div
+            style={{
+              background: 'var(--pd-surface-soft)',
+              borderRadius: 10,
+              padding: '12px 14px',
+              borderLeft: '3px solid var(--pd-accent)',
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--pd-accent)', marginBottom: 4 }}>
+              Shelly says
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--pd-text-secondary)', lineHeight: 1.5, fontStyle: 'italic' }}>
+              &ldquo;{book.shellySays}&rdquo;
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BookDetailView({ session }: { session: DemoSessionSummary }) {
   const books = booksData as Book[];
 
   const recommended = useMemo(() => {
-    const topics = session.topics ?? [];
-    if (topics.length === 0) return books[0];
-    const lowerTopics = new Set(topics.map((t) => t.toLowerCase()));
-    const match = books.find((b) =>
-      b.recommendedFor.some((tag) => lowerTopics.has(tag.toLowerCase())),
-    );
-    return match ?? books[0];
-  }, [session.topics, books]);
+    const ageGroup = session.ageGroup;
+    if (ageGroup) {
+      const matched = books.filter((b) => b.ageGroup === ageGroup);
+      if (matched.length > 0) return matched;
+    }
+    return books.filter((b) => b.ageGroup === '5-7');
+  }, [session.ageGroup, books]);
 
-  const childContext = useMemo(() => {
-    if (!session.topics?.length) return null;
-    return `Your child talked about ${session.topics.slice(0, 2).join(' and ')} today.`;
-  }, [session.topics]);
+  const ageLabel =
+    session.ageGroup === '5-7' ? 'Ages 5\u20137'
+    : session.ageGroup === '8-10' ? 'Ages 8\u201310'
+    : session.ageGroup === '11-13' ? 'Ages 11\u201313'
+    : null;
 
   return (
     <div style={{ display: 'grid', gap: 14 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--pd-text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        {'\u{1F4DA}'} A story that helps your child grow
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--pd-text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+          {'\u{1F4DA}'} Book recommendations{ageLabel ? ` \u00B7 ${ageLabel}` : ''}
+        </div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--pd-text-primary)', lineHeight: 1.4 }}>
+          Which book would Shelly send from her secret library?
+        </div>
       </div>
-      <RecommendationCard
-        emoji={recommended.coverEmoji}
-        title={recommended.title}
-        subtitle={recommended.author}
-        whyText={recommended.whyRecommended}
-        childContext={childContext}
-      />
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gap: 16,
+        }}
+      >
+        {recommended.map((book) => (
+          <BookRecommendationCard key={book.id} book={book} />
+        ))}
+      </div>
+
       {!hasChildData(session) && (
         <div className="pd-card" style={{ padding: 16, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: 13, color: 'var(--pd-text-tertiary)', lineHeight: 1.5 }}>
-            Once your child starts chatting with Shelly, we{"'"}ll personalize this recommendation based on their conversation.
+            Once your child tells Shelly their age, we{"'"}ll show books matched to their age group.
           </p>
         </div>
       )}
@@ -951,6 +1068,7 @@ export default function DemoParentPage() {
 }
 
 function DemoParentPageInner() {
+  useWakeLock();
   const searchParams = useSearchParams();
   const router = useRouter();
 

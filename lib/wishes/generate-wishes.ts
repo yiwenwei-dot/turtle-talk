@@ -68,7 +68,7 @@ export async function generateWishOptions(
         )}. When it fits, prefer wishes that connect to these favourite things (for example, if they love dinosaurs, a dinosaur book or trip to a museum).`
       : '';
 
-  const system = `You generate short wish ideas for a child aged 4-10. Reply with exactly 5 lines. Each line must be in this format: theme_slug: wish label
+  const system = `You generate short wish ideas for a child aged 5-13. Reply with exactly 5 lines. Each line must be in this format: theme_slug: wish label
 Allowed theme_slug values (use exactly these): ${THEME_LIST}
 Use a mix of themes. Keep each wish label under 50 characters, friendly and concrete (e.g. "A new LEGO set", "Go to the cinema to see a movie").${previousLine ? ` ${previousLine}` : ''}${
     favoritesLine ? ` ${favoritesLine}` : ''

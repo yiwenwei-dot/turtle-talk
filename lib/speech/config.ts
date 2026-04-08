@@ -109,7 +109,7 @@ export const speechConfig = {
       stability: 0.75,       // high = consistent, predictable voice across turns
       similarityBoost: 0.75, // adhere closely to Sarah's reference voice
       style: 0,              // no style exaggeration — keeps tone steady
-      speed: 0.9,            // slightly slower for kids aged 4-10
+      speed: 0.9,            // slightly slower for kids aged 5-13
     },
     // OpenAI TTS settings
     openaiTtsModel: process.env.SPEECH_OPENAI_TTS_MODEL ?? 'gpt-4o-mini-tts',

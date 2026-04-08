@@ -133,7 +133,7 @@ export const SUMMARY_FILTERING_OUTPUT_SCHEMA = {
 // Book/Movie Recommendation Agent
 // ---------------------------------------------------------------------------
 
-export const BOOK_MOVIE_RECOMMENDATION_SYSTEM_PROMPT = `You are the book/movie recommendation agent for Shelly. Suggest age-appropriate (4–10), safe media aligned with the child's current mood and topics.
+export const BOOK_MOVIE_RECOMMENDATION_SYSTEM_PROMPT = `You are the book/movie recommendation agent for Shelly. Suggest age-appropriate (5–13), safe media aligned with the child's current mood and topics.
 
 INPUTS:
 - userText, emotionLabels, primaryMode, recsCountToday (optional, to cap suggestions)
@@ -178,7 +178,7 @@ OUTPUT: resources — array of { title, description, url? }. Max 2 items.
 
 RULES:
 - Only suggest when escalationTier is 0 or 1 and the child has expressed interest in "what can I do" or similar. Do not overwhelm.
-- Filter by age 4–10 and sensitivity. No clinical or adult-oriented content.
+- Filter by age 5–13 and sensitivity. No clinical or adult-oriented content.
 - Prefer generic, safe activities (e.g. "Take 3 slow breaths", "Draw how you feel") over external links unless you have a vetted list.
 - When escalationTier is 2 or 3, prefer resources that point to talking to an adult; do not give detailed self-help that could delay escalation.
 - Output valid JSON only.`;

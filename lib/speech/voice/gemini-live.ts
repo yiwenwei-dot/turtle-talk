@@ -21,9 +21,10 @@ type GeminiLiveMessageEvent = {
 };
 
 function buildShellySystemInstruction(options: VoiceSessionOptions): string {
-  // VoiceSessionOptions is structurally compatible with ShellyPromptContext:
-  // it has childName, topics, difficultyProfile, and activeMission (with title/description).
-  return buildSystemPrompt(options);
+  return buildSystemPrompt({
+    ...options,
+    location: options.location ?? undefined,
+  });
 }
 
 /**

@@ -1,11 +1,40 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: https://m.media-amazon.com https://books.disney.com",
+  "media-src 'self' blob:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.elevenlabs.io https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://*.upstash.io https://*.livekit.cloud wss://*.livekit.cloud",
+  "font-src 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
+
+const SECURITY_HEADERS = [
+  { key: 'Strict-Transport-Security',  value: 'max-age=63072000; includeSubDomains' },
+  { key: 'X-Content-Type-Options',     value: 'nosniff' },
+  { key: 'X-Frame-Options',            value: 'DENY' },
+  { key: 'Referrer-Policy',            value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy',         value: 'microphone=(self), camera=(), geolocation=()' },
+  { key: 'Content-Security-Policy',    value: CSP },
+];
+
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "m.media-amazon.com" },
+      { protocol: "https", hostname: "books.disney.com" },
+    ],
+  },
   turbopack: {
     // Pin the workspace root to this project to avoid Next.js picking up a
     // stray package-lock.json higher up in the directory tree.
     root: path.resolve(__dirname),
+  },
+  async headers() {
+    return [{ source: '/(.*)', headers: SECURITY_HEADERS }];
   },
   async rewrites() {
     return [

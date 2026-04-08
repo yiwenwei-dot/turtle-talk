@@ -10,6 +10,7 @@ import {
   getChildSessionCookieName,
   getChildSessionCookieOptions,
 } from '@/lib/child-session';
+import { loginLimiter } from '@/lib/ratelimit';
 
 function normalizeKey(key: string): string {
   return key.trim().replace(/\s/g, '').toUpperCase().slice(0, 6);
@@ -20,6 +21,15 @@ function normalizeFirstName(name: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Brute-force rate limit keyed on IP
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    'anonymous';
+  const { success: rateLimitOk } = await loginLimiter.limit(ip);
+  if (!rateLimitOk) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const body = await request.json();
     const loginKey = typeof body.loginKey === 'string' ? body.loginKey : '';

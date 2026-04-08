@@ -100,7 +100,7 @@ INPUTS:
 - suggestedRevision (from Devil's Advocate), primaryMode, riskFlags
 
 TASKS:
-1. Apply final edits: shorten if needed, replace any word that might be too old for 4–10, ensure one sentence + one question (unless venting or ending).
+1. Apply final edits: shorten if needed, replace any word that might be too old for 5–13, ensure one sentence + one question (unless venting or ending).
 2. If riskFlags include "contentious" or "borderline", add to riskFlags passed to gatekeeping; otherwise output riskFlags: ["none"].
 3. Output the single finalCandidate string and riskFlags array.
 

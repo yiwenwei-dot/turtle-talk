@@ -21,6 +21,8 @@ export interface TalkEndCallButtonProps {
   hasError: boolean;
   /** When true, show gold styling and fire confetti (mission generated during call). */
   missionGenerated?: boolean;
+  /** Custom label for the idle-state "tap to talk" button. */
+  label?: string;
   onEnd: () => void;
   onRetry: () => Promise<void>;
   onStart?: () => Promise<void>;
@@ -30,6 +32,7 @@ export default function TalkEndCallButton({
   state,
   hasError,
   missionGenerated = false,
+  label = 'Tap to talk to Shelly',
   onEnd,
   onRetry,
   onStart,
@@ -176,7 +179,7 @@ export default function TalkEndCallButton({
         type="button"
         className="v2-btn-nudge-green v2-btn-primary-pill"
         onClick={handleClick}
-        aria-label="Tap to speak"
+        aria-label={label}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
         style={{
@@ -184,17 +187,18 @@ export default function TalkEndCallButton({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 10,
-          height: ROUND_SIZE,
+          height: ROUND_SIZE + 4,
           width: 'auto',
-          minWidth: 150,
-          padding: '0 28px',
+          minWidth: 200,
+          padding: '0 32px',
           borderRadius: 'var(--v2-radius-pill)',
+          background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
           color: 'white',
           border: 'none',
           cursor: 'pointer',
-          fontSize: '1rem',
+          fontSize: '1.1rem',
           fontWeight: 700,
-          boxShadow: 'var(--v2-shadow-card)',
+          boxShadow: '0 4px 20px rgba(34,197,94,0.35), 0 1px 4px rgba(0,0,0,0.1)',
           transition: 'width 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.25s ease, transform 0.15s ease, border-radius 0.25s ease',
         }}
         onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
@@ -205,13 +209,13 @@ export default function TalkEndCallButton({
         <span
           style={{
             overflow: 'hidden',
-              maxWidth: 'none',
-              opacity: 1,
+            maxWidth: 'none',
+            opacity: 1,
             transition: 'max-width 0.28s ease, opacity 0.2s ease',
             whiteSpace: 'nowrap',
           }}
         >
-          Tap to speak
+          {label}
         </span>
       </button>
     );
@@ -220,7 +224,7 @@ export default function TalkEndCallButton({
   return (
     <button
       type="button"
-      className="v2-btn-nudge-red v2-btn-primary-pill"
+      className="v2-btn-nudge-green v2-btn-primary-pill"
       onClick={handleClick}
       aria-label="End call"
       onPointerEnter={handlePointerEnter}
@@ -230,20 +234,20 @@ export default function TalkEndCallButton({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        height: ROUND_SIZE,
+        height: ROUND_SIZE + 4,
         width: 'auto',
-        minWidth: 150,
-        padding: '0 28px',
+        minWidth: 180,
+        padding: '0 32px',
         borderRadius: 'var(--v2-radius-pill)',
         background: missionGenerated
           ? 'linear-gradient(135deg, var(--v2-gold) 0%, var(--v2-gold-dark) 100%)'
-          : 'var(--v2-end-call-red)',
+          : 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
         color: 'white',
         border: 'none',
         cursor: 'pointer',
-        fontSize: '1rem',
+        fontSize: '1.05rem',
         fontWeight: 700,
-        boxShadow: 'var(--v2-shadow-card)',
+        boxShadow: '0 4px 20px rgba(34,197,94,0.35), 0 1px 4px rgba(0,0,0,0.1)',
         transition: 'width 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.25s ease, transform 0.15s ease, border-radius 0.25s ease, background 0.3s ease',
       }}
       onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}

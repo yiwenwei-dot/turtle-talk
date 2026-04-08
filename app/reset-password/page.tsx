@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 const inputStyle: React.CSSProperties = {
@@ -76,6 +77,15 @@ export default function ResetPasswordPage() {
         backdropFilter: 'blur(12px)',
         border: '1px solid rgba(255,255,255,0.2)',
       }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <Image
+            src="/TurtleTalk---Logo.png"
+            alt="TurtleTalk"
+            width={72}
+            height={72}
+            style={{ borderRadius: 20 }}
+          />
+        </div>
         {done ? (
           <>
             <h1 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, color: 'white' }}>Password updated</h1>
