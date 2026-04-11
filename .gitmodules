@@ -1,3 +1,0 @@
-[submodule "livekit-agent"]
-	path = livekit-agent
-	url = https://github.com/ianktoo/turtle-talk-livekit-agent.git
