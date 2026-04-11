@@ -1088,19 +1088,34 @@ function DemoParentPageInner() {
   // ---- load session ----
   const loadSession = useCallback(
     async (rawId: string) => {
-      const id = rawId.trim();
+      // Normalize to match the format the child generates (always uppercase,
+      // trimmed). Scans sometimes include stray whitespace from QR decoders.
+      const id = rawId.trim().toUpperCase();
       if (!id) return;
       setLoading(true);
       setSessionError(null);
       try {
-        const res = await fetch(`/api/demo/session/${encodeURIComponent(id)}`);
+        const res = await fetch(`/api/demo/session/${encodeURIComponent(id)}`, {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+        });
         if (!res.ok) {
           if (res.status === 404) {
             setSessionError(
               'We couldn\u2019t find that session yet. If your child is still getting started, try again in a moment.',
             );
           } else {
-            setSessionError('Something went wrong loading this demo.');
+            // Surface the server-side error so we can diagnose 500/503/429 etc.
+            let detail = '';
+            try {
+              const errBody = (await res.json()) as { error?: string };
+              if (errBody?.error) detail = ` (${errBody.error})`;
+            } catch {
+              /* response wasn't JSON */
+            }
+            setSessionError(
+              `Something went wrong loading this demo.${detail} [status ${res.status}]`,
+            );
           }
           setSession(null);
           return;
@@ -1122,8 +1137,9 @@ function DemoParentPageInner() {
   useEffect(() => {
     const param = searchParams.get('session');
     if (param && !sessionIdInput) {
-      setSessionIdInput(param.toUpperCase());
-      void loadSession(param);
+      const normalized = param.trim().toUpperCase();
+      setSessionIdInput(normalized);
+      void loadSession(normalized);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

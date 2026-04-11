@@ -1941,6 +1941,18 @@ export default function DemoFlow() {
   const [confirmEndOpen, setConfirmEndOpen] = useState(false);
   const [helpSection, setHelpSection] = useState<'voice' | 'missions' | 'parentDashboard' | 'survey' | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
+  // Client-only parent URL for the QR code. Computed after mount so SSR and
+  // client render match (prevents a hydration mismatch that was causing the
+  // QR code SVG to be left on the server-rendered fallback value).
+  const [parentUrl, setParentUrl] = useState<string>('');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!session.demoId) {
+      setParentUrl('');
+      return;
+    }
+    setParentUrl(`${window.location.origin}/demo/parent?session=${encodeURIComponent(session.demoId)}`);
+  }, [session.demoId]);
 
   const updateSession = useCallback((patch: Partial<DemoSession>) => {
     setSession((prev) => {
@@ -2286,16 +2298,28 @@ export default function DemoFlow() {
                 display: 'inline-flex',
               }}
             >
-              <QRCode
-                value={
-                  typeof window !== 'undefined'
-                    ? `${window.location.origin}/demo/parent?session=${session.demoId ?? ''}`
-                    : '/demo/parent'
-                }
-                size={160}
-                bgColor="#ffffff"
-                fgColor="#0E1020"
-              />
+              {parentUrl ? (
+                <QRCode
+                  value={parentUrl}
+                  size={160}
+                  bgColor="#ffffff"
+                  fgColor="#0E1020"
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 160,
+                    height: 160,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    color: '#384165',
+                  }}
+                >
+                  {'Generating\u2026'}
+                </div>
+              )}
             </div>
             <div
               style={{
