@@ -74,9 +74,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ttl: '1h',
     });
     at.addGrant({ roomJoin: true, room: roomName, canPublish: true, canSubscribe: true });
-    // Agent uses agentName: 'shelly', which turns off automatic dispatch. Request dispatch on join so the agent joins this room.
+    // Agent uses agentName: 'tammy', which turns off automatic dispatch. Request dispatch on join so the agent joins this room.
     at.roomConfig = new RoomConfiguration({
-      agents: [new RoomAgentDispatch({ agentName: 'shelly', metadata: dispatchMetadata ?? '' })],
+      agents: [new RoomAgentDispatch({ agentName: 'tammy', metadata: dispatchMetadata ?? '' })],
     });
     const token = await at.toJwt();
 

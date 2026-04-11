@@ -1,5 +1,5 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).  
-TurtleTalk is a children's voice-chat app: talk to Shelly the sea turtle, get voice replies, and earn brave missions.
+TurtleTalk is a children's voice-chat app: talk to Tammy the sea turtle, get voice replies, and earn brave missions.
 
 ## Getting Started
 
@@ -31,7 +31,7 @@ If you set `NEXT_PUBLIC_DB_PROVIDER=supabase`, run the migrations in your Supaba
 
 ## Voice and audio
 
-Set `NEXT_PUBLIC_VOICE_PROVIDER` to choose how the app talks to Shelly:
+Set `NEXT_PUBLIC_VOICE_PROVIDER` to choose how the app talks to Tammy:
 
 | Provider        | Description |
 |----------------|-------------|
@@ -40,7 +40,7 @@ Set `NEXT_PUBLIC_VOICE_PROVIDER` to choose how the app talks to Shelly:
 | `gemini-live`  | Gemini Live API (real-time bidirectional voice). |
 | `livekit`      | LiveKit room + agent; agent uses Gemini Live for voice. See [livekit-agent](livekit-agent/README.md). |
 
-For the **native** pipeline, for Shelly to reply with real conversation (not just “I’m listening, tell me more”), use **Anthropic** or **OpenAI** for the chat step: set `SPEECH_CHAT_PROVIDER=anthropic` (or `openai`) and the matching API key in `.env.local`. See `.env.example` for all speech options.
+For the **native** pipeline, for Tammy to reply with real conversation (not just “I’m listening, tell me more”), use **Anthropic** or **OpenAI** for the chat step: set `SPEECH_CHAT_PROVIDER=anthropic` (or `openai`) and the matching API key in `.env.local`. See `.env.example` for all speech options.
 
 **LiveKit**: To use `livekit`, run the agent in `livekit-agent/` (e.g. `pnpm dev` after `lk cloud auth` and setting `GOOGLE_API_KEY`). Add `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` to `.env.local` so the app can issue room tokens at `/api/livekit/token`.
 

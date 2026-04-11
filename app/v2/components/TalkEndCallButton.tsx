@@ -32,7 +32,7 @@ export default function TalkEndCallButton({
   state,
   hasError,
   missionGenerated = false,
-  label = 'Tap to talk to Shelly',
+  label = 'Tap to talk to Tammy',
   onEnd,
   onRetry,
   onStart,
@@ -102,7 +102,7 @@ export default function TalkEndCallButton({
   if (isConnecting) {
     return (
       <div
-        className="v2-shelly-connecting"
+        className="v2-tammy-connecting"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -120,7 +120,7 @@ export default function TalkEndCallButton({
         aria-live="polite"
       >
         <span style={{ fontSize: 22, lineHeight: 1 }} aria-hidden>🐢</span>
-        Connecting to Shelly
+        Connecting to Tammy
       </div>
     );
   }

@@ -32,7 +32,7 @@ All “back to listening” paths use the same helper so event management is sea
 | Item | Status |
 |------|--------|
 | **useSpeechConversation** | **Removed.** Talk page uses `useVoiceSession` + `VoiceConversationProvider` only. |
-| **Legacy debug logs** | **Removed.** Ingest `fetch` calls and `appendFileSync` debug-e0caad.log from native.ts, route, SpeechService. Console `[Shelly]` logs kept for support. See [DEBUG.md](../../DEBUG.md). |
+| **Legacy debug logs** | **Removed.** Ingest `fetch` calls and `appendFileSync` debug-e0caad.log from native.ts, route, SpeechService. Console `[Tammy]` logs kept for support. See [DEBUG.md](../../DEBUG.md). |
 | **missionDeclined** | Only existed in the removed hook; not in provider or API. Omitted from types. |
 
 ### 2.2 What to keep
@@ -71,13 +71,13 @@ All “back to listening” paths use the same helper so event management is sea
    - No change required if behavior is correct; only verify there are no lingering “idle” or “speaking” stuck states.
 
 6. **Debug instrumentation**  
-   - Keep one minimal set of logs (e.g. `[Shelly]` stage logs) or remove them and rely on session-based instrumentation when debugging.  
+   - Keep one minimal set of logs (e.g. `[Tammy]` stage logs) or remove them and rely on session-based instrumentation when debugging.  
    - Remove or replace old ingest URLs (e.g. `e0caad`) with a single config (e.g. env or session ID) so we don’t scatter magic IDs.
 
 7. **Empty LLM response**  
    - Server already sends meta with empty `responseText` and no audio when the LLM returns empty.  
    - Client already treats empty `responseText` as “no TTS” and calls `transitionToListening()`.  
-   - Optional: server could send a short fallback phrase when the LLM returns empty so Shelly always says something; keep as product decision.
+   - Optional: server could send a short fallback phrase when the LLM returns empty so Tammy always says something; keep as product decision.
 
 ---
 

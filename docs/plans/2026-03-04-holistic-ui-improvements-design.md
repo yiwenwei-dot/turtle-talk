@@ -16,7 +16,7 @@ improve feedback/polish throughout. Simplicity is the guiding principle.
 
 ### Home page (`app/page.tsx`)
 - Wire up the existing sky animation (CSS `home-hero` already defined)
-- Add a welcoming sub-headline beneath "Talk to Shelly"
+- Add a welcoming sub-headline beneath "Talk to Tammy"
 - Show a streak/last-session nudge from localStorage if available
 - Increase turtle emoji size and prominence as the hero visual
 

@@ -143,7 +143,7 @@ export default async function PrivacyPage() {
             <strong style={{ color: 'var(--pd-text-primary)' }}>
               Conversation transcripts are not retained on TurtleTalk servers
             </strong>{' '}
-            — only short thematic summaries are saved so Shelly can remember context across sessions.
+            — only short thematic summaries are saved so Tammy can remember context across sessions.
           </p>
         </div>
 

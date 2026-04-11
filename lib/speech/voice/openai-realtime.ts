@@ -27,7 +27,7 @@ function buildTools(): RealtimeTool[] {
     {
       type: 'function',
       name: 'report_mood',
-      description: "Set Shelly's current emotional state. You MUST call this every single turn.",
+      description: "Set Tammy's current emotional state. You MUST call this every single turn.",
       parameters: {
         type: 'object',
         properties: {
@@ -247,7 +247,7 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
       await this.pc.setRemoteDescription(answer);
     } catch (err) {
       if (this._generation !== gen) return;
-      console.info('[Shelly] openai-realtime: start error');
+      console.info('[Tammy] openai-realtime: start error');
       this.emit(
         'error',
         err instanceof Error ? err.message : 'Failed to start OpenAI Realtime',
@@ -370,7 +370,7 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
 
     if (this.pendingEnd) {
       this.pendingEnd = false;
-      // Give Shelly a brief grace period to finish playing
+      // Give Tammy a brief grace period to finish playing
       // her final audio before we tear down the call.
       if (this.gracefulEndTimeout) {
         clearTimeout(this.gracefulEndTimeout);

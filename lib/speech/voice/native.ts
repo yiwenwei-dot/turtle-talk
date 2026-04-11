@@ -27,7 +27,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
   private messages: Message[] = [];
   private pendingEnd = false;
   private options: VoiceSessionOptions = {};
-  /** Epoch ms before which VAD must not trigger — prevents Shelly's echo from being queued as user input. */
+  /** Epoch ms before which VAD must not trigger — prevents Tammy's echo from being queued as user input. */
   private vadGraceUntil = 0;
 
   // ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
   // ---------------------------------------------------------------------------
 
   async start(options: VoiceSessionOptions): Promise<void> {
-    console.info('[Shelly] native start');
+    console.info('[Tammy] native start');
     this.options = options;
     // Always set messages from options so each session starts with the correct history (or empty).
     this.messages = (options.initialMessages?.length ? [...options.initialMessages] : []).slice(-MAX_CONVERSATION_MESSAGES);
@@ -54,7 +54,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
-      console.info('[Shelly] native: microphone access failed');
+      console.info('[Tammy] native: microphone access failed');
       this.emit('error', 'Could not access microphone');
       this.setState('idle');
       this.emit('moodChange', 'idle');
@@ -74,7 +74,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
   }
 
   stop(): void {
-    console.info('[Shelly] native stop');
+    console.info('[Tammy] native stop');
     this.cleanup();
     this.setState('ended');
     this.emit('moodChange', 'idle');
@@ -82,7 +82,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
   }
 
   setMuted(muted: boolean): void {
-    console.info('[Shelly] native mute:', muted);
+    console.info('[Tammy] native mute:', muted);
     if (muted) {
       this.prevState = this.state;
       this.audioCtx?.suspend();
@@ -113,7 +113,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
         return;
       }
 
-      // After Shelly finishes speaking, suppress VAD for the grace period to prevent
+      // After Tammy finishes speaking, suppress VAD for the grace period to prevent
       // acoustic echo or residual mic energy from triggering an immediate recording.
       if (Date.now() < this.vadGraceUntil) {
         aboveThresholdSince = null;
@@ -151,7 +151,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
 
   private startRecording(): void {
     if (!this.stream) return;
-    console.info('[Shelly] native: recording');
+    console.info('[Tammy] native: recording');
     this.chunks = [];
     this.recorder = new MediaRecorder(this.stream);
     this.recorder.start();
@@ -181,12 +181,12 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
 
   private async sendAudio(blob: Blob): Promise<void> {
     if (blob.size < MIN_AUDIO_BYTES) {
-      console.info('[Shelly] native: blob too small, back to listening');
+      console.info('[Tammy] native: blob too small, back to listening');
       this.transitionToListening();
       return;
     }
 
-    console.info('[Shelly] native: processing (request to /api/talk)');
+    console.info('[Tammy] native: processing (request to /api/talk)');
     this.setState('processing');
     this.emit('moodChange', 'confused');
 
@@ -213,11 +213,11 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
         } else {
           errMsg = `HTTP ${res.status}`;
         }
-        console.info('[Shelly] native: API error response', res.status);
+        console.info('[Tammy] native: API error response', res.status);
         throw new Error(errMsg);
       }
       if (!res.body) {
-        console.info('[Shelly] native: no response body');
+        console.info('[Tammy] native: no response body');
         throw new Error('No response body');
       }
 
@@ -242,7 +242,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
             if (userText.trim()) this.emit('userTranscript', userText);
           } else if (event.type === 'meta') {
             receivedMeta = true;
-            console.info('[Shelly] native: meta received');
+            console.info('[Tammy] native: meta received');
             const { userText, responseText, mood, missionChoices, endConversation, childName, topic } =
               event as {
                 userText: string; responseText: string; mood: TurtleMood;
@@ -268,15 +268,15 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
               this.setState('speaking');
               this.emit('moodChange', mood ?? 'talking');
             } else {
-              console.info('[Shelly] native: meta had empty response, back to listening');
+              console.info('[Tammy] native: meta had empty response, back to listening');
               this.transitionToListening();
             }
 
           } else if (event.type === 'audio') {
-            console.info('[Shelly] native: audio received');
+            console.info('[Tammy] native: audio received');
             await this.playAudio(event.base64 as string);
           } else if (event.type === 'error') {
-            console.info('[Shelly] native: stream error event');
+            console.info('[Tammy] native: stream error event');
             const errPayload = event.error as string;
             throw new Error(errPayload);
           }
@@ -285,15 +285,15 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
 
       // Single place for "stream ended" recovery: avoid duplicate emissions, keep state/mood in sync
       if (!receivedMeta && this.state === 'processing') {
-        console.info('[Shelly] native: stream ended without meta, back to listening');
+        console.info('[Tammy] native: stream ended without meta, back to listening');
         this.transitionToListening();
       } else if (this.state === 'speaking') {
-        console.info('[Shelly] native: stream ended while speaking, back to listening');
+        console.info('[Tammy] native: stream ended while speaking, back to listening');
         this.transitionToListening();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong';
-      console.info('[Shelly] native: sendAudio error');
+      console.info('[Tammy] native: sendAudio error');
       this.emit('error', msg);
       this.transitionToListening();
     }
@@ -305,7 +305,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
 
   private async playAudio(base64: string): Promise<void> {
     return new Promise((resolve) => {
-      console.info('[Shelly] native: playing audio');
+      console.info('[Tammy] native: playing audio');
       const audioData = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
       const buffer = audioData.buffer.slice(audioData.byteOffset, audioData.byteOffset + audioData.byteLength);
       const playCtx = new AudioContext();
@@ -318,7 +318,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
         source.start();
         source.onended = () => {
           playCtx.close();
-          console.info('[Shelly] native: audio ended, back to listening');
+          console.info('[Tammy] native: audio ended, back to listening');
           if (this.pendingEnd) {
             this.pendingEnd = false;
             this.stop();
@@ -328,7 +328,7 @@ export class NativeVoiceProvider extends BaseVoiceProvider {
           resolve();
         };
       }).catch((err) => {
-        console.info('[Shelly] native: audio decode failed');
+        console.info('[Tammy] native: audio decode failed');
         playCtx.close();
         if (this.state !== 'ended' && this.state !== 'muted') {
           this.emit('error', `Audio playback failed: ${err instanceof Error ? err.message : 'invalid audio format'}`);

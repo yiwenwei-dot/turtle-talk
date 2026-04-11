@@ -90,7 +90,7 @@ export function useVoiceSession(
       void handleAppToolCall(call);
     };
     const onError   = (msg: string) => {
-      console.info('[Shelly] error from provider:', msg || '(empty)');
+      console.info('[Tammy] error from provider:', msg || '(empty)');
       setError(msg);
     };
     const onEnd     = () => optsRef.current.onEnd?.();
@@ -147,7 +147,7 @@ export function useVoiceSession(
   }, [provider]);
 
   const startListening = useCallback(async () => {
-    console.info('[Shelly] startListening called');
+    console.info('[Tammy] startListening called');
     setError(null);
     setIsMeaningful(false);
     const opts = optsRef.current;

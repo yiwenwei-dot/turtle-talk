@@ -9,7 +9,7 @@ Each completed mission awards the child a decoration (theme emoji) they can manu
 
 ## Goals
 
-- Demo-ready flow: Talk to Shelly → get a mission → complete it → earn a decoration → place it on the tree
+- Demo-ready flow: Talk to Tammy → get a mission → complete it → earn a decoration → place it on the tree
 - No authentication required at any point in this flow
 - Logged-in experience (existing server API path) is untouched
 
@@ -28,14 +28,14 @@ placedDecorations = placedMissionIds
   .map((id, i) => ({ emoji: THEME_EMOJI[missionById[id]?.theme ?? 'curious'], slotId: `slot-${i+1}` }))
 ```
 
-**Child name:** Already stored in localStorage by `usePersonalMemory` when Shelly learns it. Fallback to `"Explorer"` if absent.
+**Child name:** Already stored in localStorage by `usePersonalMemory` when Tammy learns it. Fallback to `"Explorer"` if absent.
 
 **Theme → Emoji map (existing):**
 - brave=🦁, kind=💛, calm=🌊, confident=⭐, creative=🎨, social=🤝, curious=🔍
 
 ## Decoration Flow
 
-1. Child talks to Shelly → picks a mission → mission saved as `active`
+1. Child talks to Tammy → picks a mission → mission saved as `active`
 2. Child completes mission → taps "Done!" → mission transitions to `completed`
 3. Completed mission with theme emoji appears in the **rewards box** on `/appreciation`
 4. Child taps decoration → taps "Put on tree" → `placeDecoration(missionId)` fires
@@ -51,7 +51,7 @@ placedDecorations = placedMissionIds
 - Tree renders from `useLocalTree` (localStorage, no API)
 - Decoration picker shows unplaced mission-earned decorations
 - Empty rewards box: `"Complete a mission to earn your first decoration!"`
-- Wish list section: hidden; replaced by `"Complete more missions with Shelly!"`
+- Wish list section: hidden; replaced by `"Complete more missions with Tammy!"`
 
 **Logged-in path:** unchanged — existing `useTree` + `useEncouragement` + server APIs
 

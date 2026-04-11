@@ -3,11 +3,11 @@
 
 ## Problem
 
-The Vapi integration gets stuck in an endless "Shelly is speaking" state. The old `VapiVoiceProvider` tried to detect when the assistant stopped speaking by listening for `message.type === 'status-update' && message.status === 'ended'`. That event never fires reliably, so the state never clears.
+The Vapi integration gets stuck in an endless "Tammy is speaking" state. The old `VapiVoiceProvider` tried to detect when the assistant stopped speaking by listening for `message.type === 'status-update' && message.status === 'ended'`. That event never fires reliably, so the state never clears.
 
 ## Goal
 
-A working voice conversation with Vapi. No mood signals, no mission function calls — just a child talking to Shelly and Shelly talking back.
+A working voice conversation with Vapi. No mood signals, no mission function calls — just a child talking to Tammy and Tammy talking back.
 
 ## Scope
 

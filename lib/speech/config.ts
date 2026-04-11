@@ -57,7 +57,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  *   anthropic  (default) — Claude via LangChain; returns text + tool_calls (recommended for voice)
  *   openai     — OpenAI GPT via LangChain; returns text + tool_calls
- *   gemini     — Gemini; with tool use often returns empty content (Shelly may use fallback phrases)
+ *   gemini     — Gemini; with tool use often returns empty content (Tammy may use fallback phrases)
  *
  *   Anthropic models  (SPEECH_ANTHROPIC_MODEL):
  *     claude-haiku-4-5-20251001  ← default | fastest Claude; best price/speed for voice

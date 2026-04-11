@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
     try {
       weatherDescription = await getWeatherDescription(location.latitude, location.longitude);
     } catch {
-      // non-fatal; Shelly works without weather
+      // non-fatal; Tammy works without weather
     }
   }
 
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode(JSON.stringify(obj) + '\n'));
 
       try {
-        console.info('[Shelly] route: stream start');
+        console.info('[Tammy] route: stream start');
         logAgent.logEvent('api_talk', 'stream_start', { blobSize: audioFile.size });
         // Phase 0: STT first so we can send user_text immediately (UI shows "You said: ..." while LLM runs)
         let userText: string;
@@ -163,13 +163,13 @@ export async function POST(req: NextRequest) {
         }
         if (!userText.trim()) {
           logAgent.logEvent('api_talk', 'early_exit_empty_user');
-          console.info('[Shelly] route: empty user text, closing');
+          console.info('[Tammy] route: empty user text, closing');
           return;
         }
         send({ type: 'user_text', userText });
         // Phase 1: guardrails + chat (no STT — we already have userText)
         const textResult = await service.processToText(audioFile, context, { preTranscribedText: userText });
-        console.info('[Shelly] route: processToText done');
+        console.info('[Tammy] route: processToText done');
         logAgent.logEvent('api_talk', 'processToText_done', {
           userTextLen: textResult.userText.length,
           responseLen: textResult.responseText?.length ?? 0,
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
 
         // When LLM returns empty, use a fallback phrase so we always send meta + TTS
         if (!textResult.responseText?.trim()) {
-          console.info('[Shelly] route: empty response, using fallback phrase');
+          console.info('[Tammy] route: empty response, using fallback phrase');
           textResult.responseText = FALLBACK_EMPTY_RESPONSE;
           textResult.mood = 'confused';
         }
@@ -185,40 +185,40 @@ export async function POST(req: NextRequest) {
         // Log this turn (user + LLM) for conversation history visibility (console + debug ingest)
         const userSnippet = (textResult.userText || '').slice(0, 100);
         const responseSnippet = (textResult.responseText || '').slice(0, 100);
-        console.info('[Shelly] turn — user:', userSnippet, '| response:', responseSnippet);
+        console.info('[Tammy] turn — user:', userSnippet, '| response:', responseSnippet);
 
         // Only include missionProgressNote in meta if it was set
         const metaPayload = textResult.missionProgressNote
           ? textResult
           : { ...textResult, missionProgressNote: undefined };
         send({ type: 'meta', ...metaPayload });
-        console.info('[Shelly] route: meta sent');
+        console.info('[Tammy] route: meta sent');
         logAgent.logEvent('api_talk', 'meta_sent');
 
         // Phase 2: TTS — only synthesize when there is actual response text
         if (textResult.responseText.trim()) {
-          console.info('[Shelly] route: TTS start');
+          console.info('[Tammy] route: TTS start');
           let audioBuffer: ArrayBuffer;
           try {
             audioBuffer = await tts.synthesize(textResult.responseText);
           } catch (ttsErr) {
             // Provider "unusual activity" (e.g. ElevenLabs 401): prefer Gemini TTS when available (works from server)
             if (isProviderUnusualActivityError(ttsErr) && process.env.GEMINI_API_KEY) {
-              console.info('[Shelly] route: TTS fallback to Gemini (provider unusual activity)');
+              console.info('[Tammy] route: TTS fallback to Gemini (provider unusual activity)');
               const fallbackTts = new GeminiTTSProvider();
               audioBuffer = await fallbackTts.synthesize(textResult.responseText);
             } else if (speechConfig.tts.provider === 'elevenlabs' && process.env.GEMINI_API_KEY) {
-              console.info('[Shelly] route: TTS fallback to Gemini (ElevenLabs unusual activity)');
+              console.info('[Tammy] route: TTS fallback to Gemini (ElevenLabs unusual activity)');
               const fallbackTts = new GeminiTTSProvider();
               audioBuffer = await fallbackTts.synthesize(textResult.responseText);
             } else if (speechConfig.tts.provider === 'gemini' && process.env.ELEVENLABS_API_KEY) {
-              console.info('[Shelly] route: TTS fallback to ElevenLabs');
+              console.info('[Tammy] route: TTS fallback to ElevenLabs');
               try {
                 const fallbackTts = new ElevenLabsTTSProvider();
                 audioBuffer = await fallbackTts.synthesize(textResult.responseText);
               } catch (elevenErr) {
                 if (isProviderUnusualActivityError(elevenErr) && process.env.GEMINI_API_KEY) {
-                  console.info('[Shelly] route: TTS fallback to Gemini (ElevenLabs returned unusual activity)');
+                  console.info('[Tammy] route: TTS fallback to Gemini (ElevenLabs returned unusual activity)');
                   const geminiTts = new GeminiTTSProvider();
                   audioBuffer = await geminiTts.synthesize(textResult.responseText);
                 } else {
@@ -231,10 +231,10 @@ export async function POST(req: NextRequest) {
           }
           const base64 = Buffer.from(audioBuffer).toString('base64');
           send({ type: 'audio', base64 });
-          console.info('[Shelly] route: audio sent');
+          console.info('[Tammy] route: audio sent');
           logAgent.logEvent('api_talk', 'audio_sent', { byteLength: audioBuffer.byteLength });
         } else {
-          console.info('[Shelly] route: no audio (empty response)');
+          console.info('[Tammy] route: no audio (empty response)');
         }
       } catch (err) {
         logAgent.logEvent(
@@ -247,7 +247,7 @@ export async function POST(req: NextRequest) {
           'error',
         );
         console.info(
-          '[Shelly] route: error',
+          '[Tammy] route: error',
           err instanceof SpeechServiceError ? err.stage : 'unexpected',
         );
         const stageModels: Record<string, string> = {
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
           if (err instanceof Error) error = err.message;
         }
         send({ type: 'error', error });
-        console.info('[Shelly] route: error sent to client');
+        console.info('[Tammy] route: error sent to client');
       } finally {
         controller.close();
       }

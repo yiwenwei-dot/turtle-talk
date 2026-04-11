@@ -19,7 +19,7 @@ function EmptyStateToday() {
         lineHeight: 1.5,
       }}
     >
-      No missions yet — talk to Shelly to get one!
+      No missions yet — talk to Tammy to get one!
     </div>
   );
 }

@@ -1,6 +1,6 @@
 /**
- * Time awareness for Shelly: format current date/time for the child's location.
- * Used when building the system prompt so Shelly can reference time of day naturally.
+ * Time awareness for Tammy: format current date/time for the child's location.
+ * Used when building the system prompt so Tammy can reference time of day naturally.
  */
 
 /**

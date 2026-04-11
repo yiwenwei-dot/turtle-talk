@@ -1,14 +1,14 @@
 import type { ConversationContext } from '../types';
-import { BASE_SYSTEM_PROMPT } from './shelly-base';
+import { BASE_SYSTEM_PROMPT } from './tammy-base';
 import { getTimeDescription } from '../awareness/time';
 import { getLocationDescription } from '../awareness/location';
 
 /**
- * Minimal context needed to build Shelly's system prompt.
+ * Minimal context needed to build Tammy's system prompt.
  * Both ConversationContext (server chat) and VoiceSessionOptions (voice providers)
  * are structurally compatible with this shape.
  */
-export interface ShellyPromptContext {
+export interface TammyPromptContext {
   childName?: string | null;
   topics?: string[];
   difficultyProfile?: 'beginner' | 'intermediate' | 'confident';
@@ -35,10 +35,10 @@ function sanitizeForPrompt(s: string, maxLen = 200): string {
 }
 
 /**
- * Build the full system prompt for Shelly given high-level context.
+ * Build the full system prompt for Tammy given high-level context.
  * Used by both the /api/talk chat provider and realtime voice providers.
  */
-export function buildSystemPrompt(ctx: ShellyPromptContext | ConversationContext): string {
+export function buildSystemPrompt(ctx: TammyPromptContext | ConversationContext): string {
   const {
     childName,
     topics,
@@ -48,7 +48,7 @@ export function buildSystemPrompt(ctx: ShellyPromptContext | ConversationContext
     clientLocalTime,
     location,
     weatherDescription,
-  } = ctx as ShellyPromptContext & ConversationContext;
+  } = ctx as TammyPromptContext & ConversationContext;
 
   const safeName = childName?.trim() ? sanitizeForPrompt(childName.trim(), 50) : null;
 
@@ -86,7 +86,7 @@ export function buildSystemPrompt(ctx: ShellyPromptContext | ConversationContext
     prompt += `\n\nAWARENESS (use naturally; do not lecture): ${awarenessParts.join(' ')}`;
   }
 
-  const profile: ShellyPromptContext['difficultyProfile'] =
+  const profile: TammyPromptContext['difficultyProfile'] =
     difficultyProfile ?? 'beginner';
 
   const difficultyInstruction =

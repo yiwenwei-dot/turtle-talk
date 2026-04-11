@@ -499,7 +499,7 @@ Find the `<section aria-label="My wish list"` block. Wrap its contents so guests
         margin: 0,
       }}
     >
-      Complete more missions with Shelly to earn more decorations!
+      Complete more missions with Tammy to earn more decorations!
     </p>
   ) : (
     <>
@@ -577,7 +577,7 @@ git commit -m "feat(appreciation): localStorage guest path — mission-earned de
 8. The theme emoji for the completed mission should appear in the picker
 9. Tap the emoji → tap "Put on tree" → decoration appears on the tree SVG
 10. Progress bar should advance to 1/10
-11. Talk to Shelly briefly, she learns your name → revisit `/appreciation` → header shows `{name}'s Tree`
+11. Talk to Tammy briefly, she learns your name → revisit `/appreciation` → header shows `{name}'s Tree`
 12. Reload page → decorations persist (localStorage)
 13. Verify logged-in path unchanged: log in as a child → `/appreciation` shows server-backed tree as before
 

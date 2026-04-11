@@ -15,7 +15,7 @@ describe('TalkEndCallButton', () => {
         onStart={onStart}
       />,
     );
-    expect(screen.getByRole('button', { name: /Tap to talk to Shelly/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tap to talk to Tammy/i })).toBeInTheDocument();
   });
 
   it('calls onStart when Start call is clicked', async () => {
@@ -29,7 +29,7 @@ describe('TalkEndCallButton', () => {
         onStart={onStart}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /Tap to talk to Shelly/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Tap to talk to Tammy/i }));
     expect(onStart).toHaveBeenCalledTimes(1);
   });
 

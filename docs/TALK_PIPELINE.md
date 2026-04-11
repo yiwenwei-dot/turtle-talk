@@ -1,6 +1,6 @@
-# Talk-to-Shelly pipeline
+# Talk-to-Tammy pipeline
 
-End-to-end flow from "Talk to Shelly" until the conversation is done: interruption, mute, transcription, captioning, and tools.
+End-to-end flow from "Talk to Tammy" until the conversation is done: interruption, mute, transcription, captioning, and tools.
 
 ## Provider choice
 
@@ -71,7 +71,7 @@ End-to-end flow from "Talk to Shelly" until the conversation is done: interrupti
 ### 10. Captioning / transcription (native)
 
 - **User**: text comes from server in `meta.userText` (from STT); appended to `messages` as `{ role: 'user', content: userText }`.
-- **Shelly**: `meta.responseText` appended as assistant message. Rendered by `ConversationSubtitles` (last user + last assistant; processing shows typing dots).
+- **Tammy**: `meta.responseText` appended as assistant message. Rendered by `ConversationSubtitles` (last user + last assistant; processing shows typing dots).
 
 ### 11. Tools (native path)
 
@@ -81,7 +81,7 @@ End-to-end flow from "Talk to Shelly" until the conversation is done: interrupti
 
 ### 12. Interruption (native)
 
-- No barge-in: while **processing** or **speaking**, VAD loop does nothing (early return). User must wait for Shelly to finish or end the call.
+- No barge-in: while **processing** or **speaking**, VAD loop does nothing (early return). User must wait for Tammy to finish or end the call.
 
 ---
 
@@ -120,7 +120,7 @@ End-to-end flow from "Talk to Shelly" until the conversation is done: interrupti
 ## LiveKit path (agent on server)
 
 - `createVoiceProvider()` → `LiveKitVoiceProvider` (when configured); `provider.start()` POSTs to `/api/livekit/token` to mint a room token and LiveKit URL.
-- Browser joins the room; a `shelly` LiveKit agent (see `livekit-agent/`) runs the OpenAI Realtime pipeline and sends:
+- Browser joins the room; a `tammy` LiveKit agent (see `livekit-agent/`) runs the OpenAI Realtime pipeline and sends:
   - `{ type: 'transcript', role, text }` messages for captions.
   - `{ type: 'missionChoices', choices: MissionSuggestion[] }` once per call end, where each choice has `title`, `description`, optional `theme`, and `difficulty: 'easy'|'medium'|'stretch'`.
   - `{ type: 'endConversation' }` when the call should end.
@@ -130,7 +130,7 @@ End-to-end flow from "Talk to Shelly" until the conversation is done: interrupti
 
 ## Error surfacing (browser)
 
-- **useVoiceSession**: subscribes to `provider.on('error', setError)`. UI shows `error` with "Oops! Shelly had a little hiccup", the **actual error message** below it, and "Try again".
+- **useVoiceSession**: subscribes to `provider.on('error', setError)`. UI shows `error` with "Oops! Tammy had a little hiccup", the **actual error message** below it, and "Try again".
 - **Native**: microphone failure, `!res.ok` (with JSON `error` or `HTTP status`), no body, stream `type: 'error'`, playAudio decode failure → all lead to `emit('error', msg)`.
 - **VAPI**: start failure (env, network), and `vapi.on('error')` → `emit('error', msg)`.
 - **/api/talk**: all failures send `{ type: 'error', error }` in the stream before closing; client parses and emits.
@@ -139,4 +139,4 @@ End-to-end flow from "Talk to Shelly" until the conversation is done: interrupti
 
 ## Console logs (stages)
 
-Non-revealing `[Shelly]` logs mark each stage so you can see where the pipeline is in the browser and server console.
+Non-revealing `[Tammy]` logs mark each stage so you can see where the pipeline is in the browser and server console.

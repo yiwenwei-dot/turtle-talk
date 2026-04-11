@@ -189,7 +189,7 @@ Parse with `.safeParse()` and return `400` on failure with a generic `"Invalid r
 
 ### Prompt Sanitization
 
-**`lib/speech/prompts/shelly-build.ts`** — `buildSystemPrompt` is the canonical interpolation point for all voice paths (HTTP `/api/talk`, Vapi `/api/vapi/llm`, OpenAI Realtime, Gemini Live). Sanitization belongs here, not scattered across each API route, so all paths are covered uniformly.
+**`lib/speech/prompts/tammy-build.ts`** — `buildSystemPrompt` is the canonical interpolation point for all voice paths (HTTP `/api/talk`, Vapi `/api/vapi/llm`, OpenAI Realtime, Gemini Live). Sanitization belongs here, not scattered across each API route, so all paths are covered uniformly.
 
 Add `sanitizeForPrompt` as a module-level helper and call it at each interpolation site within `buildSystemPrompt`:
 

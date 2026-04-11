@@ -1,5 +1,5 @@
 /**
- * Shelly conversation and safety pipeline: types and agent prompts.
+ * Tammy conversation and safety pipeline: types and agent prompts.
  * Layers: conversation understanding → processing → refinement → gatekeeping.
  */
 

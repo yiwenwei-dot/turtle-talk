@@ -1,13 +1,13 @@
 'use client';
 
-export interface ShellyLogoPlaceholderProps {
+export interface TammyLogoPlaceholderProps {
   /** When true, applies a gentle bobbing animation (e.g. during connecting). */
   animate?: boolean;
   /** When true, renders a smaller icon (e.g. after conversation starts). */
   compact?: boolean;
 }
 
-export default function ShellyLogoPlaceholder({ animate = false, compact = false }: ShellyLogoPlaceholderProps) {
+export default function TammyLogoPlaceholder({ animate = false, compact = false }: TammyLogoPlaceholderProps) {
   const size = compact ? 56 : 100;
   const fontSize = compact ? 32 : 48;
   const minHeight = compact ? 80 : 120;
@@ -26,7 +26,7 @@ export default function ShellyLogoPlaceholder({ animate = false, compact = false
       aria-hidden
     >
       <div
-        className={animate ? 'v2-shelly-connecting' : undefined}
+        className={animate ? 'v2-tammy-connecting' : undefined}
         style={{
           width: size,
           height: size,

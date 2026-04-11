@@ -17,7 +17,7 @@ import BraveMissionsView from '../components/BraveMissionsView';
 import PostCallModal from '../components/PostCallModal';
 import MenuButton from '../components/MenuButton';
 import TalkStatusIndicator from '../components/TalkStatusIndicator';
-import ShellyLogoPlaceholder from '../components/ShellyLogoPlaceholder';
+import TammyLogoPlaceholder from '../components/TammyLogoPlaceholder';
 import TalkConversationCard from '../components/TalkConversationCard';
 import TalkEndCallButton from '../components/TalkEndCallButton';
 import TalkMuteToggle from '../components/TalkMuteToggle';
@@ -220,7 +220,7 @@ function V2ConversationView() {
           margin: '0 auto',
         }}
       >
-        <ShellyLogoPlaceholder
+        <TammyLogoPlaceholder
           animate={state === 'connecting'}
           compact={state !== 'idle'}
         />

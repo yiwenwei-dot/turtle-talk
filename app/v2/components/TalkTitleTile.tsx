@@ -22,7 +22,7 @@ export default function TalkTitleTile() {
           textShadow: '0 1px 1px rgba(255,255,255,0.5)',
         }}
       >
-        Talking with shelly
+        Talking with tammy
       </span>
     </div>
   );

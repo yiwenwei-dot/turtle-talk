@@ -207,7 +207,7 @@ async start(options: VoiceSessionOptions): Promise<void> {
     assistantOverrides: {
       model: {
         provider: 'custom-llm',
-        model: 'shelly',
+        model: 'tammy',
         url: `${llmBase}/api/vapi/llm`,
         metadataSendMode: 'variable',
       },
@@ -287,9 +287,9 @@ npm run dev
 **Step 4: Navigate to `/talk` and verify**
 
 - Turtle appears, state shows "Getting ready..."
-- After a second: state shows "Shelly is listening 👂" (Vapi call connected)
-- Speak a sentence — state transitions to "I hear you! 🎤" then "Shelly is thinking..."
-- Shelly responds — state shows "Shelly is speaking!"
+- After a second: state shows "Tammy is listening 👂" (Vapi call connected)
+- Speak a sentence — state transitions to "I hear you! 🎤" then "Tammy is thinking..."
+- Tammy responds — state shows "Tammy is speaking!"
 - After ~5 exchanges: mission choices appear
 
 **Step 5: Check browser console for errors**

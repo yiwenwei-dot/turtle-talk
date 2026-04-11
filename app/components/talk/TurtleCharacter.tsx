@@ -90,7 +90,7 @@ export default function TurtleCharacter({ mood, size = 200 }: Props) {
       viewBox="0 0 200 200"
       width={size}
       height={size}
-      aria-label={`Shelly the turtle, feeling ${mood}`}
+      aria-label={`Tammy the turtle, feeling ${mood}`}
       className={cfg.cssClass}
       style={{ display: 'block', overflow: 'visible' }}
     >

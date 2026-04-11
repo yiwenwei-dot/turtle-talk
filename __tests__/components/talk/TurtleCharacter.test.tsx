@@ -35,7 +35,7 @@ describe('TurtleCharacter', () => {
 
   it('has accessible aria-label', () => {
     render(<TurtleCharacter mood="happy" />);
-    expect(screen.getByLabelText('Shelly the turtle, feeling happy')).toBeTruthy();
+    expect(screen.getByLabelText('Tammy the turtle, feeling happy')).toBeTruthy();
   });
 
   it('renders ellipse elements for the shell', () => {

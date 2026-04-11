@@ -52,7 +52,7 @@ describe('GeminiTTSProvider', () => {
     it('wraps audio/L16 PCM in a WAV header', async () => {
       makeMockModel('audio/L16;codec=pcm;rate=24000', FAKE_PCM_B64);
       const provider = new GeminiTTSProvider('test-key');
-      const result = await provider.synthesize('Hello Shelly');
+      const result = await provider.synthesize('Hello Tammy');
       const view = new DataView(result);
       // RIFF marker
       expect(String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3))).toBe('RIFF');

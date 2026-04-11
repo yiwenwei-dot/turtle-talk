@@ -1,6 +1,6 @@
 /**
- * Location awareness for Shelly: short description of where the child is.
- * Used in the system prompt so Shelly can reference place when relevant (e.g. "sunny where you are").
+ * Location awareness for Tammy: short description of where the child is.
+ * Used in the system prompt so Tammy can reference place when relevant (e.g. "sunny where you are").
  */
 
 import type { AwarenessLocation } from '../types';

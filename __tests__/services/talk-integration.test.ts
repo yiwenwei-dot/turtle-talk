@@ -1,5 +1,5 @@
 /**
- * Integration tests for the full Shelly talk pipeline:
+ * Integration tests for the full Tammy talk pipeline:
  *   STT → guardrails → LLM (with tools) → guardrails → TTS
  *
  * Uses:

@@ -927,15 +927,15 @@ export default function V2GardenPage() {
         </>
       )}
 
-      {/* Brave Call with Shelly modal */}
+      {/* Brave Call with Tammy modal */}
       {whichModal === 'talk' && (
         <>
           <div role="presentation" style={modalBackdropStyle} onClick={() => setWhichModal(null)} />
           <div role="dialog" aria-modal="true" style={modalDialogStyle} onClick={(e) => e.stopPropagation()}>
-            <ModalHeader title="Start a Brave Call with Shelly" onClose={() => setWhichModal(null)} />
+            <ModalHeader title="Start a Brave Call with Tammy" onClose={() => setWhichModal(null)} />
             <div style={{ padding: '20px', textAlign: 'center' }}>
               <p style={{ margin: '0 0 20px', color: 'var(--v2-text-secondary)', fontSize: '1rem' }}>
-                Start a Brave Call with Shelly to talk about your day. Then complete brave missions to earn decorations!
+                Start a Brave Call with Tammy to talk about your day. Then complete brave missions to earn decorations!
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button
@@ -1257,7 +1257,7 @@ export default function V2GardenPage() {
           <>
             <div role="presentation" style={modalBackdropStyle} onClick={() => setWhichModal(null)} />
             <div role="dialog" aria-modal="true" style={modalDialogStyle} onClick={(e) => e.stopPropagation()}>
-              <ModalHeader title="Conversation with Shelly" onClose={() => setWhichModal(null)} />
+              <ModalHeader title="Conversation with Tammy" onClose={() => setWhichModal(null)} />
               <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
                 {convoLoading ? (
                   <p style={{ color: 'var(--v2-text-muted)', fontSize: '0.95rem', textAlign: 'center' }}>Loading…</p>
@@ -1267,7 +1267,7 @@ export default function V2GardenPage() {
                     background: 'var(--v2-glass)', border: '1px solid var(--v2-glass-border)',
                   }}>
                     <p style={{ color: 'var(--v2-text-secondary)', fontSize: '0.95rem', textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
-                      No conversations yet. Talk with Shelly to see your conversation here.
+                      No conversations yet. Talk with Tammy to see your conversation here.
                     </p>
                   </div>
                 ) : (
@@ -1308,7 +1308,7 @@ export default function V2GardenPage() {
                     color: '#fff', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer',
                   }}
                 >
-                  Talk with Shelly
+                  Talk with Tammy
                 </button>
               </div>
             </div>

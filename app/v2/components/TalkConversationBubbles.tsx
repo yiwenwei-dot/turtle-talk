@@ -90,7 +90,7 @@ export default function TalkConversationBubbles({
                 textAlign: 'center',
               }}
             >
-              Once you start chatting, your conversation with Shelly will appear here.
+              Once you start chatting, your conversation with Tammy will appear here.
             </p>
           </div>
         ) : (
@@ -105,7 +105,7 @@ export default function TalkConversationBubbles({
           >
             {(isConnecting || isListeningEmpty) && (
               <span
-                className={isConnecting ? 'v2-shelly-connecting' : undefined}
+                className={isConnecting ? 'v2-tammy-connecting' : undefined}
                 style={{ fontSize: 36, lineHeight: 1 }}
                 aria-hidden
               >
@@ -132,10 +132,10 @@ export default function TalkConversationBubbles({
                 }}
               >
                 {isConnecting
-                  ? 'Connecting to Shelly'
+                  ? 'Connecting to Tammy'
                   : isListeningEmpty
                     ? 'Say hi or ask a question.'
-                    : 'Tap the button below to talk with Shelly.'}
+                    : 'Tap the button below to talk with Tammy.'}
               </p>
               {(isListeningEmpty || (!isConnecting && !isListeningEmpty)) && (
                 <p
@@ -150,8 +150,8 @@ export default function TalkConversationBubbles({
                   }}
                 >
                   {isListeningEmpty
-                    ? 'Just talk—Shelly is listening.'
-                    : 'Say hi or ask Shelly a question.'}
+                    ? 'Just talk—Tammy is listening.'
+                    : 'Say hi or ask Tammy a question.'}
                 </p>
               )}
             </div>

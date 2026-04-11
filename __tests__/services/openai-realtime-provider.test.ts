@@ -244,9 +244,9 @@ test('transcription event → emits userTranscript', async () => {
   p.on('userTranscript', (t) => transcripts.push(t));
   dc.simulateMessage({
     type: 'conversation.item.input_audio_transcription.completed',
-    transcript: 'Hello Shelly',
+    transcript: 'Hello Tammy',
   });
-  expect(transcripts).toContain('Hello Shelly');
+  expect(transcripts).toContain('Hello Tammy');
 });
 
 test('error event → emits error with message', async () => {

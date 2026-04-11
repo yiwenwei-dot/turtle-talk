@@ -144,7 +144,7 @@ export class LiveKitVoiceProvider extends BaseVoiceProvider {
       this._agentJoinTimeoutId = setTimeout(() => {
         this._agentJoinTimeoutId = null;
         if (this._generation === gen && this.room && !this.audioEl) {
-          this.emit('error', "Shelly couldn't join the room. Is the agent running on your server?");
+          this.emit('error', "Tammy couldn't join the room. Is the agent running on your server?");
         }
       }, 15000);
     } catch (err) {

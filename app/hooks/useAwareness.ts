@@ -10,7 +10,7 @@ export interface AwarenessState {
 }
 
 /**
- * Provides time and optional location for AI awareness (Shelly).
+ * Provides time and optional location for AI awareness (Tammy).
  * - timezone: from browser (e.g. "America/New_York")
  * - clientLocalTime: ISO string at call time
  * - location: optional; set by parent/settings or leave null (no automatic geolocation to avoid prompts)

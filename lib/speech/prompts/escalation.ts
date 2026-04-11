@@ -1,10 +1,10 @@
 /**
  * Escalation response templates (Tier 0–3) and parent alert messaging.
  * Used by the gatekeeping layer and escalation-check logic to keep
- * Shelly's responses safe and consistent when distress or safety signals are present.
+ * Tammy's responses safe and consistent when distress or safety signals are present.
  */
 
-import type { EscalationTier } from '../../shelly-agents/types';
+import type { EscalationTier } from '../../tammy-agents/types';
 
 // ---------------------------------------------------------------------------
 // Tier 0 – Normal (no template override; use mode-appropriate response)
@@ -100,11 +100,11 @@ export interface ParentAlertPayload {
 
 const PARENT_ALERT_REASONS: Record<ParentAlertPayload['reasonCode'], string> = {
   severe_safety_keywords:
-    'Shelly detected language that may need a trusted adult\'s support. We encourage you to check in with your child when you can.',
+    'Tammy detected language that may need a trusted adult\'s support. We encourage you to check in with your child when you can.',
   pattern_over_days:
-    'Your child has had some tough conversations with Shelly lately. You might want to check in and see how they\'re doing.',
+    'Your child has had some tough conversations with Tammy lately. You might want to check in and see how they\'re doing.',
   other:
-    'Shelly noticed something that might be worth a gentle check-in with your child.',
+    'Tammy noticed something that might be worth a gentle check-in with your child.',
 };
 
 export function buildParentAlertPayload(
@@ -114,7 +114,7 @@ export function buildParentAlertPayload(
 ): ParentAlertPayload {
   const suggestedParentMessage =
     escalationTier === 3
-      ? 'Shelly had a conversation with your child that touched on something serious. We recommend talking with your child and, if needed, reaching out to a professional for support.'
+      ? 'Tammy had a conversation with your child that touched on something serious. We recommend talking with your child and, if needed, reaching out to a professional for support.'
       : PARENT_ALERT_REASONS[reasonCode];
 
   return {

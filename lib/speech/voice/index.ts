@@ -36,7 +36,7 @@ const _getDefaultVoiceProvider = createLazySingleton((): import('./types').Voice
     'NEXT_PUBLIC_VOICE_PROVIDER',
     process.env.NEXT_PUBLIC_VOICE_PROVIDER,
     VOICE_PROVIDERS,
-    'livekit',
+    'native',
   );
   return buildVoiceProvider(name);
 });
@@ -52,7 +52,7 @@ export function createVoiceProvider(name?: string): import('./types').VoiceConve
       'NEXT_PUBLIC_VOICE_PROVIDER',
       name,
       VOICE_PROVIDERS,
-      'livekit',
+      'native',
     );
     return buildVoiceProvider(validated);
   }
@@ -69,7 +69,7 @@ export function createFreshVoiceProvider(): import('./types').VoiceConversationP
     'NEXT_PUBLIC_VOICE_PROVIDER',
     process.env.NEXT_PUBLIC_VOICE_PROVIDER,
     VOICE_PROVIDERS,
-    'livekit',
+    'native',
   );
   return buildVoiceProvider(name);
 }

@@ -3,7 +3,7 @@ import { SpeechServiceError, GuardrailBlockedError } from '@/lib/speech/errors';
 import type { STTProvider, TTSProvider, ChatProvider, ConversationContext, MissionSuggestion } from '@/lib/speech/types';
 import type { GuardrailAgent, GuardrailResult } from '@/lib/speech/guardrails/types';
 
-function makeSTT(text = 'Hello Shelly'): jest.Mocked<STTProvider> {
+function makeSTT(text = 'Hello Tammy'): jest.Mocked<STTProvider> {
   return { transcribe: jest.fn().mockResolvedValue(text) };
 }
 
@@ -49,9 +49,9 @@ describe('SpeechService', () => {
     const result = await service.process(new Blob(['audio']), ctx);
 
     expect(stt.transcribe).toHaveBeenCalledTimes(1);
-    expect(chat.chat).toHaveBeenCalledWith('Hello Shelly', ctx);
+    expect(chat.chat).toHaveBeenCalledWith('Hello Tammy', ctx);
     expect(tts.synthesize).toHaveBeenCalledWith('Hi there!');
-    expect(result.userText).toBe('Hello Shelly');
+    expect(result.userText).toBe('Hello Tammy');
     expect(result.responseText).toBe('Hi there!');
     expect(result.mood).toBe('happy');
     expect(result.responseAudio).toBeInstanceOf(ArrayBuffer);
@@ -66,7 +66,7 @@ describe('SpeechService', () => {
     const service = new SpeechService({ stt, tts, chat, guardrails: [guardrail] });
     await service.process(new Blob(['audio']), ctx);
 
-    expect(guardrail.checkInput).toHaveBeenCalledWith('Hello Shelly');
+    expect(guardrail.checkInput).toHaveBeenCalledWith('Hello Tammy');
     expect(guardrail.checkOutput).toHaveBeenCalledWith('Hi there!');
   });
 

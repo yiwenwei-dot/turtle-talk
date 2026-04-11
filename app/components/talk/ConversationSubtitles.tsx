@@ -25,7 +25,7 @@ export default function ConversationSubtitles({ messages, state, pendingUserTran
   const isEmpty = messages.length === 0 && !isProcessing && !pendingUserTranscript?.trim();
   const showPending = isProcessing && (pendingUserTranscript?.trim() ?? '').length > 0;
 
-  const [phase, setPhase] = useState<'idle' | 'user' | 'shelly'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'user' | 'tammy'>('idle');
   const [wordIndex, setWordIndex] = useState(0);
   const [currentWords, setCurrentWords] = useState<string[]>([]);
   const turnIdRef = useRef<string>('');
@@ -72,7 +72,7 @@ export default function ConversationSubtitles({ messages, state, pendingUserTran
           setCurrentWords(userWords);
           setWordIndex(0);
         } else if (assistantWords.length > 0) {
-          setPhase('shelly');
+          setPhase('tammy');
           setCurrentWords(assistantWords);
           setWordIndex(0);
         } else {
@@ -98,7 +98,7 @@ export default function ConversationSubtitles({ messages, state, pendingUserTran
             const assistantWords = getWords(lastAssistant.content);
             if (assistantWords.length > 0) {
               clearIntervalRef();
-              setPhase('shelly');
+              setPhase('tammy');
               setCurrentWords(assistantWords);
               return 0;
             }
@@ -116,8 +116,8 @@ export default function ConversationSubtitles({ messages, state, pendingUserTran
 
   const chunk = currentWords.slice(wordIndex, wordIndex + WORDS_PER_CHUNK);
   const captionText = chunk.join(' ');
-  const isShelly = phase === 'shelly';
-  const showCaption = (phase === 'user' || phase === 'shelly') && captionText.length > 0;
+  const isTammy = phase === 'tammy';
+  const showCaption = (phase === 'user' || phase === 'tammy') && captionText.length > 0;
 
   return (
     <div
@@ -143,7 +143,7 @@ export default function ConversationSubtitles({ messages, state, pendingUserTran
             fontStyle: 'italic',
           }}
         >
-          Say something to Shelly! 🐢
+          Say something to Tammy! 🐢
         </p>
       ) : (
         <div style={{ textAlign: 'center', width: '100%' }}>
@@ -169,13 +169,13 @@ export default function ConversationSubtitles({ messages, state, pendingUserTran
               style={{
                 fontSize: 'clamp(1.2rem, 4.5vw, 1.5rem)',
                 fontWeight: 700,
-                color: isShelly ? '#4ade80' : 'white',
+                color: isTammy ? '#4ade80' : 'white',
                 lineHeight: 1.45,
                 margin: 0,
                 textShadow: '0 2px 12px rgba(0,0,0,0.45)',
                 animation: 'subtitleFade 0.3s ease-out both',
               }}
-              aria-label={isShelly ? 'Shelly' : 'You'}
+              aria-label={isTammy ? 'Tammy' : 'You'}
             >
               {captionText}
             </p>

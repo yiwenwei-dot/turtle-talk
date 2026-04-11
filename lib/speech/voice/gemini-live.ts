@@ -20,7 +20,7 @@ type GeminiLiveMessageEvent = {
   };
 };
 
-function buildShellySystemInstruction(options: VoiceSessionOptions): string {
+function buildTammySystemInstruction(options: VoiceSessionOptions): string {
   return buildSystemPrompt({
     ...options,
     location: options.location ?? undefined,
@@ -73,7 +73,7 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
         httpOptions: { apiVersion: 'v1alpha' },
       });
 
-      const systemInstruction = buildShellySystemInstruction(options);
+      const systemInstruction = buildTammySystemInstruction(options);
 
       const session = await ai.live.connect({
         model: LIVE_MODEL,
@@ -84,7 +84,7 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
         callbacks: {
           onopen: () => {
             if (this._generation !== gen) return;
-            console.info('[Shelly] gemini-live: connected');
+            console.info('[Tammy] gemini-live: connected');
           },
           onmessage: (e: GeminiLiveMessageEvent) => {
             if (this._generation !== gen) return;
@@ -124,7 +124,7 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
           },
           onclose: () => {
             if (this._generation !== gen) return;
-            console.info('[Shelly] gemini-live: closed');
+            console.info('[Tammy] gemini-live: closed');
             this.session = null;
             this.mediaStream?.getTracks().forEach((t) => t.stop());
             this.mediaStream = null;
@@ -148,7 +148,7 @@ export class GeminiLiveVoiceProvider extends BaseVoiceProvider {
       this.startMicCapture(gen);
     } catch (err) {
       if (this._generation !== gen) return;
-      console.info('[Shelly] gemini-live: start error');
+      console.info('[Tammy] gemini-live: start error');
       this.emit('error', err instanceof Error ? err.message : 'Failed to start Gemini Live');
       this.emit('stateChange', 'idle');
       this.emit('moodChange', 'idle');

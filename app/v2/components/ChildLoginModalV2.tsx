@@ -120,7 +120,7 @@ export default function ChildLoginModalV2({
             textAlign: 'center',
           }}
         >
-          Log in to Shelly
+          Log in to Tammy
         </h2>
         <p
           style={{

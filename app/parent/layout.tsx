@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Parent Dashboard | TurtleTalk',
-    description: "Weekly summary of your child's conversations, missions, and growth with Shelly.",
+    description: "Weekly summary of your child's conversations, missions, and growth with Tammy.",
   },
 };
 

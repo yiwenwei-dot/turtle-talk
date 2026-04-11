@@ -1,9 +1,9 @@
 /**
- * Data contracts for the Shelly conversation and safety pipeline.
+ * Data contracts for the Tammy conversation and safety pipeline.
  * Used by the conversation-understanding, processing, refinement, and gatekeeping layers.
  */
 
-import type { ShellyMode } from '../speech/prompts/shelly-modes';
+import type { TammyMode } from '../speech/prompts/tammy-modes';
 
 // ---------------------------------------------------------------------------
 // Turn context (input to the pipeline each turn)
@@ -13,7 +13,7 @@ export interface TurnContext {
   userText: string;
   timestamp: string; // ISO
   recentHistorySummary: string;
-  priorMode: ShellyMode;
+  priorMode: TammyMode;
   emotionLast?: string;
   escalationLast?: EscalationTier;
   /** Optional: last N turns for pattern detection */
@@ -76,8 +76,8 @@ export interface ProductEngagementSuggestion {
 }
 
 export interface UnderstandingOutput {
-  primaryMode: ShellyMode;
-  modeMix: Partial<Record<ShellyMode, number>>;
+  primaryMode: TammyMode;
+  modeMix: Partial<Record<TammyMode, number>>;
   modeConfidence: number;
   interactionStyle: InteractionStyle;
   taskOrientation: TaskOrientation;

@@ -290,7 +290,7 @@ export default function BottomNav({ talkProps }: BottomNavProps = {}) {
       {/* Centre pill — mic only; short tap = brave call (/talk), long-press = /journal */}
       <Link
         href="/v2/talk"
-        aria-label="Start a Brave Call with Shelly (long-press for journal)"
+        aria-label="Start a Brave Call with Tammy (long-press for journal)"
         className="tt-tap-shake"
         style={{
           textDecoration: 'none',
@@ -348,7 +348,7 @@ export default function BottomNav({ talkProps }: BottomNavProps = {}) {
               transition: 'max-width 0.25s ease, opacity 0.2s ease',
             }}
           >
-            Brave Call with Shelly
+            Brave Call with Tammy
           </span>
         </div>
       </Link>

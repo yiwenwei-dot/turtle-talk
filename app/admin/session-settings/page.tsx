@@ -185,8 +185,8 @@ export default function SessionSettingsPage() {
                       lineHeight: 1.45,
                     }}
                   >
-                    When enabled, children can interrupt Shelly while she is speaking.
-                    When disabled, Shelly finishes her response before listening.
+                    When enabled, children can interrupt Tammy while she is speaking.
+                    When disabled, Tammy finishes her response before listening.
                   </span>
                 </span>
               </label>

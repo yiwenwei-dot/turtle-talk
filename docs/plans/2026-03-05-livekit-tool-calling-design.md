@@ -23,10 +23,10 @@ The LiveKit agent (`livekit-agent/main.ts`) currently has no tool calling. Missi
 All tool logic lives in the agent. The client receives results via the LiveKit data channel and reacts without any extra API calls.
 
 ```
-[Child speaks] → OpenAI Realtime → [Shelly responds]
-                                  → [Shelly calls propose_missions tool]
+[Child speaks] → OpenAI Realtime → [Tammy responds]
+                                  → [Tammy calls propose_missions tool]
                                       → agent sends { type: 'missionChoices', choices } over data channel
-                                  → [Shelly calls end_conversation tool]
+                                  → [Tammy calls end_conversation tool]
                                       → agent sends { type: 'endConversation' } over data channel
                                       → agent disconnects room after farewell audio
 ```
@@ -35,10 +35,10 @@ All tool logic lives in the agent. The client receives results via the LiveKit d
 
 Two tools added to `RealtimeModel`:
 
-- **`propose_missions`** — `choices: MissionSuggestion[]` (array of 3, each with `title`, `description`, `theme: MissionTheme`, `difficulty: 'easy'|'medium'|'stretch'`). Shelly calls this when wrapping up.
+- **`propose_missions`** — `choices: MissionSuggestion[]` (array of 3, each with `title`, `description`, `theme: MissionTheme`, `difficulty: 'easy'|'medium'|'stretch'`). Tammy calls this when wrapping up.
 - **`end_conversation`** — no args. Called after missions are proposed. Agent disconnects room after a short delay so farewell audio can finish.
 
-`ShellyAgent` instructions amended: "At the end of every conversation, call `propose_missions` with 3 age-appropriate challenges based on what the child mentioned, then call `end_conversation`."
+`TammyAgent` instructions amended: "At the end of every conversation, call `propose_missions` with 3 age-appropriate challenges based on what the child mentioned, then call `end_conversation`."
 
 Tool call handler:
 1. Send tool result back to model (required by OpenAI Realtime)

@@ -112,7 +112,7 @@ describe('AppreciationPageInner', () => {
   it('shows guest missions message in wish-list section', () => {
     render(<AppreciationPageInner />);
     expect(
-      screen.getByText('Complete more missions with Shelly to earn more decorations!')
+      screen.getByText('Complete more missions with Tammy to earn more decorations!')
     ).toBeInTheDocument();
   });
 

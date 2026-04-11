@@ -67,7 +67,7 @@ Added `voiceProvider` field driven by `NEXT_PUBLIC_VOICE_PROVIDER` env var.
 ### Changed — Talk page UI redesign
 
 - **Subtitle display** — removed the dark glass box. Text floats directly on the ocean
-  background with text-shadow for readability. Shelly's line is large
+  background with text-shadow for readability. Tammy's line is large
   (`clamp(1.2rem, 4.5vw, 1.5rem)`, bold white); the user's line is smaller and dimmer.
 - **Fewer controls** — only the End Call button is prominent (72 px, red gradient, bottom
   centre). Mute is a small 40 px circle in the top-left corner. Start Over removed from

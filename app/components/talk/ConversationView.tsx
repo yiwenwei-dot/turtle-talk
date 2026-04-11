@@ -21,11 +21,11 @@ const ACTIVE_STATES_SET = new Set(['listening', 'recording', 'processing', 'spea
 
 const STATE_LABELS: Record<string, string> = {
   idle:       'Getting ready...',
-  connecting: 'Connecting to Shelly...',
-  listening:  'Shelly is listening 👂',
+  connecting: 'Connecting to Tammy...',
+  listening:  'Tammy is listening 👂',
   recording:  'I hear you! 🎤',
-  processing: 'Shelly is thinking... 🐢',
-  speaking:   'Shelly is speaking!',
+  processing: 'Tammy is thinking... 🐢',
+  speaking:   'Tammy is speaking!',
   muted:      'Microphone off 🔇',
   ended:      'Goodbye! 🌊',
 };
@@ -72,7 +72,7 @@ export function ConversationView() {
     });
 
   // Do not auto-start: AudioContext must be created/resumed after a user gesture (Chrome autoplay policy).
-  // Start only when the user taps "Start" / "Talk to Shelly" so the gesture unblocks audio.
+  // Start only when the user taps "Start" / "Talk to Tammy" so the gesture unblocks audio.
 
   const callEnded = state === 'ended';
 

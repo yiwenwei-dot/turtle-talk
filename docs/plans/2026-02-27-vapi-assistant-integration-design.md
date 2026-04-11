@@ -24,7 +24,7 @@ await this.vapi.start({
     model: {
       provider: 'custom-llm',
       url: `${llmBaseUrl}/api/vapi/llm`,
-      model: 'shelly',
+      model: 'tammy',
       metadataSendMode: 'variable',
     },
     variableValues: {

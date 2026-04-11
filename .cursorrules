@@ -1,7 +1,7 @@
 # Turtle Talk — Cursor Rules
 
 ## Project Overview
-Children's AI voice-chat app. A child speaks to Shelly, a friendly sea turtle, who listens, responds with voice, and suggests personal growth missions (e.g. being brave, making friends, staying calm).
+Children's AI voice-chat app. A child speaks to Tammy, a friendly sea turtle, who listens, responds with voice, and suggests personal growth missions (e.g. being brave, making friends, staying calm).
 
 ## Tech Stack
 - **Next.js 16** (App Router), **React 19**, **TypeScript 5**
@@ -106,7 +106,7 @@ All providers implement simple interfaces from `lib/speech/types.ts`. Swap via `
 
 ### TTS — `OpenAITTSProvider`
 - Model: `gpt-4o-mini-tts`, voice: `coral`, format: `mp3` (overrides: `SPEECH_TTS_MODEL`, `SPEECH_TTS_VOICE`, `SPEECH_TTS_INSTRUCTIONS`)
-- Passes a `instructions` string to control Shelly's voice personality and pacing
+- Passes a `instructions` string to control Tammy's voice personality and pacing
 - Input: `string`
 - Output: `ArrayBuffer` (decoded by Web Audio API on the client)
 - Interface: `TTSProvider { synthesize(text: string): Promise<ArrayBuffer> }`
@@ -120,7 +120,7 @@ All providers implement simple interfaces from `lib/speech/types.ts`. Swap via `
 - Optional `ctx.childName` appends a personalisation line to the system prompt
 - Factory: `createChatProvider('anthropic' | 'openai')` in `providers/chat.ts`
 
-## Shelly System Prompt (`lib/speech/providers/chat.ts` → `SHELLY_SYSTEM_PROMPT`)
+## Tammy System Prompt (`lib/speech/providers/chat.ts` → `SHELLY_SYSTEM_PROMPT`)
 The full prompt enforces:
 1. **Persona** — kind, curious sea turtle for ages 5–13; 2–3 sentence max; simple words
 2. **Strict JSON output** — every response must be valid JSON: `{ "text": "...", "mood": "..." }`
@@ -130,7 +130,7 @@ The full prompt enforces:
    - `confused` — unclear topic, needs clarification
    - `surprised` — exciting or unexpected
    - `talking` — default
-4. **Mission generation** — optional `"mission"` field added when Shelly identifies a personal challenge:
+4. **Mission generation** — optional `"mission"` field added when Tammy identifies a personal challenge:
    ```json
    { "text": "...", "mood": "happy", "mission": { "title": "...", "description": "...", "theme": "social" } }
    ```
@@ -216,7 +216,7 @@ Fallback response: `"Oh my! Let's talk about something else. What's your favouri
 - See [DEBUG.md](DEBUG.md) for voice debug and audio checklist.
 
 ## Missions Flow
-1. Shelly's chat response includes `missionChoices` (3 missions) when ending the conversation
+1. Tammy's chat response includes `missionChoices` (3 missions) when ending the conversation
 2. API route passes them in stream meta; client emits `missionChoices` from provider
 3. Talk page shows MissionSelectView; user picks one; `useMissions.addMission` stores it
 4. Missions stored in `localStorage` under key `turtle-talk-missions`

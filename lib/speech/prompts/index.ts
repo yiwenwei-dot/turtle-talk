@@ -1,15 +1,15 @@
-export { BASE_SYSTEM_PROMPT } from './shelly-base';
-export { GOODBYE_EXCEPTION_SECTION } from './shelly-ending';
-export { buildSystemPrompt, type ShellyPromptContext } from './shelly-build';
+export { BASE_SYSTEM_PROMPT } from './tammy-base';
+export { GOODBYE_EXCEPTION_SECTION } from './tammy-ending';
+export { buildSystemPrompt, type TammyPromptContext } from './tammy-build';
 export { getFirstMessageInstruction } from './first-message';
 export {
   SHELLY_MODES,
   getModeSystemPromptBlock,
   EXPLICIT_MODE_SIGNALS,
   DEFAULT_MODE,
-  type ShellyMode,
+  type TammyMode,
   type ModeStyleGuide,
-} from './shelly-modes';
+} from './tammy-modes';
 export {
   getEscalationResponse,
   getTier1Response,

@@ -23,7 +23,7 @@ export class LLMGuardrail implements GuardrailAgent {
   async checkOutput(text: string): Promise<GuardrailResult> {
     void text;
     void OUTPUT_SAFETY_PROMPT;
-    // TODO: call LLM with OUTPUT_SAFETY_PROMPT and Shelly's reply.
+    // TODO: call LLM with OUTPUT_SAFETY_PROMPT and Tammy's reply.
     return { safe: true };
   }
 }

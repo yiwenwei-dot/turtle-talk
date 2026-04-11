@@ -9,14 +9,14 @@ import {
   buildParentAlertPayload,
   TIER_2_MAIN_PHRASE,
 } from '@/lib/speech/prompts';
-import type { EscalationTier } from '@/lib/shelly-agents';
+import type { EscalationTier } from '@/lib/tammy-agents';
 
 /**
  * Helper to write a timestamped artifact for each evaluation.
- * Files are written to: logs/shelly-flow/<ISO_TIMESTAMP>-<caseId>.json
+ * Files are written to: logs/tammy-flow/<ISO_TIMESTAMP>-<caseId>.json
  */
 function writeEvaluationArtifact(caseId: string, payload: unknown): string {
-  const baseDir = path.join(process.cwd(), 'logs', 'shelly-flow');
+  const baseDir = path.join(process.cwd(), 'logs', 'tammy-flow');
   if (!fs.existsSync(baseDir)) {
     fs.mkdirSync(baseDir, { recursive: true });
   }
@@ -35,7 +35,7 @@ function writeEvaluationArtifact(caseId: string, payload: unknown): string {
   return fullPath;
 }
 
-describe('Shelly conversation & safety flow (artifact evaluations)', () => {
+describe('Tammy conversation & safety flow (artifact evaluations)', () => {
   test('normal listening flow (Tier 0) writes evaluation artifact', () => {
     const mode = DEFAULT_MODE;
     const modeGuide = SHELLY_MODES[mode];
@@ -133,7 +133,7 @@ describe('Shelly conversation & safety flow (artifact evaluations)', () => {
 
     const artifact = {
       description:
-        'Tier 3: severe keywords, Shelly uses pre-approved template and triggers quiet parent alert.',
+        'Tier 3: severe keywords, Tammy uses pre-approved template and triggers quiet parent alert.',
       input: {
         primaryMode: mode,
         escalationTier,

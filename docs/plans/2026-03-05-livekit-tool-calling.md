@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add `propose_missions` and `end_conversation` tool calling to the LiveKit agent so Shelly proposes missions at the end of every conversation.
+**Goal:** Add `propose_missions` and `end_conversation` tool calling to the LiveKit agent so Tammy proposes missions at the end of every conversation.
 
-**Architecture:** Tools are defined using the `tool()` helper from `@livekit/agents` and passed to `ShellyAgent`. When Shelly calls a tool, its `execute` function publishes a data channel message to the LiveKit room; the React client's existing `DataReceived` handler emits the event to `useVoiceSession`, which already wires `missionChoices` and `end` to the talk page.
+**Architecture:** Tools are defined using the `tool()` helper from `@livekit/agents` and passed to `TammyAgent`. When Tammy calls a tool, its `execute` function publishes a data channel message to the LiveKit room; the React client's existing `DataReceived` handler emits the event to `useVoiceSession`, which already wires `missionChoices` and `end` to the talk page.
 
 **Tech Stack:** `@livekit/agents` `tool()` helper (JSONSchema7 parameters), LiveKit data channel (`room.localParticipant.publishData`), TypeScript
 
@@ -22,7 +22,7 @@ git push origin feat/livekit-tool-calling
 
 ---
 
-### Task 1: Update `ShellyAgent` to accept tools and update instructions
+### Task 1: Update `TammyAgent` to accept tools and update instructions
 
 **Files:**
 - Modify: `livekit-agent/agent.ts`
@@ -40,9 +40,9 @@ The constructor now accepts an optional `tools` array and passes it to `super()`
 ```ts
 import { voice, type ToolContext } from '@livekit/agents';
 
-export class ShellyAgent extends voice.Agent {
+export class TammyAgent extends voice.Agent {
   constructor(options?: { childName?: string; topics?: string[]; tools?: ToolContext }) {
-    let instructions = `You are Shelly, a friendly sea turtle who chats with children aged 4-10.
+    let instructions = `You are Tammy, a friendly sea turtle who chats with children aged 4-10.
 
 CONVERSATION FOCUS — stay on the child:
 - Always focus on the child: their feelings, what they did today, and what they are saying right now.
@@ -84,7 +84,7 @@ Expected: no errors (or only pre-existing ones unrelated to this file).
 
 ```bash
 git add livekit-agent/agent.ts
-git commit -m "feat(agent): accept tools + add mission-ending instructions to ShellyAgent"
+git commit -m "feat(agent): accept tools + add mission-ending instructions to TammyAgent"
 ```
 
 ---
@@ -158,15 +158,15 @@ Insert after `const { childName, topics } = parseDispatchMetadata(ctx);`:
     });
 ```
 
-**Step 4: Pass tools to `ShellyAgent`**
+**Step 4: Pass tools to `TammyAgent`**
 
 Replace:
 ```ts
-      agent: new ShellyAgent({ childName, topics }),
+      agent: new TammyAgent({ childName, topics }),
 ```
 With:
 ```ts
-      agent: new ShellyAgent({ childName, topics, tools: [proposeMissionsTool, endConversationTool] }),
+      agent: new TammyAgent({ childName, topics, tools: [proposeMissionsTool, endConversationTool] }),
 ```
 
 **Step 5: Remove the now-redundant `const room = ctx.room;` line** that already existed after `await ctx.connect()`
@@ -338,8 +338,8 @@ Confirm you see `registered worker` in the logs.
 
 **Step 2: Open `/talk` in the browser**
 
-- Click "Talk to Shelly"
-- Confirm Shelly greets you
+- Click "Talk to Tammy"
+- Confirm Tammy greets you
 - Have a short conversation (3-4 turns)
 - Say "goodbye" or "I have to go"
 - Confirm: mission choices appear in the UI (`MissionSelectView`)
@@ -364,7 +364,7 @@ journalctl -t turtle-talk-agent -n 30 --no-pager
 ```bash
 git push origin feat/livekit-tool-calling
 gh pr create --title "feat: propose_missions + end_conversation tool calling in LiveKit agent" \
-  --body "Adds tool calling to the LiveKit agent. Shelly now proposes 3 missions at end of every conversation.
+  --body "Adds tool calling to the LiveKit agent. Tammy now proposes 3 missions at end of every conversation.
 
 ## Changes
 - \`livekit-agent/agent.ts\`: accept tools, add mission-ending instructions
@@ -372,7 +372,7 @@ gh pr create --title "feat: propose_missions + end_conversation tool calling in 
 - \`lib/speech/voice/livekit.ts\`: handle missionChoices + endConversation data messages
 
 ## Test plan
-- [ ] Manual end-to-end: Shelly greets, converses, proposes missions, ends conversation
+- [ ] Manual end-to-end: Tammy greets, converses, proposes missions, ends conversation
 - [ ] MissionSelectView appears with 3 choices
 - [ ] Selecting a mission saves to DB and navigates to /missions
 - [ ] Agent logs show no errors"

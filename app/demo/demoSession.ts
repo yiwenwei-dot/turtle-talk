@@ -22,10 +22,10 @@ export type DemoStep =
  *
  * Each entry is documented below:
  *
- * - **tattleCard** — Child picks a themed tattle card to set the topic for their conversation with Shelly.
+ * - **tattleCard** — Child picks a themed tattle card to set the topic for their conversation with Tammy.
  * - **childWarmupName** — Child enters their name, age, favourite book, and fun facts via a playful keyboard.
- * - **childCourageConversation** — Live voice conversation between the child and Shelly.
- * - **missionsPick** — Shelly suggests 2-3 brave missions; child picks one, skips, or talks more.
+ * - **childCourageConversation** — Live voice conversation between the child and Tammy.
+ * - **missionsPick** — Tammy suggests 2-3 brave missions; child picks one, skips, or talks more.
  * - **missionDo** — Child marks the chosen mission complete or dismisses it.
  * - **wish** — Child chooses how to make a wish (solo / with grown-up / with friend).
  * - **survey** — Quick check-in: rating + QR code for parent view.

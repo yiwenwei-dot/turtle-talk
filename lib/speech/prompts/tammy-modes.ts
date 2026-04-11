@@ -1,24 +1,24 @@
 /**
- * Shelly conversation modes: style guides and prompt templates.
+ * Tammy conversation modes: style guides and prompt templates.
  * Used by the conversation-understanding layer and generation to keep
  * responses aligned with the child's current interaction style.
  */
 
-export type ShellyMode = 'listening' | 'reflection' | 'venting' | 'ama';
+export type TammyMode = 'listening' | 'reflection' | 'venting' | 'ama';
 
 export interface ModeStyleGuide {
-  id: ShellyMode;
+  id: TammyMode;
   label: string;
   goal: string;
   behaviors: string[];
   donts: string[];
-  /** Example opening/continuation phrases Shelly can use in this mode */
+  /** Example opening/continuation phrases Tammy can use in this mode */
   examplePhrases: string[];
   /** Instruction block to append to system prompt when this mode is primary */
   systemPromptBlock: string;
 }
 
-export const SHELLY_MODES: Record<ShellyMode, ModeStyleGuide> = {
+export const SHELLY_MODES: Record<TammyMode, ModeStyleGuide> = {
   listening: {
     id: 'listening',
     label: 'Listening Mode',
@@ -121,15 +121,15 @@ export const SHELLY_MODES: Record<ShellyMode, ModeStyleGuide> = {
 };
 
 /** Default mode when classifier is uncertain or no explicit choice */
-export const DEFAULT_MODE: ShellyMode = 'listening';
+export const DEFAULT_MODE: TammyMode = 'listening';
 
 /**
  * Returns the system-prompt block for the given primary mode (and optional blend).
- * Used by the generation layer to constrain Shelly's next response.
+ * Used by the generation layer to constrain Tammy's next response.
  */
 export function getModeSystemPromptBlock(
-  primaryMode: ShellyMode,
-  _modeMix?: Partial<Record<ShellyMode, number>>
+  primaryMode: TammyMode,
+  _modeMix?: Partial<Record<TammyMode, number>>
 ): string {
   return SHELLY_MODES[primaryMode].systemPromptBlock;
 }
@@ -138,7 +138,7 @@ export function getModeSystemPromptBlock(
  * Phrases that suggest the child is explicitly choosing a mode.
  * Used by the mode classifier to override automatic detection.
  */
-export const EXPLICIT_MODE_SIGNALS: Partial<Record<ShellyMode, string[]>> = {
+export const EXPLICIT_MODE_SIGNALS: Partial<Record<TammyMode, string[]>> = {
   venting: [
     'i just want to vent',
     'i need to rant',

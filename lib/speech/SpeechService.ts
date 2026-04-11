@@ -81,7 +81,7 @@ export class SpeechService {
       try {
         userText = await this.stt.transcribe(audio);
         if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
-          console.info('[Shelly] service: STT done');
+          console.info('[Tammy] service: STT done');
         }
       } catch (err) {
         throw new SpeechServiceError('Speech-to-text failed', 'stt', err);
@@ -109,7 +109,7 @@ export class SpeechService {
     try {
       chatResponse = await this.chat.chat(userText, context);
       if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
-        console.info('[Shelly] service: chat done');
+        console.info('[Tammy] service: chat done');
       }
     } catch (err) {
       throw new SpeechServiceError('Chat provider failed', 'chat', err);

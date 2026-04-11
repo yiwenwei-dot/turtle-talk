@@ -45,7 +45,7 @@ export function DemoShell(props: { children: React.ReactNode; onResetAll: () => 
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ fontWeight: 800, letterSpacing: 0.3 }}>Shelly</div>
+            <div style={{ fontWeight: 800, letterSpacing: 0.3 }}>Tammy</div>
             <div
               style={{
                 color: 'var(--v2-text-secondary)',

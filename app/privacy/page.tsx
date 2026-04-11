@@ -164,7 +164,7 @@ export default function PrivacyPage() {
 
           <Section title="5. Voice Data">
             <p>
-              Voice conversations with Shelly are streamed to our AI provider in real time to generate responses.
+              Voice conversations with Tammy are streamed to our AI provider in real time to generate responses.
               Audio is processed transiently and is <strong>not stored as audio recordings</strong> after the
               conversation ends. Text transcripts may be temporarily retained to improve session quality and are
               deleted within 30 days.

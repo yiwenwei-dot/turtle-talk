@@ -33,7 +33,7 @@ type Book = {
   ageGroup?: string;
   goodreadsRating?: number;
   whyKidsChoose?: string[];
-  shellySays?: string;
+  tammySays?: string;
   recommendedFor: string[];
   whyRecommended: string;
   fullDescription: string;
@@ -213,7 +213,7 @@ function PreferenceCardsPicker({ onSelect }: { onSelect: (p: ParentPreference) =
           {'\u{1F422}'}
         </div>
         <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800, color: 'var(--pd-text-primary)' }}>
-          How would you like Shelly to help your family?
+          How would you like Tammy to help your family?
         </h2>
         <p style={{ margin: 0, fontSize: 15, color: 'var(--pd-text-tertiary)', lineHeight: 1.5 }}>
           Choose one card. We{"'"}ll show you something helpful based on your child{"'"}s conversation.
@@ -356,7 +356,7 @@ function RecommendationCard({
         }}
       >
         <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--pd-accent)' }}>
-          Why Shelly recommends it:
+          Why Tammy recommends it:
         </div>
         <div style={{ fontSize: 14, color: 'var(--pd-text-secondary)', lineHeight: 1.55 }}>
           {whyText}
@@ -453,7 +453,7 @@ function BookRecommendationCard({ book }: { book: Book }) {
           </div>
         )}
 
-        {book.shellySays && (
+        {book.tammySays && (
           <div
             style={{
               background: 'var(--pd-surface-soft)',
@@ -463,10 +463,10 @@ function BookRecommendationCard({ book }: { book: Book }) {
             }}
           >
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--pd-accent)', marginBottom: 4 }}>
-              Shelly says
+              Tammy says
             </div>
             <div style={{ fontSize: 14, color: 'var(--pd-text-secondary)', lineHeight: 1.5, fontStyle: 'italic' }}>
-              &ldquo;{book.shellySays}&rdquo;
+              &ldquo;{book.tammySays}&rdquo;
             </div>
           </div>
         )}
@@ -500,7 +500,7 @@ function BookDetailView({ session }: { session: DemoSessionSummary }) {
           {'\u{1F4DA}'} Book recommendations{ageLabel ? ` \u00B7 ${ageLabel}` : ''}
         </div>
         <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--pd-text-primary)', lineHeight: 1.4 }}>
-          Which book would Shelly send from her secret library?
+          Which book would Tammy send from her secret library?
         </div>
       </div>
 
@@ -519,7 +519,7 @@ function BookDetailView({ session }: { session: DemoSessionSummary }) {
       {!hasChildData(session) && (
         <div className="pd-card" style={{ padding: 16, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: 13, color: 'var(--pd-text-tertiary)', lineHeight: 1.5 }}>
-            Once your child tells Shelly their age, we{"'"}ll show books matched to their age group.
+            Once your child tells Tammy their age, we{"'"}ll show books matched to their age group.
           </p>
         </div>
       )}
@@ -566,7 +566,7 @@ function MovieDetailView({ session }: { session: DemoSessionSummary }) {
       {!hasChildData(session) && (
         <div className="pd-card" style={{ padding: 16, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: 13, color: 'var(--pd-text-tertiary)', lineHeight: 1.5 }}>
-            Once your child starts chatting with Shelly, we{"'"}ll match a movie to their interests.
+            Once your child starts chatting with Tammy, we{"'"}ll match a movie to their interests.
           </p>
         </div>
       )}
@@ -596,7 +596,7 @@ function GardenDetailView({ session }: { session: DemoSessionSummary }) {
             {hasMissions ? '\u{1F33B}' : '\u{1F331}'}
           </div>
           <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 800, color: 'var(--pd-text-primary)' }}>
-            Shelly{"'"}s Garden
+            Tammy{"'"}s Garden
           </h3>
           {hasMissions ? (
             <p style={{ margin: 0, fontSize: 14, color: 'var(--pd-text-secondary)', lineHeight: 1.5 }}>
@@ -699,7 +699,7 @@ function DinnerDetailView({ session }: { session: DemoSessionSummary }) {
   return (
     <div style={{ display: 'grid', gap: 14 }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--pd-text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        {'\u{1F37D}\uFE0F'} Shelly{"'"}s Dinner Question
+        {'\u{1F37D}\uFE0F'} Tammy{"'"}s Dinner Question
       </div>
 
       <div className="pd-card-elevated" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -764,7 +764,7 @@ function DinnerDetailView({ session }: { session: DemoSessionSummary }) {
 
         {!hasChildData(session) && (
           <div style={{ fontSize: 13, color: 'var(--pd-text-tertiary)', textAlign: 'center', lineHeight: 1.45 }}>
-            Once your child chats with Shelly, we{"'"}ll tailor conversation starters to their topics.
+            Once your child chats with Tammy, we{"'"}ll tailor conversation starters to their topics.
           </div>
         )}
       </div>
@@ -805,7 +805,7 @@ function MissionProgress({ session }: { session: DemoSessionSummary }) {
         </div>
       ) : (
         <div style={{ fontSize: 13, color: 'var(--pd-text-tertiary)', lineHeight: 1.5 }}>
-          Missions will appear once {name.toLowerCase() === 'your child' ? 'your child starts' : `${session.childName} starts`} exploring with Shelly.
+          Missions will appear once {name.toLowerCase() === 'your child' ? 'your child starts' : `${session.childName} starts`} exploring with Tammy.
         </div>
       )}
     </div>
@@ -1243,7 +1243,7 @@ function DemoParentPageInner() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontWeight: 800, fontSize: 17, color: 'var(--pd-text-primary)', letterSpacing: 0.2 }}>
-              Shelly
+              Tammy
             </span>
             <span style={{ fontSize: 13, color: 'var(--pd-text-tertiary)' }}>
               Voice companion for brave kids
@@ -1429,7 +1429,7 @@ function DemoParentPageInner() {
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--pd-text-tertiary)' }}>
                     {hasChildData(session)
-                      ? 'This page updates automatically as your child talks with Shelly.'
+                      ? 'This page updates automatically as your child talks with Tammy.'
                       : 'Data will appear once your child has a conversation!'}
                   </div>
                 </div>
@@ -1483,7 +1483,7 @@ function DemoParentPageInner() {
                   Which one would you want most based on {childLabel.toLowerCase() === 'your child' ? 'your kid' : `${session.childName}`}{"'"}s conversation?
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--pd-text-tertiary)', lineHeight: 1.5 }}>
-                  Tap the cards above to explore all four features Shelly offers families.
+                  Tap the cards above to explore all four features Tammy offers families.
                 </div>
               </div>
             )}

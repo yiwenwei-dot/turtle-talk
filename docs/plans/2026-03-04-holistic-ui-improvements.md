@@ -97,7 +97,7 @@ Replace the single `<TurtleCharacter>` line in `app/talk/page.tsx` (currently li
 
 **Step 3: Visual check**
 Start the dev server and verify:
-- On `/talk`, pressing "Talk to Shelly" and the state transitioning to `listening` shows a cyan pulse ring
+- On `/talk`, pressing "Talk to Tammy" and the state transitioning to `listening` shows a cyan pulse ring
 - Ring disappears when state changes to `recording` or `speaking`
 
 **Step 4: Commit**
@@ -191,11 +191,11 @@ git commit -m "feat: add recording duration timer and audio label to journal pag
 - Modify: `app/page.tsx`
 
 **Context:**
-The home page is minimal. Add a second line below "Talk to Shelly" that adds warmth and context. Keep it static (no async data needed, simplicity is key).
+The home page is minimal. Add a second line below "Talk to Tammy" that adds warmth and context. Keep it static (no async data needed, simplicity is key).
 
 **Step 1: Add sub-headline**
 
-In `app/page.tsx`, after the `<p>` tag that says "Talk to Shelly" (lines 43–52), add:
+In `app/page.tsx`, after the `<p>` tag that says "Talk to Tammy" (lines 43–52), add:
 ```tsx
 <p
   style={{
@@ -212,7 +212,7 @@ In `app/page.tsx`, after the `<p>` tag that says "Talk to Shelly" (lines 43–52
 
 **Step 2: Verify**
 
-Run `npm run dev` and visit `/`. Confirm the sub-line appears below "Talk to Shelly" and doesn't push the messages strip too far down on small screens.
+Run `npm run dev` and visit `/`. Confirm the sub-line appears below "Talk to Tammy" and doesn't push the messages strip too far down on small screens.
 
 **Step 3: Commit**
 

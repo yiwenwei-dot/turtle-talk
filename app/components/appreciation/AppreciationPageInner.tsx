@@ -330,7 +330,7 @@ export default function AppreciationPageInner() {
                   margin: 0,
                 }}
               >
-                Complete more missions with Shelly to earn more decorations!
+                Complete more missions with Tammy to earn more decorations!
               </p>
             ) : (
               <>

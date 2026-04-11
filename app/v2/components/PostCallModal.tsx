@@ -64,7 +64,7 @@ export default function PostCallModal({ onNewCall, onGoHome }: PostCallModalProp
             textAlign: 'center',
           }}
         >
-          Call with Shelly ended
+          Call with Tammy ended
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

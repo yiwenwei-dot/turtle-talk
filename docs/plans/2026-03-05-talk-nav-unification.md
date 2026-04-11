@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Merge the floating Talk to Shelly button and TalkBottomBar into the existing BottomNav so /talk feels like a brave, seamless part of the app rather than a separate screen.
+**Goal:** Merge the floating Talk to Tammy button and TalkBottomBar into the existing BottomNav so /talk feels like a brave, seamless part of the app rather than a separate screen.
 
 **Architecture:** `useVoiceSession` gains `isMeaningful` (elapsed >= 40s). `BottomNav` gains optional `talkProps`; when present it renders call-state controls instead of nav items. `/talk/page.tsx` drops the floating button + TalkBottomBar, mounts `<BottomNav talkProps={…} />`. Pull-turtle and hold-end-call provide error recovery.
 
@@ -139,7 +139,7 @@ Find the inner `<div>` inside the center `<Link href="/talk">` (around line 135�
       transition: 'max-width 0.25s ease, opacity 0.2s ease',
     }}
   >
-    Talk to Shelly
+    Talk to Tammy
   </span>
 </div>
 ```
@@ -148,7 +148,7 @@ Find the inner `<div>` inside the center `<Link href="/talk">` (around line 135�
 ```bash
 cd C:/Users/iankt/projects/turtle-talk && npx next dev --port 3001 2>&1 &
 ```
-Open http://localhost:3001 — center button should be a larger circle with a phone icon. Hover it — should expand to "Talk to Shelly" pill.
+Open http://localhost:3001 — center button should be a larger circle with a phone icon. Hover it — should expand to "Talk to Tammy" pill.
 
 Kill dev server when done.
 
@@ -448,7 +448,7 @@ const talkNavProps: TalkNavProps = {
 };
 ```
 
-**Step 4: Remove the floating "Talk to Shelly" button and status label**
+**Step 4: Remove the floating "Talk to Tammy" button and status label**
 
 Delete the entire block from line 148 to 185 (the `state === 'idle' || state === 'connecting'` ternary and the `<p>` status label). Replace with just the status label for active states (so the child knows what's happening):
 
@@ -627,14 +627,14 @@ Expected: same pass count as before (233+).
 **Step 5: Commit**
 ```bash
 cd C:/Users/iankt/projects/turtle-talk && git add app/components/BottomNav.tsx app/talk/page.tsx app/hooks/useVoiceSession.ts && git add -A -- app/components/talk/ && git commit -m "$(cat <<'EOF'
-feat(talk): unify Talk to Shelly button into BottomNav with call-state morphing
+feat(talk): unify Talk to Tammy button into BottomNav with call-state morphing
 
 - Phone circle → pill replaces Mic in center nav; bigger, bolder
 - /talk page: BottomNav stays visible; call controls replace nav items
 - End Call turns gold after 40s meaningful call
 - Hold End Call 2s to refresh; pull turtle down to retry on error
 - Subtle RotateCcw hint (no button) when connection fails
-- Remove floating Talk to Shelly button and TalkBottomBar component
+- Remove floating Talk to Tammy button and TalkBottomBar component
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
@@ -646,7 +646,7 @@ EOF
 ## Testing Checklist (manual)
 
 - [ ] Home page: center button is a large circle with Phone icon
-- [ ] Hover center button: expands smoothly to "Talk to Shelly" pill
+- [ ] Hover center button: expands smoothly to "Talk to Tammy" pill
 - [ ] Tap center button from home: navigates to /talk
 - [ ] /talk idle: same nav bar, same Phone circle, tapping starts call
 - [ ] /talk connecting: bar shows "Connecting…" pill, no flanks

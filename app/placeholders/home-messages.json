@@ -2,7 +2,7 @@
   "_note": "Placeholder: inspirationalMessage for hero block; messages for modal list. Swap for real API later.",
   "inspirationalMessage": {
     "text": "You're braver than you know!",
-    "from": "Shelly"
+    "from": "Tammy"
   },
   "messages": [
     { "id": "msg-1", "text": "You've got this!", "from": "Dad" },

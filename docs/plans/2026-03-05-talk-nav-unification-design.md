@@ -2,7 +2,7 @@
 
 ## Overview
 
-Unify the "Talk to Shelly" entry point and in-call controls into the existing BottomNav bar.
+Unify the "Talk to Tammy" entry point and in-call controls into the existing BottomNav bar.
 Eliminate the floating button in /talk page content. Maintain the existing visual language.
 
 ---
@@ -10,7 +10,7 @@ Eliminate the floating button in /talk page content. Maintain the existing visua
 ## 1. Center Button Redesign (BottomNav — all pages)
 
 - **Idle / other pages**: Perfect circle (~68px diameter), `Phone` icon, green gradient — same colours as current pill (`#16a34a → #22c55e`), same box-shadow
-- **On hover / focus / when on /talk (idle)**: Animates outward to pill with "Talk to Shelly" label, same expand logic currently in use (max-width 0 → 140, opacity 0 → 1)
+- **On hover / focus / when on /talk (idle)**: Animates outward to pill with "Talk to Tammy" label, same expand logic currently in use (max-width 0 → 140, opacity 0 → 1)
 - Icon changes from `Mic` to `Phone` (lucide)
 - Size bump: circle is larger than current pill so it reads as a clear primary action
 
@@ -18,7 +18,7 @@ Eliminate the floating button in /talk page content. Maintain the existing visua
 
 ## 2. /talk Page Integration
 
-Remove the floating "Talk to Shelly" button from page content. Remove `TalkBottomBar`.
+Remove the floating "Talk to Tammy" button from page content. Remove `TalkBottomBar`.
 Add `BottomNav` to `/talk/page.tsx` with optional `talkProps` that drive call-state rendering.
 
 ### BottomNav talkProps interface
@@ -41,7 +41,7 @@ interface TalkNavProps {
 
 | State | Left slot | Center | Right slot |
 |---|---|---|---|
-| `idle` | Home/Appreciation | Phone circle → "Talk to Shelly" pill | Missions |
+| `idle` | Home/Appreciation | Phone circle → "Talk to Tammy" pill | Missions |
 | `connecting` | (hidden/faded) | Spinner + "Connecting…" pill (disabled) | (hidden) |
 | Active call, < 40s | Mute button | End call pill (red gradient) | (empty) |
 | Active call, >= 40s | Mute button | End call pill (**gold gradient**) | Tiny `RotateCcw` icon (error only) |
@@ -68,7 +68,7 @@ Active states: `listening`, `recording`, `processing`, `speaking`.
 - `RotateCcw` 16px, `opacity: 0.35`, `cursor: default`, no hover state, no onClick.
 - Purely decorative — signals something is off without adding UI noise.
 
-### b) Pull Shelly to retry
+### b) Pull Tammy to retry
 - `onPointerDown` / `onPointerMove` on `TurtleCharacter` wrapper div.
 - If user drags down > 60px, trigger a retry: call `onRetry()` (which calls `startListening()`).
 - Visual: turtle translates down with the drag, snaps back with a spring transition.

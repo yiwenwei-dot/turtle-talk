@@ -1,6 +1,6 @@
 /**
- * Weather awareness for Shelly: fetch current conditions from Open-Meteo (free, no API key).
- * Used when building the system prompt so Shelly can reference weather naturally.
+ * Weather awareness for Tammy: fetch current conditions from Open-Meteo (free, no API key).
+ * Used when building the system prompt so Tammy can reference weather naturally.
  */
 
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';

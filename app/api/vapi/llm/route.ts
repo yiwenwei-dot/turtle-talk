@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  console.info('[Shelly] vapi/llm: request received');
+  console.info('[Tammy] vapi/llm: request received');
 
   // Extract per-call context from the injected system message (set via model.messages in VapiVoiceProvider)
   const systemMsg = (body.messages ?? []).find((m) => m.role === 'system');
@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
   // Last user message is the one we respond to
   const lastUser = [...rawMessages].reverse().find((m) => m.role === 'user');
   if (!lastUser) {
-    console.info('[Shelly] vapi/llm: no user message, greeting');
-    return openAIResponse("Hi there! I'm Shelly. What would you like to talk about? 🐢", [
+    console.info('[Tammy] vapi/llm: no user message, greeting');
+    return openAIResponse("Hi there! I'm Tammy. What would you like to talk about? 🐢", [
       toolCall('reportMood', { mood: 'happy' }),
     ]);
   }
@@ -84,20 +84,20 @@ export async function POST(req: NextRequest) {
   };
 
   // --- Guardrail + LLM ---
-  console.info('[Shelly] vapi/llm: guardrail input');
+  console.info('[Tammy] vapi/llm: guardrail input');
   const guardrail = new ChildSafeGuardrail();
   const inputCheck = await guardrail.checkInput(lastUser.content);
 
   if (!inputCheck.safe) {
-    console.info('[Shelly] vapi/llm: guardrail blocked input');
+    console.info('[Tammy] vapi/llm: guardrail blocked input');
     return openAIResponse(FALLBACK_TEXT, [toolCall('reportMood', { mood: 'confused' })]);
   }
 
   try {
-    console.info('[Shelly] vapi/llm: chat start');
+    console.info('[Tammy] vapi/llm: chat start');
     const chat = createChatProvider(speechConfig.chat.provider);
     const response = await chat.chat(lastUser.content, context);
-    console.info('[Shelly] vapi/llm: chat done');
+    console.info('[Tammy] vapi/llm: chat done');
 
     const outputCheck = await guardrail.checkOutput(response.text);
     const text = outputCheck.sanitized ?? response.text;
@@ -116,10 +116,10 @@ export async function POST(req: NextRequest) {
       tools.push(toolCall('reportEndConversation', {}));
     }
 
-    console.info('[Shelly] vapi/llm: returning tools', tools.map(t => t.function.name));
+    console.info('[Tammy] vapi/llm: returning tools', tools.map(t => t.function.name));
     return openAIResponse(text, tools);
   } catch (err) {
-    console.info('[Shelly] vapi/llm: LLM error (returning fallback)');
+    console.info('[Tammy] vapi/llm: LLM error (returning fallback)');
     return openAIResponse(
       "Oops! My brain got a little confused. Can you say that again?",
       [toolCall('reportMood', { mood: 'confused' })],
@@ -144,7 +144,7 @@ function openAIResponse(content: string, tool_calls: ToolCall[]) {
     id: `chatcmpl-vapi-${Date.now()}`,
     object: 'chat.completion',
     created: Math.floor(Date.now() / 1000),
-    model: 'shelly',
+    model: 'tammy',
     choices: [
       {
         index: 0,

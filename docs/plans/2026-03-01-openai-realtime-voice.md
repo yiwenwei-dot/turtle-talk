@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add `openai-realtime` as a new voice provider that uses OpenAI's WebRTC Realtime API for real-time, bidirectional audio with Shelly the turtle.
+**Goal:** Add `openai-realtime` as a new voice provider that uses OpenAI's WebRTC Realtime API for real-time, bidirectional audio with Tammy the turtle.
 
-**Architecture:** New `OpenAIRealtimeVoiceProvider` extends `BaseVoiceProvider`. A Next.js server route mints an ephemeral key (keeps `OPENAI_API_KEY` server-side). The browser uses native WebRTC — mic audio streams to OpenAI, model audio plays via an `<audio>` element. The 5 Shelly tools are sent as JSON Schema on `session.update` via a data channel; tool call results are handled client-side.
+**Architecture:** New `OpenAIRealtimeVoiceProvider` extends `BaseVoiceProvider`. A Next.js server route mints an ephemeral key (keeps `OPENAI_API_KEY` server-side). The browser uses native WebRTC — mic audio streams to OpenAI, model audio plays via an `<audio>` element. The 5 Tammy tools are sent as JSON Schema on `session.update` via a data channel; tool call results are handled client-side.
 
 **Tech Stack:** Next.js App Router (server route), native browser WebRTC (`RTCPeerConnection`, `RTCDataChannel`), OpenAI Realtime API (`/v1/realtime/sessions` + `/v1/realtime?model=...`), Jest + jsdom (tests).
 
@@ -276,7 +276,7 @@ function buildTools(): RealtimeTool[] {
     {
       type: 'function',
       name: 'report_mood',
-      description: "Set Shelly's current emotional state. You MUST call this every single turn.",
+      description: "Set Tammy's current emotional state. You MUST call this every single turn.",
       parameters: {
         type: 'object',
         properties: {
@@ -365,7 +365,7 @@ function buildTools(): RealtimeTool[] {
 // System prompt (mirrors BASE_SYSTEM_PROMPT in chat.ts + tool rules)
 // ---------------------------------------------------------------------------
 
-const BASE_SYSTEM_PROMPT = `You are Shelly, a friendly sea turtle who chats with children aged 4-10.
+const BASE_SYSTEM_PROMPT = `You are Tammy, a friendly sea turtle who chats with children aged 4-10.
 
 CONVERSATION FOCUS — stay on the child:
 - Always focus on the child: their feelings, what they did today, and what they are saying right now.
@@ -552,7 +552,7 @@ export class OpenAIRealtimeVoiceProvider extends BaseVoiceProvider {
       await this.pc.setRemoteDescription(answer);
     } catch (err) {
       if (this._generation !== gen) return;
-      console.info('[Shelly] openai-realtime: start error');
+      console.info('[Tammy] openai-realtime: start error');
       this.emit(
         'error',
         err instanceof Error ? err.message : 'Failed to start OpenAI Realtime',
@@ -986,9 +986,9 @@ test('transcription event → emits userTranscript', async () => {
   p.on('userTranscript', (t) => transcripts.push(t));
   dc.simulateMessage({
     type: 'conversation.item.input_audio_transcription.completed',
-    transcript: 'Hello Shelly',
+    transcript: 'Hello Tammy',
   });
-  expect(transcripts).toContain('Hello Shelly');
+  expect(transcripts).toContain('Hello Tammy');
 });
 
 test('error event → emits error with message', async () => {
@@ -1211,7 +1211,7 @@ npm run dev
 - [ ] `lib/speech/voice/index.ts` updated (export + factory case)
 - [ ] `NEXT_PUBLIC_VOICE_PROVIDER=openai-realtime` in `.env.local`
 - [ ] `npx jest --no-coverage` → all tests pass
-- [ ] App loads at `/talk`, mic permission granted, Shelly connects via WebRTC
+- [ ] App loads at `/talk`, mic permission granted, Tammy connects via WebRTC
 - [ ] Speaking triggers `stateChange: recording → processing → speaking → listening`
 - [ ] Turtle mood updates correctly via `report_mood` tool
 - [ ] Conversation ends with mission card appearing

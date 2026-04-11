@@ -35,7 +35,7 @@ import TalkConversationCard from '@/app/v2/components/TalkConversationCard';
 import TalkEndCallButton from '@/app/v2/components/TalkEndCallButton';
 import TalkMuteToggle from '@/app/v2/components/TalkMuteToggle';
 import TalkStatusIndicator from '@/app/v2/components/TalkStatusIndicator';
-import ShellyLogoPlaceholder from '@/app/v2/components/ShellyLogoPlaceholder';
+import TammyLogoPlaceholder from '@/app/v2/components/TammyLogoPlaceholder';
 import MicPermissionV2 from '@/app/v2/components/MicPermissionV2';
 import { useMicPermission } from '@/app/hooks/useMicPermission';
 import QRCode from 'react-qr-code';
@@ -61,7 +61,7 @@ type Book = {
   ageGroup?: string;
   goodreadsRating?: number;
   whyKidsChoose?: string[];
-  shellySays?: string;
+  tammySays?: string;
   whyRecommended?: string;
   fullDescription?: string;
   recommendedFor?: string[];
@@ -114,7 +114,7 @@ function DemoShell(props: { children: React.ReactNode; onResetAll: () => void; t
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ fontWeight: 800, letterSpacing: 0.3 }}>Shelly</div>
+            <div style={{ fontWeight: 800, letterSpacing: 0.3 }}>Tammy</div>
             <div
               style={{
                 color: 'var(--v2-text-secondary)',
@@ -361,7 +361,7 @@ function ConsentModal(props: { open: boolean; onAgree: () => void; onDecline: ()
         }}
       >
         <p style={{ margin: 0 }}>
-          TurtleTalk collects a small amount of information during this demo so Shelly can have a
+          TurtleTalk collects a small amount of information during this demo so Tammy can have a
           personalized conversation with your child:
         </p>
         <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>
@@ -431,7 +431,7 @@ function OnboardingModal(props: { open: boolean; onClose: () => void }) {
             color: '#0E1020',
           }}
         >
-          Welcome to Shelly
+          Welcome to Tammy
         </h2>
       </div>
       <div
@@ -444,10 +444,10 @@ function OnboardingModal(props: { open: boolean; onClose: () => void }) {
         }}
       >
         <p style={{ margin: 0 }}>
-          In this short tour, you'll see how Shelly (our friendly sea turtle) chats with your explorer and what you see as a grown-up.
+          In this short tour, you'll see how Tammy (our friendly sea turtle) chats with your explorer and what you see as a grown-up.
         </p>
         <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.5 }}>
-          <li>First, a cozy voice chat where Shelly learns about your explorer.</li>
+          <li>First, a cozy voice chat where Tammy learns about your explorer.</li>
           <li>Then, brave "missions" that turn talk into tiny real-world actions.</li>
           <li>Finally, a simple parent view and a super-short check-in.</li>
         </ul>
@@ -706,7 +706,7 @@ function HelpModal(props: { section: 'voice' | 'missions' | 'parentDashboard' | 
     body = (
       <div style={{ display: 'grid', gap: 8 }}>
         <p style={{ margin: 0 }}>
-          Shelly keeps chats short, warm, and age-aware. She listens for your explorer's name, what they love, and what
+          Tammy keeps chats short, warm, and age-aware. She listens for your explorer's name, what they love, and what
           feels a bit tricky.
         </p>
         <p style={{ margin: 0 }}>
@@ -724,7 +724,7 @@ function HelpModal(props: { section: 'voice' | 'missions' | 'parentDashboard' | 
           minutes.
         </p>
         <p style={{ margin: 0 }}>
-          Shelly suggests 2-3 options and you choose what feels right. In the full app, completed missions grow a
+          Tammy suggests 2-3 options and you choose what feels right. In the full app, completed missions grow a
           "courage garden" over time.
         </p>
       </div>
@@ -926,7 +926,7 @@ function MissionChoicesCard(props: {
 }) {
   return (
     <Card
-      title="Shelly suggests a brave mission"
+      title="Tammy suggests a brave mission"
       right={
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <HelpIconButton aria-label="What are missions?" onClick={props.onHelp} />
@@ -1610,7 +1610,7 @@ function ChildProfileWizard(props: {
 
       {/* ---- Name ---- */}
       {substep === 'name' && (
-        <Card title="What should Shelly call you?">
+        <Card title="What should Tammy call you?">
           <PlayfulKeyboard
             value={props.name ?? ''}
             onChange={props.onChangeName}
@@ -1681,7 +1681,7 @@ function ChildProfileWizard(props: {
       <StepNavigation
         onPrevious={hasPrev || props.onBack ? goPrev : undefined}
         onNext={goNext}
-        nextLabel={substep === 'facts' ? 'Continue to Shelly' : 'Next'}
+        nextLabel={substep === 'facts' ? 'Continue to Tammy' : 'Next'}
       />
     </div>
   );
@@ -1714,7 +1714,7 @@ function DemoParentDashboard(props: {
     const lastAssistant = [...props.messages].reverse().find((m) => m.role === 'assistant')?.content ?? '';
     return [
       lastUser ? `Child said: "${lastUser.slice(0, 120)}${lastUser.length > 120 ? '\u2026' : ''}"` : null,
-      lastAssistant ? `Shelly responded: "${lastAssistant.slice(0, 120)}${lastAssistant.length > 120 ? '\u2026' : ''}"` : null,
+      lastAssistant ? `Tammy responded: "${lastAssistant.slice(0, 120)}${lastAssistant.length > 120 ? '\u2026' : ''}"` : null,
     ].filter(Boolean) as string[];
   }, [props.messages]);
 
@@ -1739,7 +1739,7 @@ function DemoParentDashboard(props: {
             </div>
           }
         >
-          <InfoHint text={`Here's what Shelly learned about ${props.childName ?? 'your child'} today.`} />
+          <InfoHint text={`Here's what Tammy learned about ${props.childName ?? 'your child'} today.`} />
           <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <div
@@ -1835,7 +1835,7 @@ function DemoParentDashboard(props: {
             <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--v2-text-secondary)', lineHeight: 1.55 }}>
               <li>What was the bravest tiny thing you did today?</li>
               <li>What's something you want to get better at this week?</li>
-              <li>If Shelly could join dinner, what would you teach her?</li>
+              <li>If Tammy could join dinner, what would you teach her?</li>
             </ul>
           </Card>
         )}
@@ -1884,7 +1884,7 @@ function DemoParentDashboard(props: {
                         ))}
                       </ul>
                     )}
-                    {b.shellySays && (
+                    {b.tammySays && (
                       <div style={{
                         fontSize: 12,
                         color: 'var(--v2-text-secondary)',
@@ -1893,7 +1893,7 @@ function DemoParentDashboard(props: {
                         paddingLeft: 8,
                         marginTop: 2,
                       }}>
-                        &ldquo;{b.shellySays}&rdquo;
+                        &ldquo;{b.tammySays}&rdquo;
                       </div>
                     )}
                   </div>
@@ -2461,7 +2461,7 @@ export default function DemoFlow() {
                 paddingBottom: 120,
               }}
             >
-              <ShellyLogoPlaceholder animate={voice.state === 'connecting'} compact={voice.state !== 'idle'} />
+              <TammyLogoPlaceholder animate={voice.state === 'connecting'} compact={voice.state !== 'idle'} />
               <TalkConversationCard
                 messages={voice.messages}
                 pendingUserTranscript={voice.pendingUserTranscript}
@@ -2731,7 +2731,7 @@ export default function DemoFlow() {
                 <div style={{ display: 'grid', gap: 12, width: '100%', maxWidth: 360, justifySelf: 'center' }}>
                   <Card>
                     <div style={{ display: 'grid', gap: 16, textAlign: 'center' }}>
-                      <div style={{ color: 'var(--v2-text-secondary)', fontSize: 15 }}>Did you enjoy talking to Shelly?</div>
+                      <div style={{ color: 'var(--v2-text-secondary)', fontSize: 15 }}>Did you enjoy talking to Tammy?</div>
                       <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
                         {[
                           { value: 1 as const, label: '\u{1F615}', title: 'Not quite right' },
@@ -2805,7 +2805,7 @@ export default function DemoFlow() {
               state={voice.state}
               hasError={hasError}
               missionGenerated={!!pendingMissionChoices && callActive}
-              label="Tap to talk to Shelly"
+              label="Tap to talk to Tammy"
               onEnd={() => {
                 voice.endConversation();
                 const dest: DemoStep = pendingChoices.length > 0 ? 'missionsPick' : 'wish';

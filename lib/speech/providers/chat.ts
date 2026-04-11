@@ -1,5 +1,5 @@
 /**
- * Shelly — mission-aware conversation agent.
+ * Tammy — mission-aware conversation agent.
  *
  * Architecture: instead of a single withStructuredOutput blob, the agent
  * uses individual bound tools so each concern is separate and inspectable:
@@ -48,7 +48,7 @@ const reportMoodTool = tool(
   async () => '', // executor not used — we read tool_calls from the response
   {
     name: 'report_mood',
-    description: "Set Shelly's current emotional state. You MUST call this every single turn.",
+    description: "Set Tammy's current emotional state. You MUST call this every single turn.",
     schema: z.object({
       mood: z.enum(MOOD_VALUES).describe('Turtle mood for this response'),
     }),

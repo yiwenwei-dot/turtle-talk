@@ -12,7 +12,7 @@ type PlaceholderData = {
 };
 
 const data = placeholderData as PlaceholderData;
-const inspirationalMessage = data.inspirationalMessage ?? { text: "You've got this!", from: 'Shelly' };
+const inspirationalMessage = data.inspirationalMessage ?? { text: "You've got this!", from: 'Tammy' };
 const messagesList: HomeMessage[] = data.messages ?? [];
 
 function MessagesModal({ onClose }: { onClose: () => void }) {

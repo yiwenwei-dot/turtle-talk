@@ -1,5 +1,5 @@
 /**
- * First greeting instruction for Shelly when a new voice session starts.
+ * First greeting instruction for Tammy when a new voice session starts.
  * Used by the LiveKit agent so the very first message is warm and focused.
  */
 export function getFirstMessageInstruction(childName?: string | null): string {

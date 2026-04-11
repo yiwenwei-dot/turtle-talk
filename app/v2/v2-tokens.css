@@ -203,7 +203,7 @@
 }
 
 /* Kid-friendly connecting / pre-first-voice animation */
-@keyframes v2-shelly-bob {
+@keyframes v2-tammy-bob {
   0%, 100% {
     transform: translateY(0);
     opacity: 0.9;
@@ -214,12 +214,12 @@
   }
 }
 
-.v2-ui .v2-shelly-connecting {
-  animation: v2-shelly-bob 1.8s ease-in-out infinite;
+.v2-ui .v2-tammy-connecting {
+  animation: v2-tammy-bob 1.8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .v2-ui .v2-shelly-connecting {
+  .v2-ui .v2-tammy-connecting {
     animation: none;
   }
 }
