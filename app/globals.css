@@ -466,3 +466,7 @@ html.dark .parent-dashboard .pd-skeleton {
   );
   background-size: 800px 100%;
 }
+
+@keyframes blink {
+  50% { opacity: 0; }
+}

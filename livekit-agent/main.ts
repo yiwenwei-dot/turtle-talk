@@ -47,12 +47,24 @@ function sendData(
   room.localParticipant?.publishData(data, { reliable: true }).catch(() => {});
 }
 
-/** Parse dispatch metadata from the job (childName, topics). Works on LiveKit Cloud; may be empty on self-hosted. */
-function parseDispatchMetadata(ctx: JobContext): { childName?: string; topics?: string[] } {
+/** Parse dispatch metadata from the job. Works on LiveKit Cloud; may be empty on self-hosted. */
+function parseDispatchMetadata(ctx: JobContext): {
+  childName?: string;
+  topics?: string[];
+  ageGroup?: string;
+  favoriteBook?: string;
+  funFacts?: string[];
+} {
   const raw = (ctx.job as { metadata?: string })?.metadata;
   if (!raw || typeof raw !== 'string' || !raw.trim()) return {};
   try {
-    const parsed = JSON.parse(raw) as { childName?: string | null; topics?: string[] };
+    const parsed = JSON.parse(raw) as {
+      childName?: string | null;
+      topics?: string[];
+      ageGroup?: string | null;
+      favoriteBook?: string | null;
+      funFacts?: string[];
+    };
     const childName =
       typeof parsed.childName === 'string' && parsed.childName.trim()
         ? parsed.childName.trim()
@@ -60,7 +72,18 @@ function parseDispatchMetadata(ctx: JobContext): { childName?: string; topics?: 
     const topics = Array.isArray(parsed.topics)
       ? (parsed.topics as string[]).filter((t): t is string => typeof t === 'string')
       : undefined;
-    return { childName, topics };
+    const ageGroup =
+      typeof parsed.ageGroup === 'string' && parsed.ageGroup.trim()
+        ? parsed.ageGroup.trim()
+        : undefined;
+    const favoriteBook =
+      typeof parsed.favoriteBook === 'string' && parsed.favoriteBook.trim()
+        ? parsed.favoriteBook.trim()
+        : undefined;
+    const funFacts = Array.isArray(parsed.funFacts)
+      ? (parsed.funFacts as string[]).filter((f): f is string => typeof f === 'string')
+      : undefined;
+    return { childName, topics, ageGroup, favoriteBook, funFacts };
   } catch {
     return {};
   }
@@ -73,13 +96,13 @@ function parseDispatchMetadata(ctx: JobContext): { childName?: string; topics?: 
 function monitorRoom(ctx: JobContext): void {
   const room = ctx.room;
 
-  room.on(RoomEvent.ParticipantConnected, (participant) => {
+  room.on(RoomEvent.ParticipantConnected, (_participant: unknown) => {
   });
 
-  room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+  room.on(RoomEvent.ParticipantDisconnected, (_participant: unknown) => {
   });
 
-  room.on(RoomEvent.ConnectionStateChanged, (state) => {
+  room.on(RoomEvent.ConnectionStateChanged, (_state: unknown) => {
   });
 
   room.on(RoomEvent.Reconnecting, () => {
@@ -130,7 +153,7 @@ export default defineAgent({
   entry: async (ctx: JobContext) => {
     console.info('[tammy] job received', { room: ctx.job.room?.name, jobId: ctx.job.id });
     try {
-      const { childName, topics } = parseDispatchMetadata(ctx);
+      const { childName, topics, ageGroup, favoriteBook, funFacts } = parseDispatchMetadata(ctx);
 
     const room = ctx.room;
 
@@ -235,10 +258,17 @@ export default defineAgent({
 
     monitorSession(session);
 
+    // Connect to the room FIRST so the session can subscribe to the child's audio.
+    await ctx.connect();
+    monitorRoom(ctx);
+
     await session.start({
       agent: new TammyAgent({
         childName,
         topics,
+        ageGroup,
+        favoriteBook,
+        funFacts,
         tools: {
           propose_missions: proposeMissionsTool,
           end_conversation: endConversationTool,
@@ -254,9 +284,6 @@ export default defineAgent({
       },
     });
 
-    await ctx.connect();
-    monitorRoom(ctx);
-
     session.on(voice.AgentSessionEventTypes.UserInputTranscribed, (ev) => {
       if (ev.isFinal && ev.transcript.trim()) {
         sendTranscript(room, 'user', ev.transcript);
@@ -271,7 +298,7 @@ export default defineAgent({
       }
     });
 
-    const firstMessageInstruction = getFirstMessageInstruction(childName);
+    const firstMessageInstruction = getFirstMessageInstruction(childName, { favoriteBook, funFacts });
     const handle = session.generateReply({
       instructions: firstMessageInstruction,
     });

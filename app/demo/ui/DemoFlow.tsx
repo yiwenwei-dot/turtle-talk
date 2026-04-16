@@ -48,6 +48,38 @@ type DemoMissionChoice = MissionSuggestion & { __index: number };
 
 const ACTIVE_STATES = new Set(['listening', 'recording', 'processing', 'speaking', 'muted']);
 
+function ParentQrCode({ demoId }: { demoId: string }) {
+  const [url, setUrl] = useState('/demo/parent');
+  useEffect(() => {
+    const origin = window.location.origin;
+    const hostname = window.location.hostname;
+    const isLoopback = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+    const build = (base: string) => `${base}/demo/parent?session=${demoId}`;
+    if (!isLoopback) {
+      setUrl(build(origin));
+      return;
+    }
+    let cancelled = false;
+    fetch('/api/lan-host')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { host?: string | null } | null) => {
+        if (cancelled) return;
+        if (data?.host) {
+          setUrl(build(`${window.location.protocol}//${data.host}:${window.location.port || '3000'}`));
+        } else {
+          setUrl(build(origin));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setUrl(build(origin));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [demoId]);
+  return <QRCode value={url} size={160} bgColor="#ffffff" fgColor="#0E1020" />;
+}
+
 const SKIPPED_STEPS = getDemoSkippedSteps();
 
 type Book = {
@@ -1237,295 +1269,235 @@ function TattleCardPicker(props: {
   );
 }
 
-function PlayfulKeyboard(props: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  displayPlaceholder?: string;
-}) {
-  const valueRef = useRef(props.value);
-  valueRef.current = props.value;
+/* ------------------------------------------------------------------ */
+/*  Age-specific data for book and fun-fact steps                      */
+/* ------------------------------------------------------------------ */
 
-  const [useNative, setUseNative] = useState(false);
-  const nativeRef = useRef<HTMLInputElement>(null);
+const BOOKS_BY_AGE: Record<string, { title: string; image: string }[]> = {
+  '5-7': [
+    { title: 'The Invisible Boy', image: '/images/setup/books/invisible-boy.jpg' },
+    { title: 'Dragons Love Tacos', image: '/images/setup/books/dragons-love-tacos.jpg' },
+    { title: 'The Book With No Pictures', image: '/images/setup/books/book-no-pictures.jpg' },
+  ],
+  '8-10': [
+    { title: 'Dog Man', image: '/images/setup/books/dog-man.jpg' },
+    { title: 'Wonder', image: '/images/setup/books/wonder.jpg' },
+    { title: 'The Wild Robot', image: '/images/setup/books/wild-robot.jpg' },
+  ],
+  '11-13': [
+    { title: 'Harry Potter', image: '/images/setup/books/harry-potter.jpg' },
+    { title: 'New Kid', image: '/images/setup/books/new-kid.jpg' },
+    { title: 'Percy Jackson', image: '/images/setup/books/percy-jackson.jpg' },
+  ],
+  '13+': [
+    { title: 'Harry Potter', image: '/images/setup/books/harry-potter.jpg' },
+    { title: 'Percy Jackson', image: '/images/setup/books/percy-jackson.jpg' },
+    { title: 'The Hunger Games', image: '/images/setup/books/hunger-games.jpg' },
+  ],
+};
 
-  const punctuation = ['.', ',', '!', '?', "'", '-', ':'];
-  const letterRows = [
-    'QWERTYUIOP'.split(''),
-    'ASDFGHJKL'.split(''),
-    'ZXCVBNM'.split(''),
-  ];
+const FACTS_BY_AGE: Record<string, { label: string; image: string }[]> = {
+  '5-7': [
+    { label: 'I love animals', image: '/images/setup/facts/animals.png' },
+    { label: 'I like drawing', image: '/images/setup/facts/drawing.png' },
+    { label: 'I love Lego', image: '/images/setup/facts/lego.png' },
+    { label: 'I love dinosaurs', image: '/images/setup/facts/dinosaurs.png' },
+    { label: 'I like to dance', image: '/images/setup/facts/dance.png' },
+    { label: 'I love music', image: '/images/setup/facts/music.png' },
+  ],
+  '8-10': [
+    { label: 'I play sports', image: '/images/setup/facts/sports.png' },
+    { label: 'I love video games', image: '/images/setup/facts/videogames.png' },
+    { label: 'I love animals', image: '/images/setup/facts/animals.png' },
+    { label: 'I like building things', image: '/images/setup/facts/building.png' },
+    { label: 'I love outer space', image: '/images/setup/facts/space.png' },
+    { label: 'I like drawing', image: '/images/setup/facts/drawing.png' },
+  ],
+  '11-13': [
+    { label: 'I love music', image: '/images/setup/facts/music.png' },
+    { label: 'I love video games', image: '/images/setup/facts/videogames.png' },
+    { label: 'I play sports', image: '/images/setup/facts/sports.png' },
+    { label: 'I like coding', image: '/images/setup/facts/coding.png' },
+    { label: 'I love making up stories', image: '/images/setup/facts/stories.png' },
+    { label: 'I love outer space', image: '/images/setup/facts/space.png' },
+  ],
+  '13+': [
+    { label: 'I love music', image: '/images/setup/facts/music.png' },
+    { label: 'I love video games', image: '/images/setup/facts/videogames.png' },
+    { label: 'I play sports', image: '/images/setup/facts/sports.png' },
+    { label: 'I like coding', image: '/images/setup/facts/coding.png' },
+    { label: 'I love movies', image: '/images/setup/facts/movies.png' },
+    { label: 'I love making up stories', image: '/images/setup/facts/stories.png' },
+  ],
+};
 
-  const handleKey = useCallback(
-    (key: string) => {
-      const cur = valueRef.current;
-      if (key === 'BACK') {
-        props.onChange(cur.slice(0, -1));
-      } else if (key === 'SPACE') {
-        props.onChange(`${cur} `.replace(/\s+/g, ' '));
-      } else {
-        props.onChange(cur + key);
-      }
-    },
-    [props.onChange],
-  );
+type ProfileSubstep = 'age' | 'name' | 'book' | 'facts';
+const PROFILE_SUBSTEPS: ProfileSubstep[] = ['age', 'name', 'book', 'facts'];
 
-  const keyStyle = (wide?: boolean): React.CSSProperties => ({
-    minWidth: wide ? 100 : 42,
-    padding: '10px 12px',
-    borderRadius: 14,
-    border: '1px solid rgba(255,255,255,0.18)',
-    background: 'rgba(255,255,255,0.08)',
+/** Shared container style for every setup substep — responsive, single-page layout. */
+const SETUP_PAGE_STYLE: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 12,
+  width: '100%',
+};
+
+/** Image-based option card for book and fun-fact choices. */
+function optionCardStyle(active: boolean): React.CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '10px 14px',
+    borderRadius: 16,
+    border: active ? '2.5px solid rgba(90,130,255,0.95)' : '1.5px solid rgba(255,255,255,0.14)',
+    background: active ? 'rgba(90,130,255,0.14)' : 'rgba(255,255,255,0.04)',
+    cursor: 'pointer',
     color: 'var(--v2-text)',
     fontSize: 15,
     fontWeight: 700,
-    cursor: 'pointer',
+    textAlign: 'left' as const,
+    transition: 'all 150ms ease',
     WebkitTapHighlightColor: 'transparent',
-  });
-
-  if (useNative) {
-    return (
-      <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-        <input
-          ref={nativeRef}
-          autoFocus
-          value={props.value}
-          onChange={(e) => props.onChange(e.target.value)}
-          placeholder={props.placeholder ?? 'Type here\u2026'}
-          style={{
-            width: '100%',
-            padding: '14px 16px',
-            borderRadius: 16,
-            border: '1px solid rgba(255,255,255,0.18)',
-            background: 'rgba(0,0,0,0.35)',
-            color: 'var(--v2-text)',
-            fontSize: 18,
-            fontWeight: 700,
-            outline: 'none',
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => setUseNative(false)}
-          style={{
-            alignSelf: 'center',
-            appearance: 'none',
-            border: 'none',
-            background: 'transparent',
-            color: 'var(--v2-text-secondary)',
-            textDecoration: 'underline',
-            cursor: 'pointer',
-            fontSize: 13,
-            padding: 0,
-          }}
-        >
-          Use fun keyboard
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-      {/* Value display (only in on-screen keyboard mode) */}
-      {props.displayPlaceholder !== undefined && (
-        <div
-          style={{
-            width: '100%',
-            padding: '14px 16px',
-            borderRadius: 16,
-            border: '1px solid rgba(255,255,255,0.16)',
-            background: 'rgba(0,0,0,0.3)',
-            color: 'var(--v2-text)',
-            fontSize: 20,
-            fontWeight: 700,
-            minHeight: 52,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          {props.value || (
-            <span style={{ color: 'rgba(255,255,255,0.3)' }}>{props.displayPlaceholder}</span>
-          )}
-        </div>
-      )}
-
-      <div
-        style={{
-          padding: 10,
-          borderRadius: 18,
-          background: 'rgba(0,0,0,0.35)',
-          display: 'grid',
-          gap: 7,
-        }}
-      >
-        {/* Punctuation row */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
-          {punctuation.map((ch) => (
-            <button key={ch} type="button" onClick={() => handleKey(ch)} style={keyStyle()}>
-              {ch}
-            </button>
-          ))}
-        </div>
-
-        {/* Letter rows */}
-        {letterRows.map((row, rowIndex) => (
-          <div key={rowIndex} style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
-            {row.map((key) => (
-              <button key={key} type="button" onClick={() => handleKey(key.toLowerCase())} style={keyStyle()}>
-                {key}
-              </button>
-            ))}
-          </div>
-        ))}
-
-        {/* Bottom row: space + backspace */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
-          <button type="button" onClick={() => handleKey('SPACE')} style={keyStyle(true)}>
-            Space
-          </button>
-          <button type="button" onClick={() => handleKey('BACK')} style={keyStyle(true)}>
-            {'\u232B'}
-          </button>
-        </div>
-
-        {/* Native toggle */}
-        <button
-          type="button"
-          onClick={() => setUseNative(true)}
-          style={{
-            justifySelf: 'center',
-            appearance: 'none',
-            border: 'none',
-            background: 'transparent',
-            color: 'var(--v2-text-secondary)',
-            textDecoration: 'underline',
-            cursor: 'pointer',
-            fontSize: 13,
-            padding: '2px 0 0',
-          }}
-        >
-          Use my keyboard
-        </button>
-      </div>
-    </div>
-  );
+    transform: active ? 'scale(1.02)' : 'scale(1)',
+  };
 }
 
-function FunFactsBubbles(props: {
-  selected: string[];
-  onChange: (facts: string[]) => void;
-  newFact: string;
-  onChangeNewFact: (value: string) => void;
-}) {
-  const presets = [
-    'I love dinosaurs',
-    'I can whistle',
-    'I like drawing',
-    'I love Lego',
-    "I'm a fast runner",
-    'I love animals',
-    'I like to dance',
-    'I tell funny jokes',
-    'I love reading',
-    'I play sports',
-    'I like building things',
-    'I love music',
-    'I speak two languages',
-    'I can do a cartwheel',
-    "I'm a great swimmer",
-    'I love cooking',
-    'I know a magic trick',
-    'I can ride a bike with no hands',
-    'I have a pet',
-    'I love outer space',
-    'I can make people laugh',
-    "I'm really good at puzzles",
-    'I love superheroes',
-    'I help my friends',
-    'I love nature',
-    'I can climb really high',
-    'I love making up stories',
-    "I'm learning an instrument",
-    'I love video games',
-    'I can do a funny voice',
-  ];
+/** Letter-to-image mapping for the photo keyboard. */
+const LETTER_IMAGES: Record<string, { word: string; image: string }> = {
+  A: { word: 'Apple', image: '/images/setup/keys/a.png' },
+  B: { word: 'Bear', image: '/images/setup/keys/b.png' },
+  C: { word: 'Cat', image: '/images/setup/keys/c.png' },
+  D: { word: 'Dog', image: '/images/setup/keys/d.png' },
+  E: { word: 'Elephant', image: '/images/setup/keys/e.png' },
+  F: { word: 'Fish', image: '/images/setup/keys/f.png' },
+  G: { word: 'Giraffe', image: '/images/setup/keys/g.png' },
+  H: { word: 'Horse', image: '/images/setup/keys/h.png' },
+  I: { word: 'Ice cream', image: '/images/setup/keys/i.png' },
+  J: { word: 'Jellyfish', image: '/images/setup/keys/j.png' },
+  K: { word: 'Koala', image: '/images/setup/keys/k.png' },
+  L: { word: 'Lion', image: '/images/setup/keys/l.png' },
+  M: { word: 'Moon', image: '/images/setup/keys/m.png' },
+  N: { word: 'Narwhal', image: '/images/setup/keys/n.png' },
+  O: { word: 'Owl', image: '/images/setup/keys/o.png' },
+  P: { word: 'Penguin', image: '/images/setup/keys/p.png' },
+  Q: { word: 'Queen', image: '/images/setup/keys/q.png' },
+  R: { word: 'Rabbit', image: '/images/setup/keys/r.png' },
+  S: { word: 'Star', image: '/images/setup/keys/s.png' },
+  T: { word: 'Turtle', image: '/images/setup/keys/t.png' },
+  U: { word: 'Umbrella', image: '/images/setup/keys/u.png' },
+  V: { word: 'Violin', image: '/images/setup/keys/v.png' },
+  W: { word: 'Whale', image: '/images/setup/keys/w.png' },
+  X: { word: 'Xylophone', image: '/images/setup/keys/x.png' },
+  Y: { word: 'Yak', image: '/images/setup/keys/y.png' },
+  Z: { word: 'Zebra', image: '/images/setup/keys/z.png' },
+};
 
-  const toggle = (fact: string) => {
-    if (props.selected.includes(fact)) {
-      props.onChange(props.selected.filter((f) => f !== fact));
-    } else {
-      props.onChange([...props.selected, fact]);
-    }
-  };
-
-  const addNew = () => {
-    const trimmed = props.newFact.trim();
-    if (!trimmed) return;
-    if (!props.selected.includes(trimmed)) {
-      props.onChange([...props.selected, trimmed]);
-    }
-    props.onChangeNewFact('');
-  };
-
+/** Kid-friendly photo keyboard — each key is a card with the photo as background. */
+function KidKeyboard({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div style={{ display: 'grid', gap: 8 }}>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-        }}
-      >
-        {presets.map((fact) => {
-          const active = props.selected.includes(fact);
-          return (
-            <button
-              key={fact}
-              type="button"
-              onClick={() => toggle(fact)}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(min(72px, 20%), 1fr))',
+      gap: 8,
+      width: '100%',
+    }}>
+      {'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((letter) => {
+        const info = LETTER_IMAGES[letter];
+        return (
+          <button
+            key={letter}
+            type="button"
+            onClick={() => onChange(value + letter)}
+            title={`${letter} for ${info?.word}`}
+            style={{
+              position: 'relative',
+              aspectRatio: '1',
+              borderRadius: 14,
+              border: '1.5px solid rgba(255,255,255,0.14)',
+              background: 'rgba(255,255,255,0.04)',
+              cursor: 'pointer',
+              overflow: 'hidden',
+              transition: 'transform 100ms, border-color 100ms',
+              WebkitTapHighlightColor: 'transparent',
+              padding: 0,
+            }}
+            onPointerDown={(e) => { const el = e.currentTarget as HTMLElement; el.style.transform = 'scale(0.92)'; el.style.borderColor = 'rgba(90,130,255,0.8)'; }}
+            onPointerUp={(e) => { const el = e.currentTarget as HTMLElement; el.style.transform = ''; el.style.borderColor = ''; }}
+            onPointerLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.transform = ''; el.style.borderColor = ''; }}
+          >
+            <img
+              src={info?.image}
+              alt={info?.word}
               style={{
-                borderRadius: 999,
-                padding: '6px 10px',
-                border: active ? '2px solid rgba(90,130,255,0.95)' : '1px solid rgba(255,255,255,0.22)',
-                background: active ? 'rgba(90,130,255,0.16)' : 'rgba(255,255,255,0.06)',
-                cursor: 'pointer',
-                color: 'var(--v2-text)',
-                fontSize: 13,
-                fontWeight: 600,
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: 0.85,
               }}
-            >
-              {fact}
-            </button>
-          );
-        })}
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-        <input
-          value={props.newFact}
-          onChange={(e) => props.onChangeNewFact(e.target.value)}
-          placeholder="Add your own\u2026"
-          style={{
-            flex: 1,
-            padding: '8px 10px',
-            borderRadius: 999,
-            border: '1px solid rgba(255,255,255,0.18)',
-            background: 'rgba(0,0,0,0.25)',
-            color: 'var(--v2-text)',
-            outline: 'none',
-            fontSize: 13,
-          }}
-        />
-        <PrimaryButton tone="ghost" onClick={addNew}>
-          Add
-        </PrimaryButton>
-      </div>
+            />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(10,12,30,0.85) 0%, rgba(10,12,30,0.15) 55%)',
+            }} />
+            <div style={{
+              position: 'absolute',
+              bottom: 3,
+              left: 0,
+              right: 0,
+              textAlign: 'center',
+            }}>
+              <div style={{
+                fontSize: 'clamp(14px, 3.5vw, 18px)',
+                fontWeight: 800,
+                color: '#fff',
+                lineHeight: 1.1,
+                textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+              }}>
+                {letter}
+              </div>
+              <div style={{
+                fontSize: 'clamp(7px, 1.8vw, 9px)',
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.7)',
+                lineHeight: 1,
+              }}>
+                {info?.word}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        onClick={() => onChange(value.slice(0, -1))}
+        style={{
+          aspectRatio: '1',
+          borderRadius: 14,
+          border: '1.5px solid rgba(255,255,255,0.14)',
+          background: 'rgba(255,255,255,0.06)',
+          cursor: 'pointer',
+          color: 'var(--v2-text)',
+          fontSize: 'clamp(10px, 2.5vw, 13px)',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          WebkitTapHighlightColor: 'transparent',
+          transition: 'transform 100ms',
+        }}
+        onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.92)'; }}
+        onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.transform = ''; }}
+        onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = ''; }}
+      >
+        Delete
+      </button>
     </div>
   );
 }
-
-type ProfileSubstep = 'name' | 'age' | 'book' | 'facts';
-const PROFILE_SUBSTEPS: ProfileSubstep[] = ['name', 'age', 'book', 'facts'];
 
 function ChildProfileWizard(props: {
   name: string | null;
@@ -1536,8 +1508,8 @@ function ChildProfileWizard(props: {
   onChangeAgeGroup: (ageGroup: DemoSession['ageGroup']) => void;
   onChangeFavoriteBook: (book: string) => void;
   onChangeFunFacts: (facts: string[]) => void;
-  newFunFact: string;
-  onChangeNewFunFact: (value: string) => void;
+  newFunFact?: string;
+  onChangeNewFunFact?: (value: string) => void;
   onBack?: () => void;
   onComplete: () => void;
   initialSubstep?: ProfileSubstep;
@@ -1570,23 +1542,37 @@ function ChildProfileWizard(props: {
     : props.ageGroup === '13+' ? 'thirteenPlus'
     : 'noShare';
 
+  const ageKey = props.ageGroup && props.ageGroup !== 'unknown' && props.ageGroup !== 'other'
+    ? props.ageGroup
+    : '8-10'; // default to 8-10 if unknown
+  const ageBooks = BOOKS_BY_AGE[ageKey] ?? BOOKS_BY_AGE['8-10'];
+  const ageFacts = FACTS_BY_AGE[ageKey] ?? FACTS_BY_AGE['8-10'];
+
+  const toggleFact = (label: string) => {
+    if (props.funFacts.includes(label)) {
+      props.onChangeFunFacts(props.funFacts.filter((f) => f !== label));
+    } else {
+      props.onChangeFunFacts([...props.funFacts, label]);
+    }
+  };
+
   const pillStyle = (active: boolean): React.CSSProperties => ({
     flex: '1 1 140px',
     minWidth: 0,
-    padding: '14px 16px',
+    padding: 'clamp(10px, 2.5vw, 14px) 16px',
     borderRadius: 999,
-    border: active ? '2px solid rgba(90,130,255,0.95)' : '1px solid rgba(255,255,255,0.20)',
+    border: active ? '2.5px solid rgba(90,130,255,0.95)' : '1.5px solid rgba(255,255,255,0.20)',
     background: active ? 'rgba(90,130,255,0.18)' : 'rgba(255,255,255,0.04)',
     cursor: 'pointer',
     color: 'var(--v2-text)',
-    fontSize: 16,
+    fontSize: 'clamp(14px, 3.5vw, 16px)',
     fontWeight: 700,
     textAlign: 'center',
     transition: 'border-color 120ms, background 120ms',
   });
 
   return (
-    <div style={{ display: 'grid', gap: 14, width: '100%', maxWidth: 480 }}>
+    <div style={{ display: 'grid', gap: 12, width: '100%', maxWidth: 520, margin: '0 auto', padding: '0 8px', boxSizing: 'border-box' }}>
       {/* Sub-step progress dots */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
         {PROFILE_SUBSTEPS.map((s, i) => (
@@ -1611,25 +1597,44 @@ function ChildProfileWizard(props: {
       {/* ---- Name ---- */}
       {substep === 'name' && (
         <Card title="What should Tammy call you?">
-          <PlayfulKeyboard
-            value={props.name ?? ''}
-            onChange={props.onChangeName}
-            placeholder="Type your name"
-            displayPlaceholder="Your name"
-          />
+          <div style={SETUP_PAGE_STYLE}>
+            <input
+              autoFocus
+              value={props.name ?? ''}
+              onChange={(e) => props.onChangeName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && (props.name ?? '').trim()) goNext(); }}
+              placeholder="Type your name"
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                borderRadius: 16,
+                border: '1.5px solid rgba(255,255,255,0.18)',
+                background: 'rgba(0,0,0,0.35)',
+                color: 'var(--v2-text)',
+                fontSize: 'clamp(18px, 4.5vw, 24px)',
+                fontWeight: 800,
+                letterSpacing: 1,
+                textAlign: 'center',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+            <InfoHint text="Use your keyboard or tap the pictures below!" />
+            <KidKeyboard value={props.name ?? ''} onChange={props.onChangeName} />
+          </div>
         </Card>
       )}
 
       {/* ---- Age ---- */}
       {substep === 'age' && (
         <Card title="How old are you?">
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ ...SETUP_PAGE_STYLE, gap: 10 }}>
             {[
               { id: 'fiveToSeven' as ChildAgeChoice, label: '5 to 7' },
               { id: 'eightToTen' as ChildAgeChoice, label: '8 to 10' },
               { id: 'elevenToThirteen' as ChildAgeChoice, label: '11 to 13' },
               { id: 'thirteenPlus' as ChildAgeChoice, label: '13+' },
-              { id: 'noShare' as ChildAgeChoice, label: "I don't wanna share" },
+              { id: 'noShare' as ChildAgeChoice, label: "I don\u2019t wanna share" },
             ].map((opt) => {
               const active = ageChoice === opt.id;
               return (
@@ -1649,30 +1654,93 @@ function ChildProfileWizard(props: {
         </Card>
       )}
 
-      {/* ---- Favorite Book ---- */}
+      {/* ---- Favorite Book (pick from 3 age-appropriate choices) ---- */}
       {substep === 'book' && (
-        <Card title="What's your favorite book?">
-          <InfoHint text="You can skip this one if you want!" />
-          <PlayfulKeyboard
-            value={props.favoriteBook}
-            onChange={props.onChangeFavoriteBook}
-            placeholder="Type a book name"
-            displayPlaceholder="e.g. The Pout-Pout Fish"
-          />
+        <Card title="Pick a book you love!">
+          <div style={{ ...SETUP_PAGE_STYLE, gap: 10 }}>
+            {ageBooks.map((book) => {
+              const active = props.favoriteBook === book.title;
+              return (
+                <button
+                  key={book.title}
+                  type="button"
+                  onClick={() => props.onChangeFavoriteBook(active ? '' : book.title)}
+                  style={optionCardStyle(active)}
+                >
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    style={{
+                      width: 52,
+                      height: 72,
+                      objectFit: 'cover',
+                      borderRadius: 8,
+                      flexShrink: 0,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    }}
+                  />
+                  <span style={{ fontSize: 'clamp(14px, 3.5vw, 16px)' }}>{book.title}</span>
+                </button>
+              );
+            })}
+            <InfoHint text="You can skip this one if you want!" />
+          </div>
         </Card>
       )}
 
-      {/* ---- Fun Facts ---- */}
+      {/* ---- Fun Facts (5 age-appropriate choices with photos) ---- */}
       {substep === 'facts' && (
-        <Card title="Tell us something cool about you!">
-          <div style={{ display: 'grid', gap: 10 }}>
-            <InfoHint text="Tap any that sound like you, or add your own!" />
-            <FunFactsBubbles
-              selected={props.funFacts}
-              onChange={props.onChangeFunFacts}
-              newFact={props.newFunFact}
-              onChangeNewFact={props.onChangeNewFunFact}
-            />
+        <Card title="What are you into?">
+          <div style={{ ...SETUP_PAGE_STYLE, gap: 8 }}>
+            <InfoHint text="Tap any that sound like you!" />
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 10,
+              width: '100%',
+            }}>
+              {ageFacts.map((fact) => {
+                const active = props.funFacts.includes(fact.label);
+                return (
+                  <button
+                    key={fact.label}
+                    type="button"
+                    onClick={() => toggleFact(fact.label)}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '10px 8px',
+                      borderRadius: 16,
+                      border: active ? '2.5px solid rgba(90,130,255,0.95)' : '1.5px solid rgba(255,255,255,0.14)',
+                      background: active ? 'rgba(90,130,255,0.14)' : 'rgba(255,255,255,0.04)',
+                      cursor: 'pointer',
+                      color: 'var(--v2-text)',
+                      fontSize: 'clamp(12px, 3vw, 14px)',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      transition: 'all 150ms ease',
+                      WebkitTapHighlightColor: 'transparent',
+                      transform: active ? 'scale(1.04)' : 'scale(1)',
+                    }}
+                  >
+                    <img
+                      src={fact.image}
+                      alt={fact.label}
+                      style={{
+                        width: 'clamp(48px, 12vw, 72px)',
+                        height: 'clamp(48px, 12vw, 72px)',
+                        objectFit: 'cover',
+                        borderRadius: 12,
+                        boxShadow: active ? '0 0 12px rgba(90,130,255,0.4)' : '0 2px 6px rgba(0,0,0,0.2)',
+                      }}
+                    />
+                    <span>{fact.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </Card>
       )}
@@ -2286,16 +2354,7 @@ export default function DemoFlow() {
                 display: 'inline-flex',
               }}
             >
-              <QRCode
-                value={
-                  typeof window !== 'undefined'
-                    ? `${window.location.origin}/demo/parent?session=${session.demoId ?? ''}`
-                    : '/demo/parent'
-                }
-                size={160}
-                bgColor="#ffffff"
-                fgColor="#0E1020"
-              />
+              <ParentQrCode demoId={session.demoId ?? ''} />
             </div>
             <div
               style={{
